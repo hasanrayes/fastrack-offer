@@ -1,0 +1,11 @@
+{
+  "name": "fastrack-offer",
+  "version": "1.0.0",
+  "description": "Fastrack Rent a Car - Landing Page",
+  "scripts": {
+    "start": "npx serve -s . -l $PORT"
+  },
+  "dependencies": {
+    "serve": "^14.2.0"
+  }
+}
