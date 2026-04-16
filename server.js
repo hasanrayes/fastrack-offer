@@ -1,6 +1,5 @@
 const express = require('express');
 const path = require('path');
-const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const ADMIN_PASS = process.env.ADMIN_PASS || 'fastrack2024';
@@ -18,6 +17,8 @@ let cars = [
 let nextCarId = 5;
 let bookings = [];
 let nextBookingId = 1;
+let leads = [];
+let nextLeadId = 1;
 
 // ── Auth middleware ──
 function auth(req, res, next) {
@@ -30,12 +31,31 @@ function auth(req, res, next) {
 // PUBLIC API
 // ══════════════════════════════
 
-// Get all cars (public)
 app.get('/api/cars', (req, res) => {
   res.json(cars);
 });
 
-// Create booking (public - from landing page)
+// Create lead (from popup)
+app.post('/api/leads', (req, res) => {
+  const { fullName, phone, interest, source } = req.body;
+  if (!fullName || !phone) {
+    return res.status(400).json({ error: 'Name and phone required' });
+  }
+  const lead = {
+    id: nextLeadId++,
+    fullName,
+    phone,
+    interest: interest || '',
+    source: source || 'popup',
+    status: 'new',
+    convertedToBooking: false,
+    createdAt: new Date().toISOString()
+  };
+  leads.unshift(lead);
+  res.json({ success: true, lead });
+});
+
+// Create booking (public)
 app.post('/api/bookings', (req, res) => {
   const { carId, carName, startDate, duration, location, fullName, phone, email, whatsapp, totalAed, savedAed } = req.body;
   if (!carName || !fullName || !phone) {
@@ -57,9 +77,13 @@ app.post('/api/bookings', (req, res) => {
     totalAed: totalAed || 0,
     savedAed: savedAed || 0,
     status: 'new',
+    type: 'booking',
     createdAt: new Date().toISOString()
   };
   bookings.unshift(booking);
+  // Mark matching lead as converted
+  const matchLead = leads.find(l => l.phone === phone && !l.convertedToBooking);
+  if (matchLead) matchLead.convertedToBooking = true;
   res.json({ success: true, ref, booking });
 });
 
@@ -67,7 +91,6 @@ app.post('/api/bookings', (req, res) => {
 // ADMIN API (requires auth)
 // ══════════════════════════════
 
-// Login check
 app.post('/api/auth', (req, res) => {
   const { password } = req.body;
   if (password === ADMIN_PASS) {
@@ -77,12 +100,33 @@ app.post('/api/auth', (req, res) => {
   }
 });
 
+// Get all leads
+app.get('/api/leads', auth, (req, res) => {
+  res.json(leads);
+});
+
+// Update lead
+app.patch('/api/leads/:id', auth, (req, res) => {
+  const l = leads.find(x => x.id === parseInt(req.params.id));
+  if (!l) return res.status(404).json({ error: 'Not found' });
+  if (req.body.status) l.status = req.body.status;
+  if (req.body.convertedToBooking !== undefined) l.convertedToBooking = req.body.convertedToBooking;
+  res.json(l);
+});
+
+// Delete lead
+app.delete('/api/leads/:id', auth, (req, res) => {
+  const idx = leads.findIndex(x => x.id === parseInt(req.params.id));
+  if (idx === -1) return res.status(404).json({ error: 'Not found' });
+  leads.splice(idx, 1);
+  res.json({ success: true });
+});
+
 // Get all bookings
 app.get('/api/bookings', auth, (req, res) => {
   res.json(bookings);
 });
 
-// Update booking status
 app.patch('/api/bookings/:id', auth, (req, res) => {
   const b = bookings.find(x => x.id === parseInt(req.params.id));
   if (!b) return res.status(404).json({ error: 'Not found' });
@@ -90,7 +134,6 @@ app.patch('/api/bookings/:id', auth, (req, res) => {
   res.json(b);
 });
 
-// Delete booking
 app.delete('/api/bookings/:id', auth, (req, res) => {
   const idx = bookings.findIndex(x => x.id === parseInt(req.params.id));
   if (idx === -1) return res.status(404).json({ error: 'Not found' });
@@ -98,7 +141,6 @@ app.delete('/api/bookings/:id', auth, (req, res) => {
   res.json({ success: true });
 });
 
-// Add car
 app.post('/api/cars', auth, (req, res) => {
   const { name, cat, img, price, was, type, badge, feats, includes, spots } = req.body;
   if (!name || !price) return res.status(400).json({ error: 'Name and price required' });
@@ -112,7 +154,6 @@ app.post('/api/cars', auth, (req, res) => {
   res.json(car);
 });
 
-// Update car
 app.put('/api/cars/:id', auth, (req, res) => {
   const car = cars.find(x => x.id === parseInt(req.params.id));
   if (!car) return res.status(404).json({ error: 'Not found' });
@@ -122,7 +163,6 @@ app.put('/api/cars/:id', auth, (req, res) => {
   res.json(car);
 });
 
-// Delete car
 app.delete('/api/cars/:id', auth, (req, res) => {
   const idx = cars.findIndex(x => x.id === parseInt(req.params.id));
   if (idx === -1) return res.status(404).json({ error: 'Not found' });
@@ -133,15 +173,18 @@ app.delete('/api/cars/:id', auth, (req, res) => {
 // Stats
 app.get('/api/stats', auth, (req, res) => {
   const totalBookings = bookings.length;
+  const totalLeads = leads.length;
   const totalRevenue = bookings.reduce((s, b) => s + (Number(b.totalAed) || 0), 0);
   const newBookings = bookings.filter(b => b.status === 'new').length;
+  const newLeads = leads.filter(l => l.status === 'new').length;
+  const convertedLeads = leads.filter(l => l.convertedToBooking).length;
+  const conversionRate = totalLeads > 0 ? Math.round((convertedLeads / totalLeads) * 100) : 0;
   const carCounts = {};
   bookings.forEach(b => { carCounts[b.carName] = (carCounts[b.carName] || 0) + 1; });
   const popularCar = Object.keys(carCounts).sort((a, b) => carCounts[b] - carCounts[a])[0] || '-';
-  res.json({ totalBookings, totalRevenue, newBookings, popularCar, totalCars: cars.length });
+  res.json({ totalBookings, totalLeads, totalRevenue, newBookings, newLeads, convertedLeads, conversionRate, popularCar, totalCars: cars.length });
 });
 
-// Serve dashboard
 app.get('/dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, 'dashboard.html'));
 });

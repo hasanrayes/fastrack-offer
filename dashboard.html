@@ -12,11 +12,34 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --color-red: #E53935;
+            --color-green: #00C853;
+            --color-white: #ffffff;
+            --color-dark-bg: #0a0a0a;
+            --color-card: #1a1a1a;
+            --color-border: #2a2a2a;
+            --color-light-bg: #f5f5f5;
+            --color-light-card: #ffffff;
+            --color-light-border: #e5e5e5;
+            --color-text-dark: #111111;
+            --color-text-light: #999999;
+            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.15);
+            --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background: #0a0a0a;
+            background: var(--color-dark-bg);
             color: #fff;
             line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body.light-mode {
+            background: var(--color-light-bg);
+            color: var(--color-text-dark);
         }
 
         /* LOGIN SCREEN */
@@ -26,7 +49,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            background: linear-gradient(135deg, var(--color-dark-bg) 0%, var(--color-card) 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -37,14 +60,23 @@
             display: none;
         }
 
+        body.light-mode .login-screen {
+            background: linear-gradient(135deg, var(--color-light-bg) 0%, #fff 100%);
+        }
+
         .login-card {
-            background: #1a1a1a;
-            border: 1px solid #2a2a2a;
+            background: var(--color-card);
+            border: 1px solid var(--color-border);
             border-radius: 12px;
             padding: 40px;
             width: 100%;
             max-width: 400px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: var(--shadow-lg);
+        }
+
+        body.light-mode .login-card {
+            background: var(--color-light-card);
+            border-color: var(--color-light-border);
         }
 
         .login-logo {
@@ -56,12 +88,15 @@
             font-family: 'Space Grotesk', sans-serif;
             font-size: 32px;
             font-weight: 700;
-            color: #fff;
             letter-spacing: -1px;
         }
 
+        body.light-mode .login-logo h1 {
+            color: var(--color-text-dark);
+        }
+
         .login-logo p {
-            color: #E53935;
+            color: var(--color-red);
             font-size: 14px;
             margin-top: 8px;
             font-weight: 600;
@@ -85,25 +120,52 @@
             color: #ccc;
         }
 
-        .form-group input {
-            background: #0a0a0a;
-            border: 1px solid #2a2a2a;
+        body.light-mode .form-group label {
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            background: var(--color-dark-bg);
+            border: 1px solid var(--color-border);
             border-radius: 8px;
             padding: 12px 16px;
             color: #fff;
             font-size: 14px;
+            font-family: 'Inter', sans-serif;
             transition: all 0.3s ease;
         }
 
-        .form-group input:focus {
+        body.light-mode .form-group input,
+        body.light-mode .form-group textarea,
+        body.light-mode .form-group select {
+            background: var(--color-light-card);
+            border-color: var(--color-light-border);
+            color: var(--color-text-dark);
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: #666;
+        }
+
+        body.light-mode .form-group input::placeholder,
+        body.light-mode .form-group textarea::placeholder {
+            color: #999;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
             outline: none;
-            border-color: #E53935;
+            border-color: var(--color-red);
             box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.1);
         }
 
         .login-btn {
             background: #fff;
-            color: #0a0a0a;
+            color: var(--color-dark-bg);
             border: none;
             border-radius: 8px;
             padding: 12px;
@@ -114,12 +176,12 @@
             font-family: 'Inter', sans-serif;
         }
 
-        .login-btn:hover {
+        .login-btn:hover:not(.loading) {
             background: #f0f0f0;
             transform: translateY(-2px);
         }
 
-        .login-btn:active {
+        .login-btn:active:not(.loading) {
             transform: translateY(0);
         }
 
@@ -129,7 +191,7 @@
         }
 
         .login-error {
-            color: #E53935;
+            color: var(--color-red);
             font-size: 14px;
             text-align: center;
             display: none;
@@ -148,8 +210,8 @@
         /* SIDEBAR */
         .sidebar {
             width: 240px;
-            background: #0a0a0a;
-            border-right: 1px solid #2a2a2a;
+            background: var(--color-dark-bg);
+            border-right: 1px solid var(--color-border);
             display: flex;
             flex-direction: column;
             overflow-y: auto;
@@ -160,12 +222,22 @@
             z-index: 100;
         }
 
+        body.light-mode .sidebar {
+            background: var(--color-light-card);
+            border-right-color: var(--color-light-border);
+        }
+
         .sidebar-logo {
             padding: 24px 20px;
-            border-bottom: 1px solid #2a2a2a;
+            border-bottom: 1px solid var(--color-border);
             display: flex;
             align-items: center;
             gap: 10px;
+            justify-content: space-between;
+        }
+
+        body.light-mode .sidebar-logo {
+            border-bottom-color: var(--color-light-border);
         }
 
         .sidebar-logo h2 {
@@ -173,6 +245,40 @@
             font-size: 20px;
             font-weight: 700;
             letter-spacing: -0.5px;
+        }
+
+        body.light-mode .sidebar-logo h2 {
+            color: var(--color-text-dark);
+        }
+
+        .theme-toggle-btn {
+            background: transparent;
+            border: 1px solid var(--color-border);
+            color: #999;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        body.light-mode .theme-toggle-btn {
+            border-color: var(--color-light-border);
+            color: #666;
+        }
+
+        .theme-toggle-btn:hover {
+            color: #fff;
+            border-color: var(--color-red);
+        }
+
+        body.light-mode .theme-toggle-btn:hover {
+            color: var(--color-text-dark);
+            border-color: var(--color-red);
         }
 
         .sidebar-nav {
@@ -192,19 +298,34 @@
             align-items: center;
             gap: 12px;
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
             border-left: 3px solid transparent;
+        }
+
+        body.light-mode .nav-item {
+            color: #888;
         }
 
         .nav-item:hover {
             color: #fff;
-            background: #1a1a1a;
+            background: var(--color-card);
+        }
+
+        body.light-mode .nav-item:hover {
+            color: var(--color-text-dark);
+            background: #f0f0f0;
         }
 
         .nav-item.active {
             color: #fff;
-            background: #1a1a1a;
-            border-left-color: #E53935;
+            background: var(--color-card);
+            border-left-color: var(--color-red);
+        }
+
+        body.light-mode .nav-item.active {
+            color: var(--color-text-dark);
+            background: #f0f0f0;
+            border-left-color: var(--color-red);
         }
 
         .nav-icon {
@@ -213,29 +334,44 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 18px;
         }
 
         .sidebar-footer {
             padding: 20px;
-            border-top: 1px solid #2a2a2a;
+            border-top: 1px solid var(--color-border);
+        }
+
+        body.light-mode .sidebar-footer {
+            border-top-color: var(--color-light-border);
         }
 
         .view-live-btn {
             width: 100%;
             background: transparent;
-            border: 1px solid #2a2a2a;
+            border: 1px solid var(--color-border);
             color: #999;
             padding: 10px;
             border-radius: 6px;
             cursor: pointer;
             font-size: 13px;
-            font-weight: 500;
+            font-weight: 600;
             transition: all 0.3s ease;
+        }
+
+        body.light-mode .view-live-btn {
+            border-color: var(--color-light-border);
+            color: #666;
         }
 
         .view-live-btn:hover {
             color: #fff;
-            border-color: #E53935;
+            border-color: var(--color-red);
+        }
+
+        body.light-mode .view-live-btn:hover {
+            color: var(--color-text-dark);
+            border-color: var(--color-red);
         }
 
         /* MAIN CONTENT */
@@ -244,6 +380,11 @@
             margin-left: 240px;
             overflow-y: auto;
             background: #111;
+            transition: background-color 0.3s ease;
+        }
+
+        body.light-mode .main-content {
+            background: var(--color-light-bg);
         }
 
         .content-view {
@@ -256,7 +397,11 @@
 
         .view-header {
             padding: 32px 32px 24px;
-            border-bottom: 1px solid #2a2a2a;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        body.light-mode .view-header {
+            border-bottom-color: var(--color-light-border);
         }
 
         .header-top {
@@ -273,10 +418,18 @@
             letter-spacing: -0.5px;
         }
 
+        body.light-mode .header-title {
+            color: var(--color-text-dark);
+        }
+
         .header-subtitle {
             color: #999;
             font-size: 14px;
             margin-top: 4px;
+        }
+
+        body.light-mode .header-subtitle {
+            color: #888;
         }
 
         /* KPI CARDS */
@@ -288,24 +441,37 @@
         }
 
         .kpi-card {
-            background: #1a1a1a;
-            border: 1px solid #2a2a2a;
+            background: var(--color-card);
+            border: 1px solid var(--color-border);
             border-radius: 12px;
             padding: 24px;
             transition: all 0.3s ease;
+        }
+
+        body.light-mode .kpi-card {
+            background: var(--color-light-card);
+            border-color: var(--color-light-border);
         }
 
         .kpi-card:hover {
             border-color: #3a3a3a;
         }
 
+        body.light-mode .kpi-card:hover {
+            border-color: #ddd;
+        }
+
         .kpi-label {
             color: #999;
             font-size: 13px;
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 12px;
+        }
+
+        body.light-mode .kpi-label {
+            color: #888;
         }
 
         .kpi-value {
@@ -315,10 +481,18 @@
             letter-spacing: -1px;
         }
 
+        body.light-mode .kpi-value {
+            color: var(--color-text-dark);
+        }
+
         .kpi-subtitle {
             color: #666;
             font-size: 12px;
             margin-top: 8px;
+        }
+
+        body.light-mode .kpi-subtitle {
+            color: #999;
         }
 
         .kpi-icon {
@@ -330,14 +504,14 @@
         }
 
         .kpi-icon.green {
-            background: #00C853;
+            background: var(--color-green);
         }
 
         .kpi-icon.red {
-            background: #E53935;
+            background: var(--color-red);
         }
 
-        /* RECENT BOOKINGS TABLE */
+        /* RECENT ACTIVITY */
         .recent-bookings {
             padding: 32px;
         }
@@ -349,11 +523,20 @@
             margin-bottom: 20px;
         }
 
+        body.light-mode .recent-bookings h3 {
+            color: var(--color-text-dark);
+        }
+
         .table-container {
-            background: #1a1a1a;
-            border: 1px solid #2a2a2a;
+            background: var(--color-card);
+            border: 1px solid var(--color-border);
             border-radius: 12px;
             overflow: hidden;
+        }
+
+        body.light-mode .table-container {
+            background: var(--color-light-card);
+            border-color: var(--color-light-border);
         }
 
         table {
@@ -363,27 +546,45 @@
         }
 
         thead {
-            background: #0a0a0a;
-            border-bottom: 1px solid #2a2a2a;
+            background: var(--color-dark-bg);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        body.light-mode thead {
+            background: #f9f9f9;
+            border-bottom-color: var(--color-light-border);
         }
 
         th {
             padding: 14px 16px;
             text-align: left;
-            font-weight: 600;
+            font-weight: 700;
             color: #999;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             font-size: 12px;
         }
 
+        body.light-mode th {
+            color: #888;
+        }
+
         td {
             padding: 14px 16px;
-            border-bottom: 1px solid #2a2a2a;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        body.light-mode td {
+            border-bottom-color: var(--color-light-border);
+            color: var(--color-text-dark);
         }
 
         tbody tr:hover {
-            background: #0a0a0a;
+            background: var(--color-dark-bg);
+        }
+
+        body.light-mode tbody tr:hover {
+            background: #f9f9f9;
         }
 
         tbody tr:last-child td {
@@ -394,7 +595,7 @@
             display: inline-block;
             padding: 4px 12px;
             border-radius: 20px;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 12px;
         }
 
@@ -408,29 +609,48 @@
             color: #FFC107;
         }
 
-        .status-badge.confirmed {
-            background: rgba(0, 200, 83, 0.1);
-            color: #00C853;
+        .status-badge.qualified {
+            background: rgba(76, 175, 80, 0.1);
+            color: #4CAF50;
         }
 
-        .status-badge.completed {
+        .status-badge.confirmed {
+            background: rgba(0, 200, 83, 0.1);
+            color: var(--color-green);
+        }
+
+        .status-badge.delivered {
             background: rgba(158, 158, 158, 0.1);
             color: #9e9e9e;
         }
 
-        .status-badge.cancelled {
-            background: rgba(229, 57, 53, 0.1);
-            color: #E53935;
+        .status-badge.completed {
+            background: rgba(76, 175, 80, 0.1);
+            color: #4CAF50;
         }
 
-        /* BOOKINGS VIEW */
+        .status-badge.cancelled {
+            background: rgba(229, 57, 53, 0.1);
+            color: var(--color-red);
+        }
+
+        .status-badge.lost {
+            background: rgba(229, 57, 53, 0.1);
+            color: var(--color-red);
+        }
+
+        /* LEADS/BOOKINGS HEADER */
         .bookings-header {
             padding: 32px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             gap: 20px;
-            border-bottom: 1px solid #2a2a2a;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        body.light-mode .bookings-header {
+            border-bottom-color: var(--color-light-border);
         }
 
         .search-bar {
@@ -440,8 +660,8 @@
 
         .search-bar input {
             width: 100%;
-            background: #1a1a1a;
-            border: 1px solid #2a2a2a;
+            background: var(--color-card);
+            border: 1px solid var(--color-border);
             border-radius: 8px;
             padding: 10px 16px;
             color: #fff;
@@ -449,13 +669,23 @@
             transition: all 0.3s ease;
         }
 
+        body.light-mode .search-bar input {
+            background: var(--color-light-card);
+            border-color: var(--color-light-border);
+            color: var(--color-text-dark);
+        }
+
         .search-bar input::placeholder {
             color: #666;
         }
 
+        body.light-mode .search-bar input::placeholder {
+            color: #999;
+        }
+
         .search-bar input:focus {
             outline: none;
-            border-color: #E53935;
+            border-color: var(--color-red);
             box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.1);
         }
 
@@ -470,18 +700,42 @@
 
         .delete-btn {
             background: transparent;
-            border: 1px solid #E53935;
-            color: #E53935;
+            border: 1px solid var(--color-red);
+            color: var(--color-red);
             padding: 6px 12px;
             border-radius: 6px;
             cursor: pointer;
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 700;
             transition: all 0.3s ease;
         }
 
         .delete-btn:hover {
             background: rgba(229, 57, 53, 0.1);
+        }
+
+        .status-select {
+            background: var(--color-dark-bg);
+            color: #fff;
+            border: 1px solid var(--color-border);
+            padding: 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        body.light-mode .status-select {
+            background: var(--color-light-card);
+            border-color: var(--color-light-border);
+            color: var(--color-text-dark);
+        }
+
+        .status-select:focus {
+            outline: none;
+            border-color: var(--color-red);
+            box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.1);
         }
 
         /* CARS VIEW */
@@ -491,7 +745,11 @@
             justify-content: space-between;
             align-items: center;
             gap: 20px;
-            border-bottom: 1px solid #2a2a2a;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        body.light-mode .cars-header {
+            border-bottom-color: var(--color-light-border);
         }
 
         .cars-header h2 {
@@ -500,16 +758,21 @@
             font-weight: 700;
         }
 
+        body.light-mode .cars-header h2 {
+            color: var(--color-text-dark);
+        }
+
         .add-car-btn {
             background: #fff;
-            color: #0a0a0a;
+            color: var(--color-dark-bg);
             border: none;
             padding: 10px 20px;
             border-radius: 8px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 14px;
+            font-family: 'Inter', sans-serif;
         }
 
         .add-car-btn:hover {
@@ -525,28 +788,43 @@
         }
 
         .car-card {
-            background: #1a1a1a;
-            border: 1px solid #2a2a2a;
+            background: var(--color-card);
+            border: 1px solid var(--color-border);
             border-radius: 12px;
             overflow: hidden;
             transition: all 0.3s ease;
         }
 
+        body.light-mode .car-card {
+            background: var(--color-light-card);
+            border-color: var(--color-light-border);
+        }
+
         .car-card:hover {
             border-color: #3a3a3a;
             transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        body.light-mode .car-card:hover {
+            border-color: #ddd;
         }
 
         .car-image {
             width: 100%;
             height: 180px;
-            background: #0a0a0a;
+            background: var(--color-dark-bg);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 12px;
             color: #666;
             overflow: hidden;
+        }
+
+        body.light-mode .car-image {
+            background: #f0f0f0;
+            color: #999;
         }
 
         .car-image img {
@@ -566,17 +844,25 @@
             margin-bottom: 4px;
         }
 
+        body.light-mode .car-title {
+            color: var(--color-text-dark);
+        }
+
         .car-category {
             color: #999;
             font-size: 12px;
             margin-bottom: 12px;
         }
 
+        body.light-mode .car-category {
+            color: #888;
+        }
+
         .car-price {
             font-family: 'Space Grotesk', sans-serif;
             font-size: 18px;
             font-weight: 700;
-            color: #00C853;
+            color: var(--color-green);
             margin-bottom: 4px;
         }
 
@@ -587,14 +873,18 @@
             margin-bottom: 12px;
         }
 
+        body.light-mode .car-was-price {
+            color: #999;
+        }
+
         .car-badge {
             display: inline-block;
-            background: #E53935;
+            background: var(--color-red);
             color: #fff;
             padding: 4px 8px;
             border-radius: 4px;
             font-size: 11px;
-            font-weight: 600;
+            font-weight: 700;
             margin-bottom: 12px;
         }
 
@@ -605,7 +895,12 @@
             color: #999;
             margin-bottom: 12px;
             padding-bottom: 12px;
-            border-bottom: 1px solid #2a2a2a;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        body.light-mode .car-meta {
+            color: #888;
+            border-bottom-color: var(--color-light-border);
         }
 
         .car-features {
@@ -616,17 +911,22 @@
             overflow: hidden;
         }
 
+        body.light-mode .car-features {
+            color: #888;
+        }
+
         .car-delete {
             width: 100%;
             background: transparent;
-            border: 1px solid #E53935;
-            color: #E53935;
+            border: 1px solid var(--color-red);
+            color: var(--color-red);
             padding: 8px;
             border-radius: 6px;
             cursor: pointer;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 12px;
             transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
         }
 
         .car-delete:hover {
@@ -641,11 +941,10 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.7);
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
             z-index: 2000;
-            display: none;
         }
 
         .modal-overlay.active {
@@ -653,15 +952,20 @@
         }
 
         .modal {
-            background: #1a1a1a;
-            border: 1px solid #2a2a2a;
+            background: var(--color-card);
+            border: 1px solid var(--color-border);
             border-radius: 12px;
             padding: 32px;
             max-width: 500px;
             width: 90%;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: var(--shadow-lg);
+        }
+
+        body.light-mode .modal {
+            background: var(--color-light-card);
+            border-color: var(--color-light-border);
         }
 
         .modal-header {
@@ -672,6 +976,10 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+        }
+
+        body.light-mode .modal-header {
+            color: var(--color-text-dark);
         }
 
         .modal-close {
@@ -687,39 +995,14 @@
             color: #fff;
         }
 
+        body.light-mode .modal-close:hover {
+            color: var(--color-text-dark);
+        }
+
         .modal-form {
             display: flex;
             flex-direction: column;
             gap: 16px;
-        }
-
-        .form-group input,
-        .form-group textarea {
-            background: #0a0a0a;
-            border: 1px solid #2a2a2a;
-            border-radius: 8px;
-            padding: 12px 16px;
-            color: #fff;
-            font-size: 14px;
-            font-family: 'Inter', sans-serif;
-            transition: all 0.3s ease;
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #E53935;
-            box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.1);
-        }
-
-        .form-group input::placeholder,
-        .form-group textarea::placeholder {
-            color: #666;
         }
 
         .form-actions {
@@ -733,7 +1016,7 @@
             padding: 12px;
             border-radius: 8px;
             border: none;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 14px;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -742,10 +1025,10 @@
 
         .btn-primary {
             background: #fff;
-            color: #0a0a0a;
+            color: var(--color-dark-bg);
         }
 
-        .btn-primary:hover {
+        .btn-primary:hover:not(.loading) {
             background: #f0f0f0;
             transform: translateY(-2px);
         }
@@ -753,11 +1036,20 @@
         .btn-secondary {
             background: transparent;
             color: #fff;
-            border: 1px solid #2a2a2a;
+            border: 1px solid var(--color-border);
+        }
+
+        body.light-mode .btn-secondary {
+            color: var(--color-text-dark);
+            border-color: var(--color-light-border);
         }
 
         .btn-secondary:hover {
             border-color: #3a3a3a;
+        }
+
+        body.light-mode .btn-secondary:hover {
+            border-color: #ddd;
         }
 
         .btn.loading {
@@ -765,7 +1057,6 @@
             cursor: not-allowed;
         }
 
-        /* CONFIRMATION MODAL */
         .confirm-modal {
             max-width: 400px;
         }
@@ -780,7 +1071,39 @@
             font-size: 14px;
         }
 
-        /* RESPONSIVE */
+        body.light-mode .confirm-message {
+            color: #666;
+        }
+
+        .export-btn {
+            background: transparent;
+            border: 1px solid var(--color-border);
+            color: #999;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body.light-mode .export-btn {
+            border-color: var(--color-light-border);
+            color: #666;
+        }
+
+        .export-btn:hover {
+            color: #fff;
+            border-color: var(--color-red);
+        }
+
+        body.light-mode .export-btn:hover {
+            color: var(--color-text-dark);
+            border-color: var(--color-red);
+        }
+
+        /* RESPONSIVE - MOBILE */
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
@@ -795,6 +1118,7 @@
 
             .main-content {
                 margin-left: 0;
+                margin-bottom: 60px;
             }
 
             .view-header,
@@ -831,23 +1155,148 @@
             th, td {
                 padding: 10px 12px;
             }
+
+            .bookings-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .search-bar {
+                max-width: 100%;
+            }
+
+            .modal {
+                width: 95%;
+                max-height: 80vh;
+                padding: 24px;
+            }
+
+            /* MOBILE BOTTOM NAV */
+            .mobile-nav {
+                display: none;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 60px;
+                background: var(--color-card);
+                border-top: 1px solid var(--color-border);
+                display: flex;
+                justify-content: space-around;
+                align-items: center;
+                z-index: 100;
+            }
+
+            body.light-mode .mobile-nav {
+                background: var(--color-light-card);
+                border-top-color: var(--color-light-border);
+            }
+
+            .mobile-nav-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 4px;
+                color: #999;
+                cursor: pointer;
+                font-size: 11px;
+                font-weight: 600;
+                transition: all 0.3s ease;
+                width: 100%;
+                height: 100%;
+                justify-content: center;
+            }
+
+            body.light-mode .mobile-nav-item {
+                color: #888;
+            }
+
+            .mobile-nav-item.active {
+                color: var(--color-red);
+            }
+
+            .mobile-nav-item span {
+                font-size: 18px;
+            }
+
+            .mobile-nav {
+                display: flex;
+            }
+
+            .cars-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal {
+                width: 95%;
+            }
+
+            /* Minimum button heights for touch */
+            button {
+                min-height: 44px;
+            }
+
+            /* Minimum font sizes */
+            body {
+                font-size: 14px;
+            }
+
+            .form-group label {
+                font-size: 14px;
+            }
         }
 
-        .export-btn {
+        @media (max-width: 480px) {
+            .kpi-value {
+                font-size: 24px;
+            }
+
+            .header-title {
+                font-size: 20px;
+            }
+
+            .cars-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .add-car-btn {
+                width: 100%;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .form-actions .btn {
+                min-height: 44px;
+            }
+        }
+
+        /* SCROLLBAR STYLING */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
             background: transparent;
-            border: 1px solid #2a2a2a;
-            color: #999;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s ease;
         }
 
-        .export-btn:hover {
-            color: #fff;
-            border-color: #E53935;
+        ::-webkit-scrollbar-thumb {
+            background: #3a3a3a;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4a4a4a;
+        }
+
+        body.light-mode ::-webkit-scrollbar-thumb {
+            background: #ddd;
+        }
+
+        body.light-mode ::-webkit-scrollbar-thumb:hover {
+            background: #ccc;
         }
     </style>
 </head>
@@ -859,7 +1308,7 @@
                 <h1>FASTRACK</h1>
                 <p>Admin Dashboard</p>
             </div>
-            <form class="login-form" onsubmit="login(event)">
+            <form class="login-form" onsubmit="handleLogin(event)">
                 <div class="form-group">
                     <label>Admin Password</label>
                     <input type="password" id="passwordInput" placeholder="Enter admin password" required>
@@ -876,11 +1325,18 @@
         <div class="sidebar" id="sidebar">
             <div class="sidebar-logo">
                 <h2>FASTRACK</h2>
+                <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle dark/light mode">
+                    <span id="themeIcon">☀️</span>
+                </button>
             </div>
             <div class="sidebar-nav">
                 <div class="nav-item active" onclick="switchView('dashboard')">
                     <div class="nav-icon">🏠</div>
                     <span>Dashboard</span>
+                </div>
+                <div class="nav-item" onclick="switchView('leads')">
+                    <div class="nav-icon">👥</div>
+                    <span>Leads</span>
                 </div>
                 <div class="nav-item" onclick="switchView('bookings')">
                     <div class="nav-icon">📋</div>
@@ -900,6 +1356,30 @@
             </div>
         </div>
 
+        <!-- MOBILE BOTTOM NAV -->
+        <div class="mobile-nav" id="mobileNav">
+            <div class="mobile-nav-item active" onclick="switchViewMobile('dashboard')">
+                <span>🏠</span>
+                <div>Dashboard</div>
+            </div>
+            <div class="mobile-nav-item" onclick="switchViewMobile('leads')">
+                <span>👥</span>
+                <div>Leads</div>
+            </div>
+            <div class="mobile-nav-item" onclick="switchViewMobile('bookings')">
+                <span>📋</span>
+                <div>Bookings</div>
+            </div>
+            <div class="mobile-nav-item" onclick="switchViewMobile('cars')">
+                <span>🚗</span>
+                <div>Cars</div>
+            </div>
+            <div class="mobile-nav-item" onclick="switchViewMobile('settings')">
+                <span>⚙️</span>
+                <div>Settings</div>
+            </div>
+        </div>
+
         <!-- MAIN CONTENT -->
         <div class="main-content">
             <!-- DASHBOARD VIEW -->
@@ -915,6 +1395,11 @@
 
                 <div class="kpi-grid">
                     <div class="kpi-card">
+                        <div class="kpi-label">Total Leads</div>
+                        <div class="kpi-value" id="totalLeadsKpi">0</div>
+                        <div class="kpi-subtitle">All time leads</div>
+                    </div>
+                    <div class="kpi-card">
                         <div class="kpi-label">Total Bookings</div>
                         <div class="kpi-value" id="totalBookingsKpi">0</div>
                         <div class="kpi-subtitle">All time bookings</div>
@@ -925,9 +1410,14 @@
                         <div class="kpi-subtitle">Total booking value</div>
                     </div>
                     <div class="kpi-card">
+                        <div class="kpi-label">Conversion Rate</div>
+                        <div class="kpi-value" id="conversionRateKpi">0%</div>
+                        <div class="kpi-subtitle">Leads to bookings</div>
+                    </div>
+                    <div class="kpi-card">
                         <div class="kpi-label">New Leads</div>
-                        <div class="kpi-value"><span class="kpi-icon green"></span><span id="newBookingsKpi">0</span></div>
-                        <div class="kpi-subtitle">Uncontacted bookings</div>
+                        <div class="kpi-value"><span class="kpi-icon green"></span><span id="newLeadsKpi">0</span></div>
+                        <div class="kpi-subtitle">Uncontacted leads</div>
                     </div>
                     <div class="kpi-card">
                         <div class="kpi-label">Active Cars</div>
@@ -937,23 +1427,58 @@
                 </div>
 
                 <div class="recent-bookings">
-                    <h3>Recent Bookings</h3>
+                    <h3>Recent Activity</h3>
                     <div class="table-container">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Ref</th>
+                                    <th>Type</th>
                                     <th>Date</th>
                                     <th>Customer</th>
                                     <th>Phone</th>
-                                    <th>Car</th>
-                                    <th>Duration</th>
-                                    <th>Total</th>
+                                    <th>Details</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
-                            <tbody id="recentBookingsTable">
-                                <tr><td colspan="8" style="text-align: center; color: #666; padding: 24px;">Loading...</td></tr>
+                            <tbody id="recentActivityTable">
+                                <tr><td colspan="6" style="text-align: center; color: #666; padding: 24px;">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LEADS VIEW -->
+            <div class="content-view" id="leadsView">
+                <div class="bookings-header">
+                    <div>
+                        <h2 class="header-title">Leads Management</h2>
+                        <p class="header-subtitle" id="leadCount">0 total leads</p>
+                    </div>
+                </div>
+
+                <div style="padding: 0 32px;">
+                    <div class="search-bar">
+                        <input type="text" id="leadSearch" placeholder="Search by name or phone...">
+                    </div>
+                </div>
+
+                <div class="bookings-table">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Name</th>
+                                    <th>Phone</th>
+                                    <th>Interest</th>
+                                    <th>Source</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leadsTable">
+                                <tr><td colspan="7" style="text-align: center; color: #666; padding: 24px;">Loading...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -964,11 +1489,11 @@
             <div class="content-view" id="bookingsView">
                 <div class="bookings-header">
                     <div>
-                        <h2 class="header-title">Booking Leads</h2>
+                        <h2 class="header-title">Booking Reservations</h2>
                         <p class="header-subtitle" id="bookingCount">0 total bookings</p>
                     </div>
                     <div style="display: flex; gap: 12px;">
-                        <button class="export-btn" onclick="exportBookings()">Export</button>
+                        <button class="export-btn" onclick="exportBookings()">Export CSV</button>
                     </div>
                 </div>
 
@@ -987,7 +1512,6 @@
                                     <th>Date</th>
                                     <th>Name</th>
                                     <th>Phone</th>
-                                    <th>Email</th>
                                     <th>Car</th>
                                     <th>Duration</th>
                                     <th>Total</th>
@@ -996,7 +1520,7 @@
                                 </tr>
                             </thead>
                             <tbody id="bookingsTable">
-                                <tr><td colspan="10" style="text-align: center; color: #666; padding: 24px;">Loading...</td></tr>
+                                <tr><td colspan="9" style="text-align: center; color: #666; padding: 24px;">Loading...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -1019,14 +1543,22 @@
                 <div class="view-header">
                     <div>
                         <h2 class="header-title">Settings</h2>
-                        <p class="header-subtitle">Manage dashboard settings</p>
+                        <p class="header-subtitle">Manage dashboard preferences</p>
                     </div>
                 </div>
                 <div style="padding: 32px;">
-                    <div class="kpi-card" style="max-width: 400px;">
-                        <div class="kpi-label">Admin Token</div>
-                        <div style="word-break: break-all; background: #0a0a0a; padding: 12px; border-radius: 6px; margin: 12px 0; font-family: monospace; font-size: 12px;" id="tokenDisplay">••••••••••••••••••••</div>
-                        <button class="btn btn-secondary" onclick="logout()" style="margin-top: 12px;">Sign Out</button>
+                    <div class="kpi-card" style="max-width: 500px;">
+                        <div class="kpi-label">Theme Preference</div>
+                        <p style="margin: 12px 0; color: #ccc; font-size: 14px;">Current theme: <strong id="themeDisplayValue">Dark Mode</strong></p>
+                        <button class="btn btn-secondary" onclick="toggleTheme()" style="margin-bottom: 24px;">Switch Theme</button>
+
+                        <div class="kpi-label">Admin Session</div>
+                        <p style="margin: 12px 0; color: #ccc; font-size: 14px;">Your admin token is securely stored in this session.</p>
+                        <button class="btn btn-primary" onclick="logout()" style="margin-bottom: 24px;">Sign Out</button>
+
+                        <div class="kpi-label">About</div>
+                        <p style="margin: 12px 0; color: #ccc; font-size: 14px;">Fastrack Admin Dashboard v1.0</p>
+                        <p style="margin: 12px 0; color: #999; font-size: 12px;">Professional car rental management system for Fastrack Rent a Car Dubai.</p>
                     </div>
                 </div>
             </div>
@@ -1045,15 +1577,41 @@
     </div>
 
     <script>
-        // GLOBAL STATE
+        // ===== GLOBAL STATE =====
         let adminToken = null;
         const API_BASE = '/api';
+        let leadsData = [];
         let bookingsData = [];
         let carsData = [];
         let statsData = {};
 
+        // ===== THEME MANAGEMENT =====
+        function initTheme() {
+            const savedTheme = localStorage.getItem('fastrack_theme') || 'dark';
+            applyTheme(savedTheme);
+        }
+
+        function applyTheme(theme) {
+            if (theme === 'light') {
+                document.body.classList.add('light-mode');
+                document.getElementById('themeIcon').textContent = '🌙';
+                document.getElementById('themeDisplayValue').textContent = 'Light Mode';
+            } else {
+                document.body.classList.remove('light-mode');
+                document.getElementById('themeIcon').textContent = '☀️';
+                document.getElementById('themeDisplayValue').textContent = 'Dark Mode';
+            }
+            localStorage.setItem('fastrack_theme', theme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = localStorage.getItem('fastrack_theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            applyTheme(newTheme);
+        }
+
         // ===== AUTHENTICATION =====
-        function login(e) {
+        function handleLogin(e) {
             e.preventDefault();
             const password = document.getElementById('passwordInput').value;
             const loginBtn = document.getElementById('loginBtn');
@@ -1070,13 +1628,13 @@
             .then(data => {
                 if (data.success) {
                     adminToken = data.token;
+                    sessionStorage.setItem('adminToken', adminToken);
                     document.getElementById('loginScreen').classList.add('hidden');
                     document.getElementById('dashboardContainer').classList.remove('hidden');
-                    loadStats();
-                    loadBookings();
-                    loadCars();
+                    loadAllData();
                     setInterval(() => {
                         loadStats();
+                        loadLeads();
                         loadBookings();
                     }, 30000);
                 } else {
@@ -1104,6 +1662,7 @@
 
         function logout() {
             adminToken = null;
+            sessionStorage.removeItem('adminToken');
             document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('dashboardContainer').classList.add('hidden');
             document.getElementById('passwordInput').value = '';
@@ -1125,24 +1684,44 @@
             return fetch(`${API_BASE}${endpoint}`, options).then(res => res.json());
         }
 
+        function loadAllData() {
+            loadStats();
+            loadLeads();
+            loadBookings();
+            loadCars();
+        }
+
         function loadStats() {
             apiCall('GET', '/stats')
                 .then(data => {
                     statsData = data;
+                    document.getElementById('totalLeadsKpi').textContent = data.totalLeads || 0;
                     document.getElementById('totalBookingsKpi').textContent = data.totalBookings || 0;
                     document.getElementById('totalRevenueKpi').textContent = `AED ${(data.totalRevenue || 0).toLocaleString()}`;
-                    document.getElementById('newBookingsKpi').textContent = data.newBookings || 0;
+                    document.getElementById('newLeadsKpi').textContent = data.newLeads || 0;
                     document.getElementById('totalCarsKpi').textContent = data.totalCars || 0;
+                    const conversionRate = data.totalLeads > 0 ? Math.round((data.totalBookings / data.totalLeads) * 100) : 0;
+                    document.getElementById('conversionRateKpi').textContent = `${conversionRate}%`;
+                    document.getElementById('leadCount').textContent = `${data.totalLeads || 0} total leads`;
                     document.getElementById('bookingCount').textContent = `${data.totalBookings || 0} total bookings`;
                 })
                 .catch(err => console.error('Failed to load stats:', err));
+        }
+
+        function loadLeads() {
+            apiCall('GET', '/leads')
+                .then(data => {
+                    leadsData = Array.isArray(data) ? data : [];
+                    renderLeadsTable();
+                })
+                .catch(err => console.error('Failed to load leads:', err));
         }
 
         function loadBookings() {
             apiCall('GET', '/bookings')
                 .then(data => {
                     bookingsData = Array.isArray(data) ? data : [];
-                    renderRecentBookings();
+                    renderRecentActivity();
                     renderBookingsTable();
                 })
                 .catch(err => console.error('Failed to load bookings:', err));
@@ -1158,25 +1737,89 @@
         }
 
         // ===== RENDER FUNCTIONS =====
-        function renderRecentBookings() {
-            const tbody = document.getElementById('recentBookingsTable');
-            const recent = bookingsData.slice(0, 10);
+        function renderRecentActivity() {
+            const tbody = document.getElementById('recentActivityTable');
+
+            // Combine leads and bookings
+            const activity = [];
+
+            leadsData.forEach(lead => {
+                activity.push({
+                    type: 'Lead',
+                    date: lead.date,
+                    name: lead.name,
+                    phone: lead.phone,
+                    details: lead.interest || '-',
+                    status: lead.status || 'new',
+                    isLead: true
+                });
+            });
+
+            bookingsData.forEach(booking => {
+                activity.push({
+                    type: 'Booking',
+                    date: booking.date,
+                    name: booking.name,
+                    phone: booking.phone,
+                    details: booking.car,
+                    status: booking.status || 'new',
+                    isBooking: true
+                });
+            });
+
+            // Sort by date descending
+            activity.sort((a, b) => new Date(b.date) - new Date(a.date));
+            const recent = activity.slice(0, 15);
 
             if (recent.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #666; padding: 24px;">No bookings yet</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #666; padding: 24px;">No activity yet</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = recent.map(b => `
+            tbody.innerHTML = recent.map(item => `
                 <tr>
-                    <td>#${b._id ? b._id.substring(0, 8) : 'N/A'}</td>
-                    <td>${formatDate(b.date)}</td>
-                    <td>${b.name}</td>
-                    <td>${b.phone}</td>
-                    <td>${b.car}</td>
-                    <td>${b.duration} days</td>
-                    <td>AED ${(b.total || 0).toLocaleString()}</td>
-                    <td><span class="status-badge ${b.status || 'new'}">${capitalize(b.status || 'new')}</span></td>
+                    <td><strong>${item.type}</strong></td>
+                    <td>${formatDate(item.date)}</td>
+                    <td>${item.name}</td>
+                    <td>${item.phone}</td>
+                    <td>${item.details}</td>
+                    <td><span class="status-badge ${item.status}">${capitalize(item.status)}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderLeadsTable() {
+            const tbody = document.getElementById('leadsTable');
+            const searchTerm = document.getElementById('leadSearch').value.toLowerCase();
+
+            const filtered = leadsData.filter(lead => {
+                const searchText = `${lead.name} ${lead.phone}`.toLowerCase();
+                return searchText.includes(searchTerm);
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #666; padding: 24px;">No leads found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(lead => `
+                <tr>
+                    <td>${formatDate(lead.date)}</td>
+                    <td><strong>${lead.name}</strong></td>
+                    <td>${lead.phone}</td>
+                    <td>${lead.interest || '-'}</td>
+                    <td>${lead.source || '-'}</td>
+                    <td>
+                        <select class="status-select" onchange="updateLeadStatus('${lead._id}', this.value)">
+                            <option value="new" ${lead.status === 'new' ? 'selected' : ''}>New</option>
+                            <option value="contacted" ${lead.status === 'contacted' ? 'selected' : ''}>Contacted</option>
+                            <option value="qualified" ${lead.status === 'qualified' ? 'selected' : ''}>Qualified</option>
+                            <option value="lost" ${lead.status === 'lost' ? 'selected' : ''}>Lost</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button class="delete-btn" onclick="deleteLead('${lead._id}')">Delete</button>
+                    </td>
                 </tr>
             `).join('');
         }
@@ -1185,38 +1828,36 @@
             const tbody = document.getElementById('bookingsTable');
             const searchTerm = document.getElementById('bookingSearch').value.toLowerCase();
 
-            const filtered = bookingsData.filter(b => {
-                const searchText = `${b.name} ${b.phone} ${b._id} ${b.car}`.toLowerCase();
+            const filtered = bookingsData.filter(booking => {
+                const searchText = `${booking.name} ${booking.phone} ${booking._id} ${booking.car}`.toLowerCase();
                 return searchText.includes(searchTerm);
             });
 
             if (filtered.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: #666; padding: 24px;">No bookings found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #666; padding: 24px;">No bookings found</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = filtered.map(b => `
+            tbody.innerHTML = filtered.map(booking => `
                 <tr>
-                    <td>#${b._id ? b._id.substring(0, 8) : 'N/A'}</td>
-                    <td>${formatDate(b.date)}</td>
-                    <td>${b.name}</td>
-                    <td>${b.phone}</td>
-                    <td>${b.email || '-'}</td>
-                    <td>${b.car}</td>
-                    <td>${b.duration} days</td>
-                    <td>AED ${(b.total || 0).toLocaleString()}</td>
+                    <td>#${booking._id ? booking._id.substring(0, 8) : 'N/A'}</td>
+                    <td>${formatDate(booking.date)}</td>
+                    <td><strong>${booking.name}</strong></td>
+                    <td>${booking.phone}</td>
+                    <td>${booking.car}</td>
+                    <td>${booking.duration} days</td>
+                    <td>AED ${(booking.total || 0).toLocaleString()}</td>
                     <td>
-                        <select style="background: #0a0a0a; color: #fff; border: 1px solid #2a2a2a; padding: 6px; border-radius: 4px; font-size: 12px; cursor: pointer;"
-                                onchange="updateBookingStatus('${b._id}', this.value)">
-                            <option value="new" ${b.status === 'new' ? 'selected' : ''}>New</option>
-                            <option value="contacted" ${b.status === 'contacted' ? 'selected' : ''}>Contacted</option>
-                            <option value="confirmed" ${b.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
-                            <option value="completed" ${b.status === 'completed' ? 'selected' : ''}>Completed</option>
-                            <option value="cancelled" ${b.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                        <select class="status-select" onchange="updateBookingStatus('${booking._id}', this.value)">
+                            <option value="new" ${booking.status === 'new' ? 'selected' : ''}>New</option>
+                            <option value="confirmed" ${booking.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+                            <option value="delivered" ${booking.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+                            <option value="completed" ${booking.status === 'completed' ? 'selected' : ''}>Completed</option>
+                            <option value="cancelled" ${booking.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
                         </select>
                     </td>
                     <td>
-                        <button class="delete-btn" onclick="deleteBooking('${b._id}')">Delete</button>
+                        <button class="delete-btn" onclick="deleteBooking('${booking._id}')">Delete</button>
                     </td>
                 </tr>
             `).join('');
@@ -1237,19 +1878,45 @@
                     </div>
                     <div class="car-content">
                         <div class="car-title">${car.name}</div>
-                        <div class="car-category">${car.cat}</div>
+                        <div class="car-category">${car.cat || 'Category'}</div>
                         <div class="car-price">AED ${(car.price || 0).toLocaleString()}</div>
                         ${car.was ? `<div class="car-was-price">AED ${(car.was).toLocaleString()}</div>` : ''}
                         ${car.badge ? `<div class="car-badge">${car.badge}</div>` : ''}
                         <div class="car-meta">
-                            <span>${car.type}</span>
-                            <span>${car.spots} spots</span>
+                            <span>${car.type || 'Manual'}</span>
+                            <span>${car.spots || 1} spots</span>
                         </div>
                         ${car.feats ? `<div class="car-features">${car.feats}</div>` : ''}
                         <button class="car-delete" onclick="deleteCar('${car._id}')">Delete Car</button>
                     </div>
                 </div>
             `).join('');
+        }
+
+        // ===== LEAD FUNCTIONS =====
+        function updateLeadStatus(id, status) {
+            apiCall('PATCH', `/leads/${id}`, { status })
+                .then(data => {
+                    if (data.success) {
+                        loadLeads();
+                        loadStats();
+                    }
+                })
+                .catch(err => console.error('Failed to update lead:', err));
+        }
+
+        function deleteLead(id) {
+            showConfirmModal('Delete Lead', 'Are you sure you want to delete this lead? This action cannot be undone.', () => {
+                apiCall('DELETE', `/leads/${id}`)
+                    .then(data => {
+                        if (data.success) {
+                            loadLeads();
+                            loadStats();
+                            closeModal();
+                        }
+                    })
+                    .catch(err => console.error('Failed to delete lead:', err));
+            });
         }
 
         // ===== BOOKING FUNCTIONS =====
@@ -1279,9 +1946,9 @@
         }
 
         function exportBookings() {
-            let csv = 'Ref,Date,Name,Phone,Email,Car,Duration,Total,Status\n';
+            let csv = 'Ref,Date,Name,Phone,Car,Duration,Total,Status\n';
             bookingsData.forEach(b => {
-                csv += `"#${b._id ? b._id.substring(0, 8) : 'N/A'}","${formatDate(b.date)}","${b.name}","${b.phone}","${b.email || ''}","${b.car}","${b.duration}","${b.total}","${b.status || 'new'}"\n`;
+                csv += `"#${b._id ? b._id.substring(0, 8) : 'N/A'}","${formatDate(b.date)}","${b.name}","${b.phone}","${b.car}","${b.duration}","${b.total}","${b.status || 'new'}"\n`;
             });
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
@@ -1321,8 +1988,8 @@
                         <input type="text" id="carType" placeholder="e.g., Manual" required>
                     </div>
                     <div class="form-group">
-                        <label>Badge</label>
-                        <input type="text" id="carBadge" placeholder="e.g., Special Offer">
+                        <label>Badge (e.g., Special Offer)</label>
+                        <input type="text" id="carBadge" placeholder="Optional">
                     </div>
                     <div class="form-group">
                         <label>Available Spots</label>
@@ -1350,20 +2017,21 @@
             const carData = {
                 name: document.getElementById('carName').value,
                 cat: document.getElementById('carCategory').value,
-                img: document.getElementById('carImage').value,
-                price: parseInt(document.getElementById('carPrice').value),
+                img: document.getElementById('carImage').value || null,
+                price: parseInt(document.getElementById('carPrice').value) || 0,
                 was: parseInt(document.getElementById('carWasPrice').value) || null,
                 type: document.getElementById('carType').value,
-                badge: document.getElementById('carBadge').value,
-                feats: document.getElementById('carFeatures').value,
-                includes: document.getElementById('carIncludes').value,
-                spots: parseInt(document.getElementById('carSpots').value)
+                badge: document.getElementById('carBadge').value || null,
+                feats: document.getElementById('carFeatures').value || null,
+                includes: document.getElementById('carIncludes').value || null,
+                spots: parseInt(document.getElementById('carSpots').value) || 1
             };
 
             apiCall('POST', '/cars', carData)
                 .then(data => {
                     if (data.success) {
                         loadCars();
+                        loadStats();
                         closeModal();
                     }
                 })
@@ -1376,6 +2044,7 @@
                     .then(data => {
                         if (data.success) {
                             loadCars();
+                            loadStats();
                             closeModal();
                         }
                     })
@@ -1396,6 +2065,29 @@
                 view.classList.remove('active');
             });
             document.getElementById(viewName + 'View').classList.add('active');
+        }
+
+        function switchViewMobile(viewName) {
+            // Update mobile nav items
+            document.querySelectorAll('.mobile-nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.mobile-nav-item').classList.add('active');
+
+            // Update content views
+            document.querySelectorAll('.content-view').forEach(view => {
+                view.classList.remove('active');
+            });
+            document.getElementById(viewName + 'View').classList.add('active');
+
+            // Also update sidebar
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            const navItems = document.querySelectorAll('.nav-item');
+            const views = ['dashboard', 'leads', 'bookings', 'cars', 'settings'];
+            const index = views.indexOf(viewName);
+            if (index >= 0) navItems[index].classList.add('active');
         }
 
         // ===== MODAL FUNCTIONS =====
@@ -1440,9 +2132,31 @@
             document.getElementById('greeting').textContent = `${greeting}! Today is ${today}`;
         }
 
-        // ===== SEARCH =====
+        // ===== INITIALIZATION =====
         document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
             updateGreeting();
+
+            // Check for existing token
+            const storedToken = sessionStorage.getItem('adminToken');
+            if (storedToken) {
+                adminToken = storedToken;
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('dashboardContainer').classList.remove('hidden');
+                loadAllData();
+                setInterval(() => {
+                    loadStats();
+                    loadLeads();
+                    loadBookings();
+                }, 30000);
+            }
+
+            // Setup search listeners
+            const leadSearch = document.getElementById('leadSearch');
+            if (leadSearch) {
+                leadSearch.addEventListener('input', renderLeadsTable);
+            }
+
             const bookingSearch = document.getElementById('bookingSearch');
             if (bookingSearch) {
                 bookingSearch.addEventListener('input', renderBookingsTable);
