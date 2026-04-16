@@ -1,11 +1,11 @@
 {
   "name": "fastrack-offer",
-  "version": "1.0.0",
-  "description": "Fastrack Rent a Car - Landing Page",
+  "version": "2.0.0",
+  "description": "Fastrack Rent a Car - Landing Page & Admin Dashboard",
   "scripts": {
-    "start": "npx serve -s . -l $PORT"
+    "start": "node server.js"
   },
   "dependencies": {
-    "serve": "^14.2.0"
+    "express": "^4.18.2"
   }
 }
