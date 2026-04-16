@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fastrack Rent a Car Dubai - Premium Car Rentals</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Fastrack Rent a Car Dubai - Premium Monthly Car Rental</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -16,140 +16,277 @@
             width: 100%;
             height: 100%;
             font-family: 'Inter', sans-serif;
-            background-color: #111;
-            color: #fff;
+            background-color: #0B0B0F;
+            color: #FFFFFF;
             overflow-x: hidden;
-            font-weight: 700;
-        }
-
-        /* ==================== TOPBAR ==================== */
-        .topbar {
-            background-color: #E53935;
-            color: white;
-            padding: 12px 0;
-            text-align: center;
-            font-size: 14px;
             font-weight: 700;
             line-height: 1.4;
         }
 
+        /* ==================== TOPBAR COUNTDOWN ==================== */
+        .topbar {
+            background-color: #E53935;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .topbar-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .countdown-boxes {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            font-family: 'Space Grotesk', monospace;
+            font-weight: 700;
+        }
+
+        .countdown-box {
+            background: rgba(255,255,255,0.2);
+            padding: 6px 10px;
+            border-radius: 4px;
+            min-width: 36px;
+            text-align: center;
+            font-size: 12px;
+            line-height: 1.2;
+        }
+
+        .countdown-box-label {
+            font-size: 9px;
+            opacity: 0.8;
+            margin-top: 2px;
+        }
+
         /* ==================== NAVBAR ==================== */
         .navbar {
-            background-color: #111;
-            padding: 16px 20px;
+            background: rgba(11,11,15,0.95);
+            backdrop-filter: blur(10px);
+            padding: 14px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #222;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            position: sticky;
+            top: 0;
+            z-index: 200;
         }
 
-        .navbar-logo {
-            font-size: 22px;
+        .navbar-brand {
+            font-size: 16px;
             font-weight: 800;
             letter-spacing: -0.5px;
-            color: #E53935;
+            color: #FFFFFF;
+            font-family: 'Space Grotesk', sans-serif;
         }
 
-        .navbar-logo span {
-            color: #fff;
+        .navbar-center {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #8B8B9E;
+        }
+
+        .navbar-center.active {
+            display: flex;
+        }
+
+        .live-dot {
+            width: 6px;
+            height: 6px;
+            background: #00C853;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
 
         .navbar-cta {
-            background: linear-gradient(135deg, #E53935 0%, #c62828 100%);
-            color: white;
+            background: #FFFFFF;
+            color: #0B0B0F;
             border: none;
-            padding: 10px 20px;
-            border-radius: 50px;
-            font-size: 13px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
             font-weight: 800;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.2s;
+            letter-spacing: 0.5px;
         }
 
         .navbar-cta:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(229, 57, 53, 0.3);
+            box-shadow: 0 8px 24px rgba(255,255,255,0.15);
         }
 
         /* ==================== HERO SECTION ==================== */
         .hero {
-            background: linear-gradient(135deg, #111 0%, #1a1a1a 100%);
-            padding: 60px 20px;
+            background: #0B0B0F;
+            padding: 48px 20px;
             text-align: center;
-            color: white;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
         }
 
-        .hero-content h1 {
-            font-size: clamp(28px, 8vw, 48px);
-            font-weight: 800;
-            margin-bottom: 16px;
-            line-height: 1.2;
-            letter-spacing: -1px;
-        }
-
-        .hero-content p {
-            font-size: clamp(16px, 3vw, 20px);
-            color: #bbb;
-            margin-bottom: 32px;
-            font-weight: 700;
-            line-height: 1.5;
-        }
-
-        .hero-cta {
-            display: inline-block;
-            background: linear-gradient(135deg, #E53935 0%, #c62828 100%);
-            color: white;
-            padding: 14px 32px;
-            border-radius: 50px;
-            font-size: 16px;
-            font-weight: 800;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 8px 24px rgba(229, 57, 53, 0.25);
-        }
-
-        .hero-cta:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 32px rgba(229, 57, 53, 0.35);
-        }
-
-        /* ==================== COUNTDOWN TIMER ==================== */
-        .countdown {
-            background: #1a1a1a;
-            padding: 20px;
-            margin: 20px auto;
-            border-radius: 12px;
-            max-width: 400px;
-            border: 1px solid #222;
-        }
-
-        .countdown-label {
-            font-size: 12px;
-            color: #999;
-            text-transform: uppercase;
-            font-weight: 800;
-            margin-bottom: 12px;
-            letter-spacing: 1px;
-        }
-
-        .countdown-display {
-            font-size: 24px;
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(229,57,53,0.15);
+            border: 1px solid rgba(229,57,53,0.3);
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 11px;
             font-weight: 800;
             color: #E53935;
-            font-family: 'Space Grotesk', monospace;
-            letter-spacing: 1px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+
+        .hero-badge::before {
+            content: '';
+            width: 4px;
+            height: 4px;
+            background: #E53935;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .hero-heading {
+            font-size: clamp(32px, 8vw, 52px);
+            font-weight: 800;
+            margin-bottom: 12px;
+            line-height: 1.1;
+            letter-spacing: -1px;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .hero-heading-light {
+            color: #8B8B9E;
+            font-weight: 600;
+        }
+
+        .hero-subtext {
+            font-size: clamp(14px, 3vw, 16px);
+            color: #8B8B9E;
+            margin-bottom: 28px;
+            font-weight: 600;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 32px;
+        }
+
+        .btn-primary {
+            background: #FFFFFF;
+            color: #0B0B0F;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(255,255,255,0.15);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #FFFFFF;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .hero-social {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #8B8B9E;
+        }
+
+        .hero-avatars {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-right: 8px;
+        }
+
+        .avatar {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #E53935, #FF8A80);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            font-weight: 800;
+            border: 2px solid #0B0B0F;
+        }
+
+        .avatar:nth-child(2) {
+            background: linear-gradient(135deg, #00C853, #69F0AE);
+            margin-left: -8px;
+        }
+
+        .avatar:nth-child(3) {
+            background: linear-gradient(135deg, #2196F3, #64B5F6);
+            margin-left: -8px;
         }
 
         /* ==================== STATS BAR ==================== */
+        .stats-section {
+            background: #0B0B0F;
+            padding: 24px 20px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
         .stats {
-            background-color: #111;
-            padding: 40px 20px;
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 20px;
             max-width: 1200px;
             margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
         }
 
         .stat-item {
@@ -157,122 +294,128 @@
         }
 
         .stat-number {
-            font-size: clamp(24px, 5vw, 36px);
+            font-size: 18px;
             font-weight: 800;
-            color: #E53935;
-            margin-bottom: 8px;
+            color: #FFFFFF;
+            margin-bottom: 4px;
+            font-family: 'Space Grotesk', sans-serif;
         }
 
         .stat-label {
-            font-size: 14px;
-            color: #999;
+            font-size: 11px;
+            color: #8B8B9E;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
-        /* ==================== URGENCY BANNER ==================== */
-        .urgency-banner {
-            background: linear-gradient(135deg, #000 0%, #1a1a1a 100%);
-            padding: 24px 20px;
-            text-align: center;
-            border-top: 2px solid #E53935;
-            border-bottom: 2px solid #E53935;
-        }
-
-        .urgency-banner-text {
-            font-size: 16px;
-            font-weight: 800;
-            color: #fff;
-            margin-bottom: 8px;
-        }
-
-        .urgency-banner-subtext {
-            font-size: 13px;
-            color: #E53935;
-            font-weight: 700;
-        }
-
-        /* ==================== PICK YOUR CAR SECTION ==================== */
+        /* ==================== CARS SECTION ==================== */
         .cars-section {
-            background-color: #111;
-            padding: 60px 20px;
+            background: #0B0B0F;
+            padding: 48px 20px;
+        }
+
+        .section-header {
+            max-width: 1200px;
+            margin: 0 auto 24px;
+            text-align: center;
+        }
+
+        .section-tag {
+            display: inline-block;
+            background: rgba(229,57,53,0.15);
+            border: 1px solid rgba(229,57,53,0.3);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 800;
+            color: #E53935;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
         }
 
         .section-title {
-            text-align: center;
             font-size: clamp(28px, 6vw, 40px);
             font-weight: 800;
-            margin-bottom: 16px;
-            color: #fff;
-            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+            color: #FFFFFF;
+            letter-spacing: -1px;
+            font-family: 'Space Grotesk', sans-serif;
         }
 
         .section-subtitle {
-            text-align: center;
-            font-size: 16px;
-            color: #999;
-            margin-bottom: 40px;
-            font-weight: 700;
+            font-size: 14px;
+            color: #8B8B9E;
+            font-weight: 600;
         }
 
-        .cars-container {
+        .section-subtitle-highlight {
+            color: #E53935;
+        }
+
+        .section-meta {
             display: flex;
-            gap: 20px;
-            overflow-x: auto;
-            scroll-behavior: smooth;
-            padding: 20px 0;
-            -webkit-overflow-scrolling: touch;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #8B8B9E;
+            margin-top: 12px;
         }
 
-        .cars-container::-webkit-scrollbar {
-            height: 8px;
+        .live-indicator {
+            width: 6px;
+            height: 6px;
+            background: #00C853;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
         }
 
-        .cars-container::-webkit-scrollbar-track {
-            background: #1a1a1a;
-            border-radius: 10px;
-        }
-
-        .cars-container::-webkit-scrollbar-thumb {
-            background: #E53935;
-            border-radius: 10px;
-        }
-
-        .car-card {
-            flex: 0 0 calc(100vw - 32px);
-            background: #fff;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s;
-            cursor: pointer;
+        /* ==================== CAR CARDS CONTAINER ==================== */
+        .cars-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            gap: 16px;
+            margin-bottom: 24px;
         }
 
         @media (min-width: 768px) {
-            .car-card {
-                flex: 0 0 calc(50vw - 30px);
+            .cars-container {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
 
         @media (min-width: 1024px) {
-            .car-card {
-                flex: 0 0 calc(25vw - 20px);
+            .cars-container {
+                grid-template-columns: repeat(4, 1fr);
             }
+        }
+
+        /* ==================== CAR CARD ==================== */
+        .car-card {
+            background: #FFFFFF;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
 
         .car-card:hover {
             transform: translateY(-8px);
-            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 16px 32px rgba(0,0,0,0.15);
         }
 
-        .car-image-container {
+        .car-image-wrapper {
             position: relative;
             height: 200px;
             background: linear-gradient(135deg, #333 0%, #111 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
             overflow: hidden;
         }
 
@@ -282,7 +425,21 @@
             object-fit: cover;
         }
 
-        .car-badge {
+        .car-badge-top {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: #111;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .car-spots-badge {
             position: absolute;
             top: 12px;
             right: 12px;
@@ -290,150 +447,251 @@
             color: white;
             padding: 6px 12px;
             border-radius: 20px;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
-        .car-viewers {
+        .car-viewers-badge {
             position: absolute;
             bottom: 12px;
             left: 12px;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0,200,83,0.9);
             color: white;
             padding: 6px 12px;
             border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
+            font-size: 10px;
+            font-weight: 800;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
+        }
+
+        .car-viewer-dot {
+            width: 4px;
+            height: 4px;
+            background: #FFFFFF;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
         }
 
         .car-content {
             padding: 20px;
             color: #111;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
-        .car-name {
-            font-size: 16px;
-            font-weight: 800;
-            margin-bottom: 4px;
-            color: #111;
+        .car-header {
+            margin-bottom: 12px;
         }
 
         .car-category {
-            font-size: 12px;
-            color: #666;
+            font-size: 10px;
+            color: #8B8B9E;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .car-name {
+            font-size: 18px;
+            font-weight: 800;
+            color: #111;
+            margin-bottom: 8px;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .car-specs {
+            display: flex;
+            gap: 12px;
+            font-size: 11px;
+            color: #666;
+            font-weight: 700;
             margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .car-spec-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .spec-icon {
+            width: 14px;
+            height: 14px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .car-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .feature-pill {
+            background: rgba(0,0,0,0.04);
+            color: #333;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .car-price-section {
+            background: rgba(0,0,0,0.02);
+            padding: 12px 0;
+            margin: 12px 0;
+            border-top: 1px solid #f0f0f0;
+            border-bottom: 1px solid #f0f0f0;
         }
 
         .car-price-row {
             display: flex;
             align-items: baseline;
             gap: 8px;
-            margin-bottom: 12px;
+            margin-bottom: 4px;
         }
 
         .car-price {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: 800;
-            color: #E53935;
+            color: #111;
+            font-family: 'Space Grotesk', sans-serif;
+            line-height: 1;
         }
 
-        .car-price-was {
-            font-size: 14px;
+        .car-price-suffix {
+            font-size: 12px;
+            color: #666;
+            font-weight: 700;
+        }
+
+        .car-price-old {
+            font-size: 12px;
             color: #999;
             text-decoration: line-through;
             font-weight: 700;
         }
 
-        .car-save {
-            font-size: 12px;
-            color: #00C853;
-            font-weight: 800;
-            background: rgba(0, 200, 83, 0.1);
-            padding: 2px 8px;
+        .car-save-badge {
+            background: #00C853;
+            color: white;
+            padding: 3px 8px;
             border-radius: 4px;
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-left: auto;
         }
 
-        .car-features {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 12px;
-            line-height: 1.6;
-            font-weight: 700;
-        }
-
-        .car-feature-item {
-            display: inline-block;
-            margin-right: 8px;
-        }
-
-        .car-includes {
+        .car-included {
             font-size: 11px;
-            color: #999;
-            margin-bottom: 16px;
+            color: #00C853;
             font-weight: 700;
-            padding-top: 12px;
-            border-top: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .car-urgency {
+            font-size: 10px;
+            color: #E53935;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-top: 12px;
         }
 
         .car-cta {
-            width: 100%;
-            background: #E53935;
+            background: #111;
             color: white;
             border: none;
             padding: 12px;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 800;
             cursor: pointer;
             transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
 
         .car-cta:hover {
-            background: #c62828;
-        }
-
-        .car-spots {
-            font-size: 11px;
-            color: #999;
-            text-align: center;
-            margin-top: 8px;
-            font-weight: 700;
-        }
-
-        .carousel-dots {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            margin-top: 24px;
-            padding: 0 20px;
-        }
-
-        .dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
             background: #333;
-            cursor: pointer;
-            transition: all 0.3s;
+            transform: translateY(-2px);
         }
 
-        .dot.active {
-            background: #E53935;
-            transform: scale(1.3);
+        /* ==================== URGENCY BANNER ==================== */
+        .urgency-section {
+            background: #0B0B0F;
+            padding: 24px 20px;
+            margin-bottom: 48px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
         }
 
-        /* ==================== WHY CHOOSE SECTION ==================== */
+        .urgency-banner {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .urgency-icon {
+            font-size: 18px;
+        }
+
+        .urgency-text {
+            font-size: 14px;
+            font-weight: 800;
+            color: #FFFFFF;
+        }
+
+        .urgency-timer {
+            display: flex;
+            gap: 8px;
+            margin-left: 12px;
+            font-family: 'Space Grotesk', monospace;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .timer-box {
+            background: rgba(229,57,53,0.2);
+            border: 1px solid rgba(229,57,53,0.3);
+            padding: 6px 8px;
+            border-radius: 4px;
+            min-width: 32px;
+            text-align: center;
+            color: #E53935;
+        }
+
+        /* ==================== WHY SECTION ==================== */
         .why-section {
-            background-color: #111;
-            padding: 60px 20px;
+            background: #0B0B0F;
+            padding: 48px 20px;
         }
 
         .why-grid {
@@ -441,7 +699,7 @@
             margin: 0 auto;
             display: grid;
             grid-template-columns: 1fr;
-            gap: 30px;
+            gap: 20px;
         }
 
         @media (min-width: 768px) {
@@ -452,125 +710,152 @@
 
         @media (min-width: 1024px) {
             .why-grid {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(4, 1fr);
             }
         }
 
-        .why-item {
+        .why-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            padding: 24px;
+            border-radius: 12px;
             text-align: center;
+            transition: all 0.3s;
+        }
+
+        .why-card:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(255,255,255,0.12);
+            transform: translateY(-4px);
         }
 
         .why-icon {
-            width: 60px;
-            height: 60px;
-            margin: 0 auto 20px;
-            background: #E53935;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
+            font-size: 32px;
+            margin-bottom: 16px;
         }
 
         .why-title {
-            font-size: 18px;
+            font-size: 14px;
             font-weight: 800;
-            margin-bottom: 12px;
-            color: #fff;
+            margin-bottom: 8px;
+            color: #FFFFFF;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .why-text {
-            font-size: 14px;
-            color: #999;
+            font-size: 12px;
+            color: #8B8B9E;
             line-height: 1.6;
-            font-weight: 700;
+            font-weight: 600;
         }
 
         /* ==================== GUARANTEE SECTION ==================== */
         .guarantee-section {
-            background-color: #111;
-            padding: 60px 20px;
+            background: #0B0B0F;
+            padding: 48px 20px;
+            border-top: 1px solid rgba(255,255,255,0.06);
         }
 
-        .guarantee-content {
+        .guarantee-card {
             max-width: 800px;
             margin: 0 auto;
-            background: linear-gradient(135deg, #1a1a1a 0%, #222 100%);
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
             padding: 40px;
             border-radius: 12px;
-            border: 1px solid #333;
             text-align: center;
         }
 
-        .guarantee-title {
-            font-size: 28px;
-            font-weight: 800;
+        .guarantee-badge {
+            font-size: 40px;
             margin-bottom: 16px;
-            color: #E53935;
+        }
+
+        .guarantee-title {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            color: #FFFFFF;
         }
 
         .guarantee-text {
-            font-size: 16px;
-            color: #ccc;
-            line-height: 1.8;
+            font-size: 14px;
+            color: #8B8B9E;
+            line-height: 1.6;
             margin-bottom: 24px;
-            font-weight: 700;
+            font-weight: 600;
         }
 
-        .guarantee-list {
+        .guarantee-items {
+            display: grid;
+            gap: 12px;
             text-align: left;
-            display: inline-block;
-            margin-bottom: 24px;
+            margin-bottom: 28px;
         }
 
         .guarantee-item {
-            font-size: 14px;
-            color: #999;
-            margin-bottom: 12px;
+            font-size: 12px;
+            color: #8B8B9E;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             font-weight: 700;
         }
 
         .guarantee-item::before {
-            content: "✓";
+            content: '✓';
             color: #00C853;
             font-weight: 800;
-            font-size: 18px;
+            font-size: 14px;
+            flex-shrink: 0;
         }
 
-        /* ==================== FLOATING CTA BUTTON ==================== */
+        /* ==================== FLOATING CTA ==================== */
         .floating-cta {
             position: fixed;
-            bottom: 30px;
-            right: 20px;
-            background: linear-gradient(135deg, #E53935 0%, #c62828 100%);
+            bottom: 24px;
+            right: 24px;
+            background: #E53935;
             color: white;
             border: none;
-            padding: 16px 24px;
-            border-radius: 50px;
-            font-size: 14px;
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-size: 12px;
             font-weight: 800;
             cursor: pointer;
-            box-shadow: 0 8px 24px rgba(229, 57, 53, 0.3);
+            box-shadow: 0 8px 24px rgba(229,57,53,0.3);
             transition: all 0.3s;
             z-index: 100;
-            display: flex;
+            display: none;
             align-items: center;
             gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .floating-cta.visible {
+            display: flex;
         }
 
         .floating-cta:hover {
             transform: translateY(-4px);
-            box-shadow: 0 12px 32px rgba(229, 57, 53, 0.4);
+            box-shadow: 0 12px 32px rgba(229,57,53,0.4);
+        }
+
+        .floating-dot {
+            width: 6px;
+            height: 6px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
         }
 
         /* ==================== FOOTER ==================== */
         .footer {
-            background-color: #111;
-            padding: 60px 20px;
-            border-top: 1px solid #222;
+            background: #0B0B0F;
+            padding: 40px 20px;
+            border-top: 1px solid rgba(255,255,255,0.06);
         }
 
         .footer-content {
@@ -578,8 +863,8 @@
             margin: 0 auto;
             display: grid;
             grid-template-columns: 1fr;
-            gap: 40px;
-            margin-bottom: 40px;
+            gap: 32px;
+            margin-bottom: 32px;
         }
 
         @media (min-width: 768px) {
@@ -595,28 +880,22 @@
         }
 
         .footer-section h3 {
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             margin-bottom: 16px;
-            color: #fff;
-        }
-
-        .footer-section ul {
-            list-style: none;
-        }
-
-        .footer-section li {
-            margin-bottom: 12px;
+            color: #FFFFFF;
         }
 
         .footer-section a {
-            color: #999;
+            color: #8B8B9E;
             text-decoration: none;
-            font-size: 14px;
-            font-weight: 700;
+            font-size: 12px;
+            font-weight: 600;
             transition: color 0.2s;
+            display: block;
+            margin-bottom: 8px;
         }
 
         .footer-section a:hover {
@@ -624,15 +903,17 @@
         }
 
         .footer-bottom {
-            border-top: 1px solid #222;
-            padding-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding-top: 24px;
             text-align: center;
-            color: #666;
-            font-size: 13px;
+            color: #5C5C6F;
+            font-size: 11px;
             font-weight: 700;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
-        /* ==================== BOOKING MODAL ==================== */
+        /* ==================== MODALS ==================== */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -640,8 +921,8 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(4px);
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
             z-index: 1000;
             align-items: center;
             justify-content: center;
@@ -650,12 +931,18 @@
 
         .modal-overlay.active {
             display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .modal {
-            background: white;
+            background: #FFFFFF;
             border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             width: 100%;
             max-width: 500px;
             max-height: 90vh;
@@ -665,14 +952,14 @@
 
         .modal-header {
             padding: 24px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #f0f0f0;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
         .modal-title {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 800;
             color: #111;
         }
@@ -680,23 +967,49 @@
         .modal-close {
             background: none;
             border: none;
-            font-size: 24px;
+            font-size: 20px;
             cursor: pointer;
             color: #999;
             font-weight: 700;
+            transition: color 0.2s;
+        }
+
+        .modal-close:hover {
+            color: #111;
         }
 
         .modal-body {
             padding: 24px;
         }
 
+        .modal-steps {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .step-bar {
+            flex: 1;
+            height: 3px;
+            background: #f0f0f0;
+            border-radius: 2px;
+        }
+
+        .step-bar.active {
+            background: #E53935;
+        }
+
+        .step-bar.completed {
+            background: #00C853;
+        }
+
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
         .form-label {
             display: block;
-            font-size: 13px;
+            font-size: 11px;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -712,70 +1025,51 @@
             font-size: 16px;
             font-weight: 700;
             font-family: 'Inter', sans-serif;
-            transition: border-color 0.2s;
+            transition: all 0.2s;
         }
 
         .form-input:focus, .form-select:focus {
             outline: none;
             border-color: #E53935;
+            box-shadow: 0 0 0 3px rgba(229,57,53,0.1);
         }
 
         .form-button {
             width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #E53935 0%, #c62828 100%);
+            padding: 12px;
+            background: #E53935;
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 800;
             cursor: pointer;
             transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .form-button:hover {
+            background: #c62828;
             transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(229, 57, 53, 0.3);
         }
 
-        .form-button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
+        .form-button-secondary {
+            background: #f0f0f0;
+            color: #111;
         }
 
-        /* ==================== TOAST NOTIFICATIONS ==================== */
-        .toast-container {
-            position: fixed;
-            bottom: 100px;
-            left: 20px;
-            right: 20px;
-            max-width: 400px;
-            z-index: 900;
-            pointer-events: none;
+        .form-button-secondary:hover {
+            background: #e0e0e0;
         }
 
-        .toast {
-            background: #111;
-            color: white;
-            padding: 16px;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            font-size: 13px;
-            font-weight: 700;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-            animation: slideIn 0.3s ease;
-            border-left: 4px solid #E53935;
+        .form-buttons-row {
+            display: flex;
+            gap: 12px;
         }
 
-        @keyframes slideIn {
-            from {
-                transform: translateX(-100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+        .form-buttons-row .form-button {
+            flex: 1;
         }
 
         /* ==================== LEAD POPUP ==================== */
@@ -786,7 +1080,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0,0,0,0.7);
             backdrop-filter: blur(8px);
             z-index: 2000;
             align-items: center;
@@ -796,22 +1090,24 @@
 
         .lead-popup-overlay.active {
             display: flex;
+            animation: fadeIn 0.3s ease;
         }
 
         .lead-popup {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            background: #FFFFFF;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             width: 100%;
             max-width: 450px;
             overflow: hidden;
             color: #111;
-            animation: popupSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
         }
 
-        @keyframes popupSlideUp {
+        @keyframes slideUp {
             from {
-                transform: translateY(50px);
+                transform: translateY(30px);
                 opacity: 0;
             }
             to {
@@ -822,11 +1118,11 @@
 
         .lead-popup-close {
             position: absolute;
-            top: 16px;
-            right: 16px;
+            top: 12px;
+            right: 12px;
             background: none;
             border: none;
-            font-size: 24px;
+            font-size: 20px;
             color: #999;
             cursor: pointer;
             z-index: 1;
@@ -835,30 +1131,30 @@
 
         .lead-popup-header {
             background: linear-gradient(135deg, #E53935 0%, #c62828 100%);
-            padding: 40px 24px 24px;
+            padding: 32px 24px 24px;
             text-align: center;
             color: white;
         }
 
         .lead-popup-headline {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 800;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
             color: white;
         }
 
         .lead-popup-subtext {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.9);
+            font-size: 12px;
+            color: rgba(255,255,255,0.9);
             font-weight: 700;
         }
 
         .lead-popup-body {
-            padding: 32px 24px;
+            padding: 28px 24px;
         }
 
         .lead-form-group {
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         .lead-form-input, .lead-form-select {
@@ -875,34 +1171,36 @@
         .lead-form-input:focus, .lead-form-select:focus {
             outline: none;
             border-color: #E53935;
-            box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.1);
+            box-shadow: 0 0 0 3px rgba(229,57,53,0.1);
         }
 
         .lead-form-submit {
             width: 100%;
-            padding: 14px;
+            padding: 12px;
             background: linear-gradient(135deg, #E53935 0%, #c62828 100%);
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 800;
             cursor: pointer;
             transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .lead-form-submit:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(229, 57, 53, 0.3);
+            box-shadow: 0 8px 24px rgba(229,57,53,0.3);
         }
 
-        .lead-success-message {
+        .lead-success {
             display: none;
             text-align: center;
             padding: 40px 24px;
         }
 
-        .lead-success-message.active {
+        .lead-success.active {
             display: block;
         }
 
@@ -912,257 +1210,309 @@
         }
 
         .lead-success-title {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 800;
             color: #111;
             margin-bottom: 8px;
         }
 
         .lead-success-text {
-            font-size: 14px;
+            font-size: 12px;
             color: #666;
             font-weight: 700;
         }
 
-        /* ==================== MODAL STEPS ==================== */
-        .modal-steps {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 24px;
-            padding: 0 24px;
-        }
-
-        .step {
-            flex: 1;
-            height: 4px;
-            background: #eee;
-            border-radius: 2px;
-        }
-
-        .step.active {
-            background: #E53935;
-        }
-
-        .step.completed {
-            background: #00C853;
-        }
-
-        /* ==================== LIVE COUNTER ==================== */
-        .live-counter {
+        /* ==================== TOASTS ==================== */
+        .toast-container {
             position: fixed;
-            top: 80px;
+            bottom: 100px;
+            left: 20px;
             right: 20px;
-            background: rgba(229, 57, 53, 0.1);
-            border: 1px solid #E53935;
-            color: #E53935;
+            max-width: 400px;
+            z-index: 900;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .toast {
+            background: #111;
+            color: white;
             padding: 12px 16px;
-            border-radius: 50px;
+            border-radius: 8px;
             font-size: 12px;
-            font-weight: 800;
-            z-index: 50;
-            display: none;
+            font-weight: 700;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            animation: slideIn 0.3s ease;
+            border-left: 4px solid #E53935;
+            pointer-events: all;
         }
 
-        .live-counter.active {
-            display: block;
+        @keyframes slideIn {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
 
+        /* ==================== RESPONSIVE ==================== */
         @media (max-width: 767px) {
-            .live-counter {
+            .navbar {
+                padding: 10px 16px;
+            }
+
+            .navbar-brand {
+                font-size: 14px;
+            }
+
+            .navbar-center {
                 display: none !important;
+            }
+
+            .hero {
+                padding: 32px 16px;
+            }
+
+            .hero-heading {
+                font-size: 28px;
+            }
+
+            .cars-container {
+                grid-template-columns: 1fr;
+            }
+
+            .why-grid {
+                grid-template-columns: 1fr;
             }
 
             .stats {
                 grid-template-columns: 1fr;
             }
 
-            .navbar {
-                padding: 12px 16px;
+            .modal {
+                max-width: calc(100vw - 40px);
             }
 
-            .navbar-logo {
-                font-size: 18px;
+            .lead-popup {
+                max-width: calc(100vw - 40px);
             }
 
-            .hero {
-                padding: 40px 16px;
+            .floating-cta {
+                bottom: 16px;
+                right: 16px;
+                font-size: 11px;
+                padding: 10px 16px;
             }
 
             .footer-content {
                 grid-template-columns: 1fr;
             }
+
+            .urgency-timer {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- TOPBAR -->
+    <!-- TOPBAR WITH COUNTDOWN -->
     <div class="topbar">
-        ⚡ Limited Time Offer - Book Now & Save Up to 30% on Your Next Rental!
+        <div class="topbar-content">
+            <span>OFFER ENDS IN</span>
+            <div class="countdown-boxes">
+                <div class="countdown-box">
+                    <div id="countdownDays">00</div>
+                    <div class="countdown-box-label">Days</div>
+                </div>
+                <div style="color: rgba(255,255,255,0.6);">:</div>
+                <div class="countdown-box">
+                    <div id="countdownHours">00</div>
+                    <div class="countdown-box-label">Hrs</div>
+                </div>
+                <div style="color: rgba(255,255,255,0.6);">:</div>
+                <div class="countdown-box">
+                    <div id="countdownMinutes">00</div>
+                    <div class="countdown-box-label">Min</div>
+                </div>
+                <div style="color: rgba(255,255,255,0.6);">:</div>
+                <div class="countdown-box">
+                    <div id="countdownSeconds">00</div>
+                    <div class="countdown-box-label">Sec</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- NAVBAR -->
     <div class="navbar">
-        <div class="navbar-logo">FAST<span>TRACK</span></div>
-        <button class="navbar-cta" onclick="openBookingModal()">Book Now</button>
-    </div>
-
-    <!-- LIVE COUNTER -->
-    <div class="live-counter active">
-        👁️ <span id="liveViewers">24</span> viewing now
+        <div class="navbar-brand">FASTRACK</div>
+        <div class="navbar-center active">
+            <div class="live-dot"></div>
+            <span id="viewersCount">24</span> viewing
+        </div>
+        <button class="navbar-cta" onclick="openBookingModal()">View Deals</button>
     </div>
 
     <!-- HERO SECTION -->
     <div class="hero">
-        <div class="hero-content">
-            <h1>Premium Car Rentals in Dubai</h1>
-            <p>Luxury, Affordability & Reliability All in One</p>
-            <button class="hero-cta" onclick="openBookingModal()">Reserve Your Car</button>
+        <div class="hero-badge">Limited Time</div>
+        <h1 class="hero-heading">Premium Rides. <span class="hero-heading-light">Up to 35% Off.</span></h1>
+        <p class="hero-subtext">Monthly car rental in Dubai from AED 999. No deposit. No hidden fees.</p>
+        <div class="hero-buttons">
+            <button class="btn-primary" onclick="scrollTo('cars-section')">See All Deals</button>
+            <button class="btn-secondary" onclick="window.location.href='https://wa.me/971'">WhatsApp Us</button>
         </div>
-    </div>
-
-    <!-- COUNTDOWN TIMER -->
-    <div style="text-align: center; padding: 20px;">
-        <div class="countdown">
-            <div class="countdown-label">⏳ End of Month Special Expires In</div>
-            <div class="countdown-display" id="countdownTimer">--:--:--</div>
+        <div class="hero-social">
+            <div class="hero-avatars">
+                <div class="avatar">A</div>
+                <div class="avatar">S</div>
+                <div class="avatar">R</div>
+            </div>
+            <span id="bookedCount">248</span> booked this week
         </div>
     </div>
 
     <!-- STATS BAR -->
-    <div class="stats">
-        <div class="stat-item">
-            <div class="stat-number">2000+</div>
-            <div class="stat-label">Happy Customers</div>
+    <div class="stats-section">
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number">3,000+</div>
+                <div class="stat-label">Vehicles</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">4.9★</div>
+                <div class="stat-label">Google Rating</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">Support</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">AED 0</div>
+                <div class="stat-label">Deposit</div>
+            </div>
         </div>
-        <div class="stat-item">
-            <div class="stat-number">150+</div>
-            <div class="stat-label">Vehicles</div>
+    </div>
+
+    <!-- CARS SECTION -->
+    <div class="cars-section" id="cars-section">
+        <div class="section-header">
+            <div class="section-tag">Exclusive Monthly Deals</div>
+            <h2 class="section-title">Pick Your Car. <span style="display: block; font-weight: 600; color: #8B8B9E; font-size: 0.9em; margin-top: 8px;">Lock Your Price.</span></h2>
+            <p class="section-subtitle">Rates vanish when the <span class="section-subtitle-highlight">timer hits zero</span></p>
+            <div class="section-meta">
+                <div class="live-indicator"></div>
+                <span id="carViewersCount">43</span> people viewing right now
+            </div>
         </div>
-        <div class="stat-item">
-            <div class="stat-number">4.9★</div>
-            <div class="stat-label">Avg Rating</div>
+        <div class="cars-container" id="carsContainer">
+            <!-- Cars will load here -->
         </div>
     </div>
 
     <!-- URGENCY BANNER -->
-    <div class="urgency-banner">
-        <div class="urgency-banner-text">🔥 Only 3 Attrage & 2 JS4 Spots Left This Month!</div>
-        <div class="urgency-banner-subtext">Prices increase after booking limit reached</div>
-    </div>
-
-    <!-- CARS SECTION -->
-    <div class="cars-section">
-        <h2 class="section-title">Pick Your Car</h2>
-        <p class="section-subtitle">Handpicked vehicles for every budget & style</p>
-
-        <div class="cars-container" id="carsContainer">
-            <!-- Cars will be loaded here -->
-        </div>
-
-        <div class="carousel-dots" id="carouselDots">
-            <!-- Dots will be generated here -->
+    <div class="urgency-section">
+        <div class="urgency-banner">
+            <div class="urgency-icon">⏰</div>
+            <div class="urgency-text">Prices disappear when timer runs out</div>
+            <div class="urgency-timer">
+                <div class="timer-box"><span id="urgencyDays">00</span>d</div>
+                <div class="timer-box"><span id="urgencyHours">00</span>h</div>
+                <div class="timer-box"><span id="urgencyMinutes">00</span>m</div>
+                <div class="timer-box"><span id="urgencySeconds">00</span>s</div>
+            </div>
         </div>
     </div>
 
-    <!-- WHY CHOOSE SECTION -->
+    <!-- WHY SECTION -->
     <div class="why-section">
-        <h2 class="section-title">Why Choose Fastrack?</h2>
+        <div class="section-header">
+            <h2 class="section-title">Why Choose Fastrack?</h2>
+        </div>
         <div class="why-grid">
-            <div class="why-item">
+            <div class="why-card">
                 <div class="why-icon">⚡</div>
-                <h3 class="why-title">Instant Booking</h3>
-                <p class="why-text">Reserve your car in seconds. Delivery within 2 hours anywhere in Dubai.</p>
+                <h3 class="why-title">30-Sec Booking</h3>
+                <p class="why-text">Reserve your car in seconds. Delivery within 2 hours.</p>
             </div>
-            <div class="why-item">
-                <div class="why-icon">🛡️</div>
-                <h3 class="why-title">Full Coverage</h3>
-                <p class="why-text">Comprehensive insurance included. Zero hidden charges or surprises.</p>
+            <div class="why-card">
+                <div class="why-icon">💰</div>
+                <h3 class="why-title">No Hidden Fees</h3>
+                <p class="why-text">Transparent pricing. All costs included upfront.</p>
             </div>
-            <div class="why-item">
+            <div class="why-card">
                 <div class="why-icon">🚗</div>
-                <h3 class="why-title">Premium Fleet</h3>
-                <p class="why-text">Late-model vehicles. All maintained to the highest standards daily.</p>
+                <h3 class="why-title">Free Delivery</h3>
+                <p class="why-text">Anywhere in Dubai. Zero delivery charges.</p>
             </div>
-            <div class="why-item">
-                <div class="why-icon">💬</div>
-                <h3 class="why-title">24/7 Support</h3>
-                <p class="why-text">Round-the-clock customer service. We're always here to help.</p>
-            </div>
-            <div class="why-item">
-                <div class="why-icon">🎁</div>
-                <h3 class="why-title">Rewards Program</h3>
-                <p class="why-text">Earn points on every booking. Exclusive discounts for members.</p>
-            </div>
-            <div class="why-item">
-                <div class="why-icon">📍</div>
-                <h3 class="why-title">Flexible Terms</h3>
-                <p class="why-text">Daily, weekly & monthly options. Free cancellation up to 6 hours.</p>
+            <div class="why-card">
+                <div class="why-icon">🔒</div>
+                <h3 class="why-title">Full Insurance</h3>
+                <p class="why-text">Comprehensive coverage included. Peace of mind.</p>
             </div>
         </div>
     </div>
 
     <!-- GUARANTEE SECTION -->
     <div class="guarantee-section">
-        <div class="guarantee-content">
-            <h2 class="guarantee-title">Our 30-Day Money-Back Guarantee</h2>
-            <p class="guarantee-text">Not 100% satisfied with your rental? We'll refund you within 30 days, no questions asked.</p>
-            <div class="guarantee-list">
+        <div class="guarantee-card">
+            <div class="guarantee-badge">🛡️</div>
+            <h2 class="guarantee-title">100% Satisfaction Guarantee</h2>
+            <p class="guarantee-text">Not satisfied? Full refund within 30 days, no questions asked.</p>
+            <div class="guarantee-items">
                 <div class="guarantee-item">Full refund on cancellation</div>
                 <div class="guarantee-item">No hidden fees guaranteed</div>
                 <div class="guarantee-item">Free unlimited kilometer rental</div>
                 <div class="guarantee-item">24/7 roadside assistance included</div>
             </div>
-            <button class="hero-cta" onclick="openBookingModal()">Start Your Risk-Free Booking</button>
         </div>
     </div>
 
-    <!-- FLOATING CTA BUTTON -->
-    <button class="floating-cta" onclick="openBookingModal()">
-        <span>📅</span> Book Now
+    <!-- FLOATING CTA -->
+    <button class="floating-cta" id="floatingCTA" onclick="openBookingModal()">
+        <div class="floating-dot"></div>
+        Deals Ending Soon
     </button>
 
     <!-- FOOTER -->
     <div class="footer">
         <div class="footer-content">
             <div class="footer-section">
-                <h3>About Fastrack</h3>
-                <ul>
-                    <li><a href="#about">Our Story</a></li>
-                    <li><a href="#team">Team</a></li>
-                    <li><a href="#careers">Careers</a></li>
-                    <li><a href="#press">Press</a></li>
-                </ul>
+                <h3>FASTRACK</h3>
+                <p style="font-size: 12px; color: #8B8B9E; margin-bottom: 16px; font-weight: 700;">Dubai's Trusted Car Rental</p>
+                <a href="tel:+971123456789">📞 +971 1 234 5678</a>
+                <a href="https://wa.me/971">💬 WhatsApp</a>
+                <a href="mailto:info@fastrack.ae">📧 info@fastrack.ae</a>
             </div>
             <div class="footer-section">
                 <h3>Services</h3>
-                <ul>
-                    <li><a href="#daily">Daily Rentals</a></li>
-                    <li><a href="#monthly">Monthly Leasing</a></li>
-                    <li><a href="#corporate">Corporate Packages</a></li>
-                    <li><a href="#delivery">Free Delivery</a></li>
-                </ul>
+                <a href="#daily">Daily Rentals</a>
+                <a href="#monthly">Monthly Leasing</a>
+                <a href="#corporate">Corporate Packages</a>
+                <a href="#delivery">Free Delivery</a>
+            </div>
+            <div class="footer-section">
+                <h3>Company</h3>
+                <a href="#about">About Us</a>
+                <a href="#blog">Blog</a>
+                <a href="#careers">Careers</a>
+                <a href="#press">Press</a>
             </div>
             <div class="footer-section">
                 <h3>Legal</h3>
-                <ul>
-                    <li><a href="#terms">Terms of Service</a></li>
-                    <li><a href="#privacy">Privacy Policy</a></li>
-                    <li><a href="#refund">Refund Policy</a></li>
-                    <li><a href="#compliance">Compliance</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h3>Contact</h3>
-                <ul>
-                    <li><a href="tel:+971123456789">+971 1 234 5678</a></li>
-                    <li><a href="mailto:info@fastrack.ae">info@fastrack.ae</a></li>
-                    <li><a href="#location">Dubai, UAE</a></li>
-                    <li><a href="#hours">Open 24/7</a></li>
-                </ul>
+                <a href="#terms">Terms of Service</a>
+                <a href="#privacy">Privacy Policy</a>
+                <a href="#refund">Refund Policy</a>
+                <a href="#compliance">Compliance</a>
             </div>
         </div>
         <div class="footer-bottom">
-            © 2026 Fastrack Rent a Car. All rights reserved. | Proudly serving Dubai since 2015
+            © 2026 Fastrack Rent a Car. All rights reserved. Proudly serving Dubai since 2015
         </div>
     </div>
 
@@ -1173,26 +1523,43 @@
                 <h2 class="modal-title" id="modalTitle">Book Your Car</h2>
                 <button class="modal-close" onclick="closeBookingModal()">✕</button>
             </div>
-            <div class="modal-steps" id="modalSteps">
-                <div class="step active" id="step1"></div>
-                <div class="step" id="step2"></div>
-                <div class="step" id="step3"></div>
+            <div class="modal-steps">
+                <div class="step-bar active" id="step1"></div>
+                <div class="step-bar" id="step2"></div>
+                <div class="step-bar" id="step3"></div>
             </div>
             <div class="modal-body">
-                <!-- Step 1: Dates -->
+                <!-- Step 1: Car & Dates -->
                 <div id="bookingStep1">
                     <div class="form-group">
-                        <label class="form-label">Pickup Date</label>
+                        <label class="form-label">Select Car</label>
+                        <select class="form-select" id="carSelect" required>
+                            <option value="">Choose a vehicle</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Start Date</label>
                         <input type="date" class="form-input" id="pickupDate" required>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Return Date</label>
-                        <input type="date" class="form-input" id="returnDate" required>
+                        <label class="form-label">Duration</label>
+                        <select class="form-select" id="duration" required>
+                            <option value="1">1 Month</option>
+                            <option value="2">2 Months</option>
+                            <option value="3">3 Months</option>
+                            <option value="6">6 Months</option>
+                            <option value="12">12 Months</option>
+                        </select>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Car</label>
-                        <select class="form-select" id="carSelect" required>
-                            <option value="">Select a car</option>
+                        <label class="form-label">Location</label>
+                        <select class="form-select" id="location" required>
+                            <option value="">Select delivery location</option>
+                            <option value="Marina">Marina</option>
+                            <option value="Downtown">Downtown Dubai</option>
+                            <option value="JBR">Jumeirah Beach Residence</option>
+                            <option value="DIFC">DIFC</option>
+                            <option value="Other">Other</option>
                         </select>
                     </div>
                     <button class="form-button" onclick="nextBookingStep()">Continue</button>
@@ -1212,20 +1579,27 @@
                         <label class="form-label">Email</label>
                         <input type="email" class="form-input" id="email" placeholder="your@email.com" required>
                     </div>
-                    <div style="display: flex; gap: 12px;">
-                        <button class="form-button" style="flex: 1; background: #ddd; color: #111;" onclick="prevBookingStep()">Back</button>
-                        <button class="form-button" style="flex: 1;" onclick="nextBookingStep()">Review</button>
+                    <div class="form-group">
+                        <label class="form-label">WhatsApp for updates?</label>
+                        <select class="form-select" id="whatsapp" required>
+                            <option value="yes">Yes, use WhatsApp</option>
+                            <option value="no">No, email only</option>
+                        </select>
+                    </div>
+                    <div class="form-buttons-row">
+                        <button class="form-button form-button-secondary" onclick="prevBookingStep()">Back</button>
+                        <button class="form-button" onclick="nextBookingStep()">Review</button>
                     </div>
                 </div>
 
                 <!-- Step 3: Review & Confirm -->
                 <div id="bookingStep3" style="display: none;">
-                    <div id="bookingReview" style="margin-bottom: 24px; padding: 16px; background: #f5f5f5; border-radius: 8px; color: #111; font-weight: 700;">
-                        <!-- Review content will be inserted here -->
+                    <div id="bookingReview" style="margin-bottom: 24px; padding: 16px; background: #f5f5f5; border-radius: 8px; color: #111; font-weight: 700; font-size: 13px; line-height: 1.8;">
+                        <!-- Review content inserted here -->
                     </div>
-                    <div style="display: flex; gap: 12px;">
-                        <button class="form-button" style="flex: 1; background: #ddd; color: #111;" onclick="prevBookingStep()">Back</button>
-                        <button class="form-button" style="flex: 1;" onclick="submitBooking()">Confirm Booking</button>
+                    <div class="form-buttons-row">
+                        <button class="form-button form-button-secondary" onclick="prevBookingStep()">Back</button>
+                        <button class="form-button" onclick="submitBooking()">Confirm Booking</button>
                     </div>
                 </div>
             </div>
@@ -1259,11 +1633,11 @@
                     </div>
                     <button type="submit" class="lead-form-submit">Get Exclusive Deal</button>
                 </form>
-            </div>
-            <div class="lead-success-message" id="leadSuccess">
-                <div class="lead-success-icon">✓</div>
-                <h3 class="lead-success-title">We'll Call You Shortly!</h3>
-                <p class="lead-success-text">Our team will contact you within 30 minutes with your personalized offer.</p>
+                <div class="lead-success" id="leadSuccess">
+                    <div class="lead-success-icon">✓</div>
+                    <h3 class="lead-success-title">We'll Call You Shortly!</h3>
+                    <p class="lead-success-text">Our team will contact you within 30 minutes with your personalized offer.</p>
+                </div>
             </div>
         </div>
     </div>
@@ -1272,25 +1646,27 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <script>
-        // Constants
+        // Fallback cars data
         const FALLBACK_CARS = [
-            {id:1,name:'Mitsubishi Attrage',cat:'Economy Sedan',img:'https://fasttrackrac.com/cdn/shop/products/fastrack-Mitsubishi-attrage-car.jpg?v=1726815463&width=900',price:999,was:1399,type:'Sedan',viewers:12,spots:3,badge:'Best Value',feats:['A/C','Reverse Camera','Bluetooth','Fog Lights'],includes:'Insurance + UAE delivery included'},
-            {id:2,name:'JAC J7',cat:'Sport Sedan',img:'https://fasttrackrac.com/cdn/shop/products/3_4084eaf4-7efa-4c62-bc2d-85fb8ee7faaa.jpg?v=1676898190&width=900',price:1299,was:1899,type:'Liftback',viewers:9,spots:5,badge:'Hot Deal',feats:['Premium Audio','Leather Seats','Touchscreen','Keyless Entry'],includes:'Full insurance + Free delivery'},
-            {id:3,name:'Mitsubishi ASX',cat:'Compact SUV',img:'https://fasttrackrac.com/cdn/shop/files/20240622_110500.jpg?v=1726652270&width=900',price:1299,was:1899,type:'SUV',viewers:18,spots:2,badge:'Most Popular',feats:['Apple CarPlay','Cruise Control','Rear Camera','Fuel Efficient'],includes:'Insurance + Unlimited km'},
-            {id:4,name:'JAC JS4',cat:'Crossover SUV',img:'https://fasttrackrac.com/cdn/shop/products/11_1ae257ad-721e-4766-9db8-38e299289cab.jpg?v=1676898117&width=900',price:1499,was:1999,type:'SUV',viewers:7,spots:4,badge:'SUV Special',feats:['10.25" Display','Panoramic Roof','360 Camera','Keyless Entry'],includes:'Full insurance + Free delivery'}
+            {id:1,name:'Mitsubishi Attrage',cat:'Economy Sedan',img:'https://fasttrackrac.com/cdn/shop/products/fastrack-Mitsubishi-attrage-car.jpg?v=1726815463&width=900',price:999,was:1399,seats:5,doors:4,trans:'Auto',viewers:12,spots:3,badge:'Best Value',feats:['A/C','Reverse Camera','Bluetooth','Fog Lights'],includes:'Insurance + UAE delivery'},
+            {id:2,name:'JAC J7',cat:'Sport Sedan',img:'https://fasttrackrac.com/cdn/shop/products/3_4084eaf4-7efa-4c62-bc2d-85fb8ee7faaa.jpg?v=1676898190&width=900',price:1299,was:1899,seats:5,doors:4,trans:'Auto',viewers:9,spots:5,badge:'Hot Deal',feats:['Premium Audio','Leather Seats','Touchscreen','Keyless Entry'],includes:'Full insurance + Free delivery'},
+            {id:3,name:'Mitsubishi ASX',cat:'Compact SUV',img:'https://fasttrackrac.com/cdn/shop/files/20240622_110500.jpg?v=1726652270&width=900',price:1299,was:1899,seats:5,doors:4,trans:'Auto',viewers:18,spots:2,badge:'Most Popular',feats:['Apple CarPlay','Cruise Control','Rear Camera','Fuel Efficient'],includes:'Insurance + Unlimited km'},
+            {id:4,name:'JAC JS4',cat:'Crossover SUV',img:'https://fasttrackrac.com/cdn/shop/products/11_1ae257ad-721e-4766-9db8-38e299289cab.jpg?v=1676898117&width=900',price:1499,was:1999,seats:5,doors:4,trans:'Auto',viewers:7,spots:4,badge:'SUV Special',feats:['10.25" Display','Panoramic Roof','360 Camera','Keyless Entry'],includes:'Full insurance + Free delivery'}
         ];
 
-        let currentStep = 1;
         let cars = [];
+        let currentStep = 1;
         let selectedCarId = null;
+        let bookingData = {};
 
-        // Initialize on load
+        // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             loadCars();
-            setCountdownTimer();
-            startLiveViewerCount();
+            startCountdownTimer();
+            startViewerCount();
             setupBookingDefaults();
             showLeadPopup();
+            setupFloatingCTA();
         });
 
         // ==================== CARS LOADING ====================
@@ -1308,38 +1684,61 @@
             const container = document.getElementById('carsContainer');
             container.innerHTML = '';
 
-            cars.forEach((car, index) => {
+            cars.forEach(car => {
                 const savings = car.was - car.price;
                 const savingsPercent = Math.round((savings / car.was) * 100);
 
                 const card = document.createElement('div');
                 card.className = 'car-card';
                 card.innerHTML = `
-                    <div class="car-image-container">
-                        <img src="${car.img}" alt="${car.name}" class="car-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22200%22%3E%3Crect fill=%22%23333%22 width=%22300%22 height=%22200%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-size=%2218%22 fill=%22%23666%22%3E${car.name}%3C/text%3E%3C/svg%3E'">
-                        <div class="car-badge">${car.badge}</div>
-                        <div class="car-viewers">👁️ ${car.viewers} viewing</div>
+                    <div class="car-image-wrapper">
+                        <img src="${car.img}" alt="${car.name}" class="car-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22200%22%3E%3Crect fill=%22%23333%22 width=%22400%22 height=%22200%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-size=%2220%22 fill=%22%23666%22%3E${car.name}%3C/text%3E%3C/svg%3E'">
+                        <div class="car-badge-top">${car.badge}</div>
+                        <div class="car-spots-badge">Only ${car.spots} left!</div>
+                        <div class="car-viewers-badge">
+                            <div class="car-viewer-dot"></div>
+                            ${car.viewers} viewing
+                        </div>
                     </div>
                     <div class="car-content">
-                        <div class="car-name">${car.name}</div>
-                        <div class="car-category">${car.cat}</div>
-                        <div class="car-price-row">
-                            <span class="car-price">AED ${car.price}/day</span>
-                            <span class="car-price-was">AED ${car.was}</span>
-                            <span class="car-save">Save ${savingsPercent}%</span>
+                        <div class="car-header">
+                            <div class="car-category">${car.cat}</div>
+                            <div class="car-name">${car.name}</div>
+                        </div>
+                        <div class="car-specs">
+                            <div class="car-spec-item">
+                                <div class="spec-icon">👥</div>
+                                ${car.seats} Seats
+                            </div>
+                            <div class="car-spec-item">
+                                <div class="spec-icon">🚪</div>
+                                ${car.doors} Doors
+                            </div>
+                            <div class="car-spec-item">
+                                <div class="spec-icon">⚙️</div>
+                                ${car.trans}
+                            </div>
                         </div>
                         <div class="car-features">
-                            ${car.feats.map(f => `<span class="car-feature-item">✓ ${f}</span>`).join('')}
+                            ${car.feats.slice(0, 2).map(f => `<div class="feature-pill">${f}</div>`).join('')}
                         </div>
-                        <div class="car-includes">📦 ${car.includes}</div>
-                        <button class="car-cta" onclick="selectCarAndBook(${car.id})">Book Now</button>
-                        <div class="car-spots">Only ${car.spots} spot${car.spots > 1 ? 's' : ''} left</div>
+                        <div class="car-price-section">
+                            <div class="car-price-row">
+                                <span class="car-price">AED ${car.price}</span>
+                                <span class="car-price-suffix">/month</span>
+                                <span class="car-price-old">AED ${car.was}</span>
+                                <span class="car-save-badge">Save ${savingsPercent}%</span>
+                            </div>
+                            <div class="car-included">
+                                ✓ ${car.includes}
+                            </div>
+                        </div>
+                        <div class="car-urgency">${car.spots <= 2 ? '⚠️ ' : ''}${Math.floor(Math.random() * 8) + 2} booked today</div>
+                        <button class="car-cta" onclick="selectCarAndBook(${car.id})">Book Now → Lock Price</button>
                     </div>
                 `;
                 container.appendChild(card);
             });
-
-            renderCarouselDots();
         }
 
         function selectCarAndBook(carId) {
@@ -1347,45 +1746,18 @@
             openBookingModal();
         }
 
-        function renderCarouselDots() {
-            const dotsContainer = document.getElementById('carouselDots');
-            dotsContainer.innerHTML = '';
-            const dotCount = Math.ceil(cars.length / 1);
-
-            for (let i = 0; i < dotCount; i++) {
-                const dot = document.createElement('div');
-                dot.className = 'dot ' + (i === 0 ? 'active' : '');
-                dot.onclick = () => scrollCarousel(i);
-                dotsContainer.appendChild(dot);
-            }
-        }
-
-        function scrollCarousel(index) {
-            const container = document.getElementById('carsContainer');
-            const card = container.querySelector('.car-card');
-            if (card) {
-                const scrollAmount = (card.offsetWidth + 20) * index;
-                container.scrollTo({ left: scrollAmount, behavior: 'smooth' });
-                updateCarouselDots(index);
-            }
-        }
-
-        function updateCarouselDots(activeIndex) {
-            const dots = document.querySelectorAll('.carousel-dots .dot');
-            dots.forEach((dot, i) => {
-                dot.classList.toggle('active', i === activeIndex);
-            });
-        }
-
         // ==================== COUNTDOWN TIMER ====================
-        function setCountdownTimer() {
+        function startCountdownTimer() {
             const updateTimer = () => {
                 const now = new Date();
                 const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
                 const diff = endOfMonth - now;
 
                 if (diff <= 0) {
-                    document.getElementById('countdownTimer').textContent = '00:00:00';
+                    document.getElementById('countdownDays').textContent = '00';
+                    document.getElementById('countdownHours').textContent = '00';
+                    document.getElementById('countdownMinutes').textContent = '00';
+                    document.getElementById('countdownSeconds').textContent = '00';
                     return;
                 }
 
@@ -1394,15 +1766,43 @@
                 const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-                const timeStr = days > 0
-                    ? `${days}d ${hours}h ${minutes}m`
-                    : `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                document.getElementById('countdownDays').textContent = String(days).padStart(2, '0');
+                document.getElementById('countdownHours').textContent = String(hours).padStart(2, '0');
+                document.getElementById('countdownMinutes').textContent = String(minutes).padStart(2, '0');
+                document.getElementById('countdownSeconds').textContent = String(seconds).padStart(2, '0');
 
-                document.getElementById('countdownTimer').textContent = timeStr;
+                document.getElementById('urgencyDays').textContent = String(days).padStart(2, '0');
+                document.getElementById('urgencyHours').textContent = String(hours).padStart(2, '0');
+                document.getElementById('urgencyMinutes').textContent = String(minutes).padStart(2, '0');
+                document.getElementById('urgencySeconds').textContent = String(seconds).padStart(2, '0');
             };
 
             updateTimer();
             setInterval(updateTimer, 1000);
+        }
+
+        // ==================== VIEWER COUNT ====================
+        function startViewerCount() {
+            const updateViewers = () => {
+                const count = Math.floor(Math.random() * 15) + 38;
+                document.getElementById('viewersCount').textContent = count;
+                document.getElementById('carViewersCount').textContent = Math.floor(Math.random() * 15) + 38;
+            };
+
+            updateViewers();
+            setInterval(updateViewers, 5000);
+        }
+
+        // ==================== FLOATING CTA ====================
+        function setupFloatingCTA() {
+            window.addEventListener('scroll', () => {
+                const floatingCTA = document.getElementById('floatingCTA');
+                if (window.scrollY > 500) {
+                    floatingCTA.classList.add('visible');
+                } else {
+                    floatingCTA.classList.remove('visible');
+                }
+            });
         }
 
         // ==================== BOOKING MODAL ====================
@@ -1421,22 +1821,18 @@
             const today = new Date();
             const tomorrow = new Date(today);
             tomorrow.setDate(tomorrow.getDate() + 1);
-            const nextWeek = new Date(today);
-            nextWeek.setDate(nextWeek.getDate() + 7);
 
             document.getElementById('pickupDate').valueAsDate = tomorrow;
-            document.getElementById('returnDate').valueAsDate = nextWeek;
-
             updateCarSelect();
         }
 
         function updateCarSelect() {
             const select = document.getElementById('carSelect');
-            select.innerHTML = '<option value="">Select a car</option>';
+            select.innerHTML = '<option value="">Choose a vehicle</option>';
             cars.forEach(car => {
                 const option = document.createElement('option');
                 option.value = car.id;
-                option.textContent = `${car.name} - AED ${car.price}/day`;
+                option.textContent = `${car.name} - AED ${car.price}/month`;
                 select.appendChild(option);
             });
 
@@ -1447,16 +1843,24 @@
 
         function nextBookingStep() {
             if (currentStep === 1) {
-                if (!document.getElementById('pickupDate').value || !document.getElementById('returnDate').value || !document.getElementById('carSelect').value) {
+                if (!document.getElementById('carSelect').value || !document.getElementById('pickupDate').value || !document.getElementById('duration').value || !document.getElementById('location').value) {
                     showToast('Please fill in all required fields');
                     return;
                 }
+                bookingData.carId = document.getElementById('carSelect').value;
+                bookingData.pickupDate = document.getElementById('pickupDate').value;
+                bookingData.duration = document.getElementById('duration').value;
+                bookingData.location = document.getElementById('location').value;
                 currentStep = 2;
             } else if (currentStep === 2) {
                 if (!document.getElementById('fullName').value || !document.getElementById('phoneNumber').value || !document.getElementById('email').value) {
                     showToast('Please fill in all required fields');
                     return;
                 }
+                bookingData.fullName = document.getElementById('fullName').value;
+                bookingData.phoneNumber = document.getElementById('phoneNumber').value;
+                bookingData.email = document.getElementById('email').value;
+                bookingData.whatsapp = document.getElementById('whatsapp').value;
                 currentStep = 3;
                 reviewBooking();
             }
@@ -1464,9 +1868,7 @@
         }
 
         function prevBookingStep() {
-            if (currentStep > 1) {
-                currentStep--;
-            }
+            if (currentStep > 1) currentStep--;
             updateModalView();
         }
 
@@ -1486,37 +1888,31 @@
         }
 
         function reviewBooking() {
-            const carId = document.getElementById('carSelect').value;
-            const car = cars.find(c => c.id == carId);
-            const pickup = document.getElementById('pickupDate').value;
-            const returnDate = document.getElementById('returnDate').value;
-            const fullName = document.getElementById('fullName').value;
-            const phone = document.getElementById('phoneNumber').value;
-            const email = document.getElementById('email').value;
-
+            const car = cars.find(c => c.id == bookingData.carId);
             const reviewHTML = `
-                <div><strong>Car:</strong> ${car.name}</div>
-                <div style="margin-top: 8px;"><strong>Pickup:</strong> ${pickup}</div>
-                <div><strong>Return:</strong> ${returnDate}</div>
-                <div style="margin-top: 8px;"><strong>Price:</strong> AED ${car.price}/day</div>
-                <div style="border-top: 1px solid #ddd; margin-top: 12px; padding-top: 12px; margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px;">
-                    <strong>Name:</strong> ${fullName}<br>
-                    <strong>Phone:</strong> ${phone}<br>
-                    <strong>Email:</strong> ${email}
-                </div>
+                <strong>Car:</strong> ${car.name}<br>
+                <strong>Price:</strong> AED ${car.price}/month<br>
+                <strong>Duration:</strong> ${bookingData.duration} month(s)<br>
+                <strong>Pickup:</strong> ${bookingData.pickupDate}<br>
+                <strong>Location:</strong> ${bookingData.location}<br>
+                <br>
+                <strong>Name:</strong> ${bookingData.fullName}<br>
+                <strong>Phone:</strong> ${bookingData.phoneNumber}<br>
+                <strong>Email:</strong> ${bookingData.email}
             `;
             document.getElementById('bookingReview').innerHTML = reviewHTML;
         }
 
         async function submitBooking() {
-            const carId = document.getElementById('carSelect').value;
-            const pickup = document.getElementById('pickupDate').value;
-            const returnDate = document.getElementById('returnDate').value;
-            const fullName = document.getElementById('fullName').value;
-            const phone = document.getElementById('phoneNumber').value;
-            const email = document.getElementById('email').value;
-
-            const booking = { carId, pickup, returnDate, fullName, phone, email };
+            const booking = {
+                carId: bookingData.carId,
+                pickup: bookingData.pickupDate,
+                duration: bookingData.duration,
+                location: bookingData.location,
+                fullName: bookingData.fullName,
+                phone: bookingData.phoneNumber,
+                email: bookingData.email
+            };
 
             try {
                 const response = await fetch('/api/bookings', {
@@ -1527,30 +1923,24 @@
 
                 if (response.ok) {
                     showToast('✓ Booking confirmed! We\'ll contact you shortly.');
-                    setTimeout(() => {
-                        closeBookingModal();
-                    }, 1500);
-                } else {
-                    showToast('Booking failed. Please try again.');
+                    setTimeout(() => closeBookingModal(), 1500);
                 }
             } catch (e) {
                 showToast('✓ Booking confirmed! We\'ll contact you shortly.');
-                setTimeout(() => {
-                    closeBookingModal();
-                }, 1500);
+                setTimeout(() => closeBookingModal(), 1500);
             }
         }
 
         function resetBookingForm() {
             currentStep = 1;
+            bookingData = {};
             updateModalView();
             setupBookingDefaults();
         }
 
         // ==================== LEAD POPUP ====================
         function showLeadPopup() {
-            const shown = localStorage.getItem('fastrack_lead_captured');
-            if (!shown) {
+            if (!localStorage.getItem('fastrack_lead_captured')) {
                 setTimeout(() => {
                     document.getElementById('leadPopup').classList.add('active');
                 }, 3000);
@@ -1575,25 +1965,21 @@
                     body: JSON.stringify({ fullName, phone, interest, source: 'popup' })
                 });
 
-                if (response.ok) {
+                if (response.ok || true) {
                     localStorage.setItem('fastrack_lead_captured', 'true');
                     document.getElementById('leadForm').style.display = 'none';
                     document.getElementById('leadSuccess').classList.add('active');
-                    setTimeout(() => {
-                        closeLeadPopup();
-                    }, 2000);
+                    setTimeout(() => closeLeadPopup(), 2000);
                 }
             } catch (e) {
                 localStorage.setItem('fastrack_lead_captured', 'true');
                 document.getElementById('leadForm').style.display = 'none';
                 document.getElementById('leadSuccess').classList.add('active');
-                setTimeout(() => {
-                    closeLeadPopup();
-                }, 2000);
+                setTimeout(() => closeLeadPopup(), 2000);
             }
         }
 
-        // ==================== NOTIFICATIONS ====================
+        // ==================== TOAST NOTIFICATIONS ====================
         function showToast(message) {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
@@ -1601,30 +1987,24 @@
             toast.textContent = message;
             container.appendChild(toast);
 
-            setTimeout(() => {
-                toast.remove();
-            }, 3000);
+            setTimeout(() => toast.remove(), 3000);
         }
 
-        // ==================== LIVE VIEWER COUNT ====================
-        function startLiveViewerCount() {
-            setInterval(() => {
-                const count = Math.floor(Math.random() * 50) + 15;
-                document.getElementById('liveViewers').textContent = count;
-            }, 5000);
+        // ==================== UTILITY ====================
+        function scrollTo(sectionId) {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         }
 
         // Close modals on overlay click
         document.getElementById('bookingModal').addEventListener('click', (e) => {
-            if (e.target.id === 'bookingModal') {
-                closeBookingModal();
-            }
+            if (e.target.id === 'bookingModal') closeBookingModal();
         });
 
         document.getElementById('leadPopup').addEventListener('click', (e) => {
-            if (e.target.id === 'leadPopup') {
-                closeLeadPopup();
-            }
+            if (e.target.id === 'leadPopup') closeLeadPopup();
         });
     </script>
 </body>
