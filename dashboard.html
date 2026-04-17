@@ -7,1905 +7,940 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
         :root {
-            --primary: #FF5F00;
-            --primary-light: #FF7F33;
-            --primary-dark: #CC4C00;
-            --primary-bg: rgba(255, 95, 0, 0.08);
-            --primary-bg-hover: rgba(255, 95, 0, 0.15);
-            --green: #10B981;
-            --green-bg: rgba(16, 185, 129, 0.1);
-            --red: #EF4444;
-            --red-bg: rgba(239, 68, 68, 0.1);
-            --yellow: #F59E0B;
-            --yellow-bg: rgba(245, 158, 11, 0.1);
-            --blue: #3B82F6;
-            --blue-bg: rgba(59, 130, 246, 0.1);
-            --purple: #8B5CF6;
-            --purple-bg: rgba(139, 92, 246, 0.1);
-
-            /* Dark theme (default) */
-            --bg-primary: #0A0A0A;
-            --bg-secondary: #111111;
-            --bg-card: #1A1A1A;
-            --bg-card-hover: #222222;
-            --bg-input: #0A0A0A;
-            --border: #2A2A2A;
-            --border-hover: #3A3A3A;
-            --text-primary: #FFFFFF;
-            --text-secondary: #A0A0A0;
-            --text-muted: #666666;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
-            --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+            --primary: #FF5F00; --primary-light: #FF7F33; --primary-dark: #CC4C00;
+            --primary-bg: rgba(255,95,0,0.08); --primary-bg-hover: rgba(255,95,0,0.15);
+            --green: #10B981; --green-bg: rgba(16,185,129,0.1);
+            --red: #EF4444; --red-bg: rgba(239,68,68,0.1);
+            --yellow: #F59E0B; --yellow-bg: rgba(245,158,11,0.1);
+            --blue: #3B82F6; --blue-bg: rgba(59,130,246,0.1);
+            --purple: #8B5CF6; --purple-bg: rgba(139,92,246,0.1);
+            --bg-primary: #0A0A0A; --bg-secondary: #111111; --bg-card: #1A1A1A;
+            --bg-card-hover: #222222; --bg-input: #0A0A0A;
+            --border: #2A2A2A; --border-hover: #3A3A3A;
+            --text-primary: #FFFFFF; --text-secondary: #A0A0A0; --text-muted: #666666;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.3); --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
             --shadow-lg: 0 12px 40px rgba(0,0,0,0.5);
-            --sidebar-width: 260px;
-            --sidebar-collapsed-width: 72px;
-            --header-height: 64px;
-            --transition: 0.2s ease;
+            --sidebar-width: 260px; --sidebar-collapsed-width: 72px;
+            --header-height: 64px; --transition: 0.2s ease;
         }
-
         .light-mode {
-            --bg-primary: #F5F5F7;
-            --bg-secondary: #FFFFFF;
-            --bg-card: #FFFFFF;
-            --bg-card-hover: #F9F9F9;
-            --bg-input: #F5F5F7;
-            --border: #E5E5E7;
-            --border-hover: #D1D1D3;
-            --text-primary: #111111;
-            --text-secondary: #666666;
-            --text-muted: #999999;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
-            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --bg-primary: #F5F5F7; --bg-secondary: #FFFFFF; --bg-card: #FFFFFF;
+            --bg-card-hover: #F9F9F9; --bg-input: #F5F5F7;
+            --border: #E5E5E7; --border-hover: #D1D1D3;
+            --text-primary: #111111; --text-secondary: #666666; --text-muted: #999999;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06); --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
             --shadow-lg: 0 12px 40px rgba(0,0,0,0.12);
         }
-
         html { height: 100%; }
+        body { font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif; background:var(--bg-primary); color:var(--text-primary); line-height:1.5; height:100%; overflow:hidden; transition:background var(--transition),color var(--transition); }
+        ::-webkit-scrollbar { width:6px; height:6px; }
+        ::-webkit-scrollbar-track { background:transparent; }
+        ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+        ::-webkit-scrollbar-thumb:hover { background:var(--border-hover); }
 
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.5;
-            height: 100%;
-            overflow: hidden;
-            transition: background var(--transition), color var(--transition);
-        }
+        /* ─── LOGIN ─── */
+        .login-screen { position:fixed; inset:0; background:var(--bg-primary); display:flex; align-items:center; justify-content:center; z-index:9999; }
+        .login-screen.hidden { display:none; }
+        .login-wrapper { width:100%; max-width:420px; padding:20px; }
+        .login-brand { text-align:center; margin-bottom:40px; }
+        .login-brand h1 { font-size:36px; font-weight:800; letter-spacing:-1.5px; background:linear-gradient(135deg,var(--primary),var(--primary-light)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .login-brand p { color:var(--text-secondary); font-size:14px; margin-top:8px; font-weight:500; }
+        .login-card { background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:36px; box-shadow:var(--shadow-lg); }
+        .login-card h2 { font-size:22px; font-weight:700; margin-bottom:8px; }
+        .login-card .subtitle { color:var(--text-secondary); font-size:14px; margin-bottom:28px; }
 
-        /* ─── SCROLLBAR ─── */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
+        /* ─── FORMS ─── */
+        .form-group { margin-bottom:16px; }
+        .form-group label { display:block; font-size:13px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; }
+        .form-input { width:100%; background:var(--bg-input); border:1px solid var(--border); border-radius:10px; padding:10px 14px; color:var(--text-primary); font-size:14px; font-family:inherit; transition:border var(--transition),box-shadow var(--transition); outline:none; }
+        .form-input:focus { border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-bg); }
+        .form-input::placeholder { color:var(--text-muted); }
+        textarea.form-input { resize:vertical; min-height:60px; }
+        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+        .checkbox-group { display:flex; align-items:center; gap:8px; margin-bottom:20px; }
+        .checkbox-group input[type="checkbox"] { width:16px; height:16px; accent-color:var(--primary); cursor:pointer; }
+        .checkbox-group label { font-size:13px; color:var(--text-secondary); cursor:pointer; margin:0; }
 
-        /* ─── LOGIN SCREEN ─── */
-        .login-screen {
-            position: fixed; inset: 0;
-            background: var(--bg-primary);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 9999;
-            transition: opacity 0.3s ease;
-        }
-        .login-screen.hidden { display: none; }
-        .login-wrapper { width: 100%; max-width: 420px; padding: 20px; }
-        .login-brand { text-align: center; margin-bottom: 40px; }
-        .login-brand h1 {
-            font-size: 36px; font-weight: 800; letter-spacing: -1.5px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-light));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .login-brand p { color: var(--text-secondary); font-size: 14px; margin-top: 8px; font-weight: 500; }
-        .login-card {
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: 16px; padding: 36px;
-            box-shadow: var(--shadow-lg);
-        }
-        .login-card h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
-        .login-card .subtitle { color: var(--text-secondary); font-size: 14px; margin-bottom: 28px; }
+        /* ─── BUTTONS ─── */
+        .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:9px 16px; border-radius:10px; border:none; font-size:13px; font-weight:600; font-family:inherit; cursor:pointer; transition:all var(--transition); text-decoration:none; white-space:nowrap; }
+        .btn:disabled { opacity:0.5; cursor:not-allowed; }
+        .btn-primary { background:var(--primary); color:#fff; }
+        .btn-primary:hover:not(:disabled) { background:var(--primary-dark); }
+        .btn-secondary { background:transparent; color:var(--text-primary); border:1px solid var(--border); }
+        .btn-secondary:hover:not(:disabled) { border-color:var(--border-hover); background:var(--bg-card-hover); }
+        .btn-danger { background:transparent; color:var(--red); border:1px solid var(--red); }
+        .btn-danger:hover:not(:disabled) { background:var(--red-bg); }
+        .btn-success { background:var(--green); color:#fff; }
+        .btn-success:hover:not(:disabled) { opacity:0.9; }
+        .btn-ghost { background:transparent; color:var(--text-secondary); padding:6px; border:none; }
+        .btn-ghost:hover { color:var(--text-primary); background:var(--bg-card-hover); }
+        .btn-sm { padding:5px 10px; font-size:12px; border-radius:8px; }
+        .btn-xs { padding:3px 8px; font-size:11px; border-radius:6px; }
+        .btn-full { width:100%; }
 
-        .form-group { margin-bottom: 20px; }
-        .form-group label {
-            display: block; font-size: 13px; font-weight: 600;
-            color: var(--text-secondary); margin-bottom: 6px;
-        }
-        .form-input {
-            width: 100%; background: var(--bg-input); border: 1px solid var(--border);
-            border-radius: 10px; padding: 12px 14px; color: var(--text-primary);
-            font-size: 14px; font-family: inherit;
-            transition: border var(--transition), box-shadow var(--transition);
-            outline: none;
-        }
-        .form-input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-bg);
-        }
-        .form-input::placeholder { color: var(--text-muted); }
+        .login-error { color:var(--red); font-size:13px; text-align:center; margin-bottom:16px; display:none; }
+        .login-footer { text-align:center; margin-top:20px; }
+        .login-footer a { color:var(--primary); text-decoration:none; font-size:13px; font-weight:500; }
 
-        .checkbox-group {
-            display: flex; align-items: center; gap: 8px; margin-bottom: 24px;
-        }
-        .checkbox-group input[type="checkbox"] {
-            width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer;
-        }
-        .checkbox-group label {
-            font-size: 13px; color: var(--text-secondary); cursor: pointer; margin: 0;
-        }
+        /* ─── APP LAYOUT ─── */
+        .app { display:flex; height:100vh; overflow:hidden; }
+        .app.hidden { display:none; }
+        .sidebar { width:var(--sidebar-width); background:var(--bg-secondary); border-right:1px solid var(--border); display:flex; flex-direction:column; transition:width var(--transition); position:fixed; top:0; left:0; bottom:0; z-index:100; overflow:hidden; }
+        .sidebar.collapsed { width:var(--sidebar-collapsed-width); }
+        .sidebar.collapsed .nav-label,.sidebar.collapsed .sidebar-brand-text,.sidebar.collapsed .nav-badge,.sidebar.collapsed .sidebar-footer-text { display:none; }
+        .sidebar.collapsed .sidebar-brand { justify-content:center; padding:20px 0; }
+        .sidebar.collapsed .nav-item { padding:12px 0; justify-content:center; }
+        .sidebar.collapsed .sidebar-footer { justify-content:center; }
+        .sidebar-brand { display:flex; align-items:center; gap:12px; padding:20px; height:var(--header-height); border-bottom:1px solid var(--border); }
+        .sidebar-brand-logo { width:32px; height:32px; border-radius:8px; background:var(--primary); display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff; font-size:14px; flex-shrink:0; }
+        .sidebar-brand-text { font-size:18px; font-weight:800; letter-spacing:-0.5px; }
+        .sidebar-nav { flex:1; overflow-y:auto; padding:12px 8px; display:flex; flex-direction:column; gap:2px; }
+        .nav-section { padding:16px 12px 8px; font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; }
+        .sidebar.collapsed .nav-section { display:none; }
+        .nav-item { display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; color:var(--text-secondary); cursor:pointer; font-size:14px; font-weight:500; transition:all var(--transition); }
+        .nav-item:hover { color:var(--text-primary); background:var(--bg-card); }
+        .nav-item.active { color:var(--primary); background:var(--primary-bg); font-weight:600; }
+        .nav-icon { width:20px; height:20px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .nav-icon svg { width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+        .nav-badge { margin-left:auto; background:var(--primary); color:#fff; font-size:11px; font-weight:700; padding:2px 7px; border-radius:10px; min-width:20px; text-align:center; }
+        .sidebar-footer { padding:12px; border-top:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+        .sidebar-user-avatar { width:34px; height:34px; border-radius:10px; background:var(--primary-bg); color:var(--primary); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; flex-shrink:0; }
+        .sidebar-user-info { flex:1; min-width:0; }
+        .sidebar-user-name { font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .sidebar-user-role { font-size:11px; color:var(--text-muted); text-transform:capitalize; }
 
-        .btn {
-            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-            padding: 11px 20px; border-radius: 10px; border: none;
-            font-size: 14px; font-weight: 600; font-family: inherit;
-            cursor: pointer; transition: all var(--transition);
-            text-decoration: none; white-space: nowrap;
-        }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-primary {
-            background: var(--primary); color: #fff;
-        }
-        .btn-primary:hover:not(:disabled) { background: var(--primary-dark); transform: translateY(-1px); }
-        .btn-secondary {
-            background: transparent; color: var(--text-primary);
-            border: 1px solid var(--border);
-        }
-        .btn-secondary:hover:not(:disabled) { border-color: var(--border-hover); background: var(--bg-card-hover); }
-        .btn-danger {
-            background: transparent; color: var(--red);
-            border: 1px solid var(--red);
-        }
-        .btn-danger:hover:not(:disabled) { background: var(--red-bg); }
-        .btn-ghost {
-            background: transparent; color: var(--text-secondary); padding: 8px;
-        }
-        .btn-ghost:hover { color: var(--text-primary); background: var(--bg-card-hover); }
-        .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
-        .btn-full { width: 100%; }
-        .btn-icon { width: 36px; height: 36px; padding: 0; border-radius: 10px; }
-
-        .login-error {
-            color: var(--red); font-size: 13px; text-align: center;
-            margin-bottom: 16px; display: none;
-        }
-        .login-footer { text-align: center; margin-top: 20px; }
-        .login-footer a {
-            color: var(--primary); text-decoration: none; font-size: 13px; font-weight: 500;
-        }
-        .login-footer a:hover { text-decoration: underline; }
-
-        /* ─── DASHBOARD LAYOUT ─── */
-        .app { display: flex; height: 100vh; overflow: hidden; }
-        .app.hidden { display: none; }
-
-        /* ─── SIDEBAR ─── */
-        .sidebar {
-            width: var(--sidebar-width);
-            background: var(--bg-secondary);
-            border-right: 1px solid var(--border);
-            display: flex; flex-direction: column;
-            transition: width var(--transition);
-            position: fixed; top: 0; left: 0; bottom: 0;
-            z-index: 100;
-            overflow: hidden;
-        }
-        .sidebar.collapsed { width: var(--sidebar-collapsed-width); }
-        .sidebar.collapsed .nav-label,
-        .sidebar.collapsed .sidebar-brand-text,
-        .sidebar.collapsed .nav-badge,
-        .sidebar.collapsed .sidebar-footer-text { display: none; }
-        .sidebar.collapsed .sidebar-brand { justify-content: center; padding: 20px 0; }
-        .sidebar.collapsed .nav-item { padding: 12px 0; justify-content: center; }
-        .sidebar.collapsed .sidebar-footer { justify-content: center; }
-
-        .sidebar-brand {
-            display: flex; align-items: center; gap: 12px;
-            padding: 20px 20px; height: var(--header-height);
-            border-bottom: 1px solid var(--border);
-        }
-        .sidebar-brand-logo {
-            width: 32px; height: 32px; border-radius: 8px;
-            background: var(--primary); display: flex; align-items: center; justify-content: center;
-            font-weight: 800; color: #fff; font-size: 14px; flex-shrink: 0;
-        }
-        .sidebar-brand-text { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
-
-        .sidebar-nav {
-            flex: 1; overflow-y: auto; padding: 12px 8px;
-            display: flex; flex-direction: column; gap: 2px;
-        }
-        .nav-section { padding: 16px 12px 8px; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-        .sidebar.collapsed .nav-section { display: none; }
-
-        .nav-item {
-            display: flex; align-items: center; gap: 12px;
-            padding: 10px 12px; border-radius: 10px;
-            color: var(--text-secondary); cursor: pointer;
-            font-size: 14px; font-weight: 500;
-            transition: all var(--transition);
-            position: relative;
-        }
-        .nav-item:hover { color: var(--text-primary); background: var(--bg-card); }
-        .nav-item.active {
-            color: var(--primary); background: var(--primary-bg);
-            font-weight: 600;
-        }
-        .nav-icon {
-            width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0; font-size: 16px;
-        }
-        .nav-icon svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-        .nav-badge {
-            margin-left: auto; background: var(--primary);
-            color: #fff; font-size: 11px; font-weight: 700;
-            padding: 2px 7px; border-radius: 10px; min-width: 20px; text-align: center;
-        }
-
-        .sidebar-footer {
-            padding: 12px; border-top: 1px solid var(--border);
-            display: flex; align-items: center; gap: 10px;
-        }
-        .sidebar-user-avatar {
-            width: 34px; height: 34px; border-radius: 10px;
-            background: var(--primary-bg); color: var(--primary);
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 700; font-size: 13px; flex-shrink: 0;
-        }
-        .sidebar-user-info { flex: 1; min-width: 0; }
-        .sidebar-user-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .sidebar-user-role { font-size: 11px; color: var(--text-muted); text-transform: capitalize; }
-
-        /* ─── MAIN AREA ─── */
-        .main-area {
-            flex: 1; margin-left: var(--sidebar-width);
-            display: flex; flex-direction: column;
-            height: 100vh; overflow: hidden;
-            transition: margin-left var(--transition);
-        }
-        .sidebar.collapsed ~ .main-area { margin-left: var(--sidebar-collapsed-width); }
-
-        /* ─── TOP HEADER ─── */
-        .top-header {
-            height: var(--header-height); min-height: var(--header-height);
-            background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border);
-            display: flex; align-items: center; gap: 16px;
-            padding: 0 24px;
-        }
-        .header-left { display: flex; align-items: center; gap: 12px; }
-        .hamburger-btn {
-            display: none; background: transparent; border: none;
-            color: var(--text-secondary); cursor: pointer; padding: 8px;
-            border-radius: 8px; font-size: 20px;
-        }
-        .hamburger-btn:hover { background: var(--bg-card); color: var(--text-primary); }
-        .collapse-btn {
-            background: transparent; border: none;
-            color: var(--text-muted); cursor: pointer; padding: 6px;
-            border-radius: 8px; font-size: 18px; transition: all var(--transition);
-        }
-        .collapse-btn:hover { color: var(--text-primary); background: var(--bg-card); }
-
-        .breadcrumbs { display: flex; align-items: center; gap: 6px; font-size: 13px; }
-        .breadcrumbs span { color: var(--text-muted); }
-        .breadcrumbs .current { color: var(--text-primary); font-weight: 600; }
-        .breadcrumbs .sep { color: var(--text-muted); font-size: 10px; }
-
-        .header-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
-        .header-search {
-            position: relative; width: 240px;
-        }
-        .header-search input {
-            width: 100%; background: var(--bg-input); border: 1px solid var(--border);
-            border-radius: 10px; padding: 8px 12px 8px 36px;
-            color: var(--text-primary); font-size: 13px; font-family: inherit;
-            outline: none; transition: all var(--transition);
-        }
-        .header-search input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-bg); }
-        .header-search input::placeholder { color: var(--text-muted); }
-        .header-search-icon {
-            position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
-            color: var(--text-muted); font-size: 14px; pointer-events: none;
-        }
-        .header-search .kbd {
-            position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: 4px; padding: 1px 6px; font-size: 11px;
-            color: var(--text-muted); font-family: inherit;
-        }
-
-        .notif-btn {
-            position: relative; background: transparent; border: none;
-            color: var(--text-secondary); cursor: pointer; padding: 8px;
-            border-radius: 10px; font-size: 18px; transition: all var(--transition);
-        }
-        .notif-btn:hover { background: var(--bg-card); color: var(--text-primary); }
-        .notif-dot {
-            position: absolute; top: 6px; right: 6px;
-            width: 8px; height: 8px; border-radius: 50%;
-            background: var(--primary); border: 2px solid var(--bg-secondary);
-        }
-
-        .theme-btn {
-            background: transparent; border: none;
-            color: var(--text-secondary); cursor: pointer; padding: 8px;
-            border-radius: 10px; font-size: 18px; transition: all var(--transition);
-        }
-        .theme-btn:hover { background: var(--bg-card); color: var(--text-primary); }
+        .main-area { flex:1; margin-left:var(--sidebar-width); display:flex; flex-direction:column; height:100vh; overflow:hidden; transition:margin-left var(--transition); }
+        .sidebar.collapsed ~ .main-area { margin-left:var(--sidebar-collapsed-width); }
+        .top-header { height:var(--header-height); min-height:var(--header-height); background:var(--bg-secondary); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:16px; padding:0 24px; }
+        .header-left { display:flex; align-items:center; gap:12px; }
+        .hamburger-btn { display:none; background:transparent; border:none; color:var(--text-secondary); cursor:pointer; padding:8px; border-radius:8px; font-size:20px; }
+        .hamburger-btn:hover { background:var(--bg-card); color:var(--text-primary); }
+        .collapse-btn { background:transparent; border:none; color:var(--text-muted); cursor:pointer; padding:6px; border-radius:8px; font-size:18px; transition:all var(--transition); }
+        .collapse-btn:hover { color:var(--text-primary); background:var(--bg-card); }
+        .breadcrumbs { display:flex; align-items:center; gap:6px; font-size:13px; }
+        .breadcrumbs span { color:var(--text-muted); }
+        .breadcrumbs .current { color:var(--text-primary); font-weight:600; }
+        .breadcrumbs .sep { color:var(--text-muted); font-size:10px; }
+        .header-right { margin-left:auto; display:flex; align-items:center; gap:8px; }
+        .header-search { position:relative; width:220px; }
+        .header-search input { width:100%; background:var(--bg-input); border:1px solid var(--border); border-radius:10px; padding:7px 12px 7px 32px; color:var(--text-primary); font-size:13px; font-family:inherit; outline:none; transition:all var(--transition); }
+        .header-search input:focus { border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-bg); }
+        .header-search input::placeholder { color:var(--text-muted); }
+        .header-search-icon { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:13px; pointer-events:none; }
+        .header-search .kbd { position:absolute; right:6px; top:50%; transform:translateY(-50%); background:var(--bg-card); border:1px solid var(--border); border-radius:4px; padding:1px 5px; font-size:10px; color:var(--text-muted); }
+        .notif-btn,.theme-btn { position:relative; background:transparent; border:none; color:var(--text-secondary); cursor:pointer; padding:8px; border-radius:10px; font-size:18px; transition:all var(--transition); }
+        .notif-btn:hover,.theme-btn:hover { background:var(--bg-card); color:var(--text-primary); }
+        .notif-dot { position:absolute; top:6px; right:6px; width:8px; height:8px; border-radius:50%; background:var(--primary); border:2px solid var(--bg-secondary); }
 
         /* ─── CONTENT ─── */
-        .content { flex: 1; overflow-y: auto; overflow-x: hidden; }
-        .view { display: none; }
-        .view.active { display: block; }
+        .content { flex:1; overflow-y:auto; overflow-x:hidden; }
+        .view { display:none; }
+        .view.active { display:block; }
+        .view-header { padding:24px 28px 16px; display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap; }
+        .view-title { font-size:22px; font-weight:700; letter-spacing:-0.5px; }
+        .view-subtitle { color:var(--text-secondary); font-size:13px; margin-top:4px; }
+        .view-actions { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
 
-        .view-header {
-            padding: 28px 28px 20px;
-            display: flex; justify-content: space-between; align-items: flex-start;
-            gap: 16px; flex-wrap: wrap;
-        }
-        .view-title { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
-        .view-subtitle { color: var(--text-secondary); font-size: 14px; margin-top: 4px; }
-        .view-actions { display: flex; align-items: center; gap: 8px; }
-
-        /* ─── KPI CARDS ─── */
-        .kpi-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 16px; padding: 0 28px 28px;
-        }
-        .kpi-card {
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: 14px; padding: 22px;
-            transition: all var(--transition);
-        }
-        .kpi-card:hover { border-color: var(--border-hover); }
-        .kpi-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
-        .kpi-icon-box {
-            width: 40px; height: 40px; border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 18px;
-        }
-        .kpi-trend { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
-        .kpi-trend.up { color: var(--green); }
-        .kpi-trend.down { color: var(--red); }
-        .kpi-value { font-size: 28px; font-weight: 700; letter-spacing: -1px; margin-bottom: 4px; }
-        .kpi-label { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+        /* ─── KPI ─── */
+        .kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; padding:0 28px 24px; }
+        .kpi-card { background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:20px; transition:all var(--transition); }
+        .kpi-card:hover { border-color:var(--border-hover); }
+        .kpi-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; }
+        .kpi-icon-box { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:16px; }
+        .kpi-value { font-size:26px; font-weight:700; letter-spacing:-1px; margin-bottom:2px; }
+        .kpi-label { font-size:12px; color:var(--text-secondary); font-weight:500; }
 
         /* ─── TABLE ─── */
-        .data-section { padding: 0 28px 28px; }
-        .data-header { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
-        .data-title { font-size: 16px; font-weight: 700; }
-        .data-tools { display: flex; align-items: center; gap: 8px; }
+        .data-section { padding:0 28px 28px; }
+        .filter-bar { display:flex; align-items:center; gap:8px; padding:0 28px 14px; flex-wrap:wrap; }
+        .filter-select,.search-input { background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:7px 10px; color:var(--text-primary); font-size:12px; font-family:inherit; outline:none; }
+        .filter-select:focus,.search-input:focus { border-color:var(--primary); }
+        .search-input { min-width:180px; }
+        .search-input::placeholder { color:var(--text-muted); }
+        .table-wrap { background:var(--bg-card); border:1px solid var(--border); border-radius:14px; overflow:hidden; overflow-x:auto; }
+        table { width:100%; border-collapse:collapse; }
+        thead { background:var(--bg-input); }
+        th { padding:10px 14px; text-align:left; font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.3px; border-bottom:1px solid var(--border); cursor:pointer; white-space:nowrap; user-select:none; }
+        th:hover { color:var(--text-secondary); }
+        th .sort-arrow { font-size:10px; margin-left:4px; }
+        td { padding:10px 14px; font-size:13px; border-bottom:1px solid var(--border); vertical-align:middle; }
+        tbody tr:last-child td { border-bottom:none; }
+        tbody tr:hover { background:var(--bg-card-hover); }
+        .row-checkbox { width:16px; height:16px; accent-color:var(--primary); cursor:pointer; }
 
-        .filter-bar {
-            display: flex; align-items: center; gap: 8px; padding: 0 28px 16px; flex-wrap: wrap;
-        }
-        .filter-select {
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: 8px; padding: 7px 12px; color: var(--text-primary);
-            font-size: 13px; font-family: inherit; outline: none; cursor: pointer;
-        }
-        .filter-select:focus { border-color: var(--primary); }
-        .search-input {
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: 8px; padding: 7px 12px; color: var(--text-primary);
-            font-size: 13px; font-family: inherit; outline: none;
-            min-width: 200px;
-        }
-        .search-input:focus { border-color: var(--primary); }
-        .search-input::placeholder { color: var(--text-muted); }
+        /* Inline edit */
+        .inline-edit { background:transparent; border:1px solid transparent; color:var(--text-primary); font-size:13px; font-family:inherit; padding:2px 4px; border-radius:4px; outline:none; width:100%; transition:all var(--transition); }
+        .inline-edit:hover { border-color:var(--border); }
+        .inline-edit:focus { border-color:var(--primary); background:var(--bg-input); box-shadow:0 0 0 2px var(--primary-bg); }
 
-        .table-wrap {
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: 14px; overflow: hidden;
-        }
-        table { width: 100%; border-collapse: collapse; }
-        thead { background: var(--bg-input); }
-        th {
-            padding: 12px 16px; text-align: left;
-            font-size: 12px; font-weight: 700; color: var(--text-muted);
-            text-transform: uppercase; letter-spacing: 0.3px;
-            border-bottom: 1px solid var(--border);
-        }
-        td {
-            padding: 12px 16px; font-size: 13px;
-            border-bottom: 1px solid var(--border);
-            vertical-align: middle;
-        }
-        tbody tr:last-child td { border-bottom: none; }
-        tbody tr:hover { background: var(--bg-card-hover); }
+        .badge { display:inline-flex; align-items:center; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; white-space:nowrap; }
+        .badge-new { background:var(--blue-bg); color:var(--blue); }
+        .badge-contacted { background:var(--yellow-bg); color:var(--yellow); }
+        .badge-qualified { background:var(--green-bg); color:var(--green); }
+        .badge-converted { background:var(--purple-bg); color:var(--purple); }
+        .badge-lost { background:var(--red-bg); color:var(--red); }
+        .badge-pending { background:var(--yellow-bg); color:var(--yellow); }
+        .badge-confirmed { background:var(--blue-bg); color:var(--blue); }
+        .badge-active { background:var(--green-bg); color:var(--green); }
+        .badge-completed { background:var(--green-bg); color:var(--green); }
+        .badge-cancelled { background:var(--red-bg); color:var(--red); }
+        .badge-superadmin { background:var(--primary-bg); color:var(--primary); }
+        .badge-manager { background:var(--blue-bg); color:var(--blue); }
+        .badge-viewer { background:var(--bg-card-hover); color:var(--text-secondary); }
 
-        .badge {
-            display: inline-flex; align-items: center; padding: 3px 10px;
-            border-radius: 20px; font-size: 12px; font-weight: 600;
-        }
-        .badge-new { background: var(--blue-bg); color: var(--blue); }
-        .badge-contacted { background: var(--yellow-bg); color: var(--yellow); }
-        .badge-qualified { background: var(--green-bg); color: var(--green); }
-        .badge-converted { background: var(--purple-bg); color: var(--purple); }
-        .badge-lost { background: var(--red-bg); color: var(--red); }
-        .badge-pending { background: var(--yellow-bg); color: var(--yellow); }
-        .badge-confirmed { background: var(--blue-bg); color: var(--blue); }
-        .badge-active { background: var(--green-bg); color: var(--green); }
-        .badge-completed { background: var(--green-bg); color: var(--green); }
-        .badge-cancelled { background: var(--red-bg); color: var(--red); }
-        .badge-superadmin { background: var(--primary-bg); color: var(--primary); }
-        .badge-manager { background: var(--blue-bg); color: var(--blue); }
-        .badge-viewer { background: var(--bg-card-hover); color: var(--text-secondary); }
+        .status-select { background:var(--bg-input); border:1px solid var(--border); border-radius:6px; padding:4px 6px; color:var(--text-primary); font-size:12px; font-family:inherit; cursor:pointer; outline:none; }
+        .status-select:focus { border-color:var(--primary); }
 
-        .status-select {
-            background: var(--bg-input); border: 1px solid var(--border);
-            border-radius: 6px; padding: 5px 8px; color: var(--text-primary);
-            font-size: 12px; font-family: inherit; cursor: pointer; outline: none;
-        }
-        .status-select:focus { border-color: var(--primary); }
+        .empty-state { text-align:center; padding:50px 20px; color:var(--text-muted); }
+        .empty-state-icon { font-size:40px; margin-bottom:12px; opacity:0.3; }
+        .empty-state-title { font-size:15px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; }
 
-        .empty-state {
-            text-align: center; padding: 60px 20px; color: var(--text-muted);
-        }
-        .empty-state-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.3; }
-        .empty-state-title { font-size: 16px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
+        /* Bulk action bar */
+        .bulk-bar { display:none; align-items:center; gap:8px; padding:10px 28px; background:var(--primary-bg); border-bottom:1px solid var(--primary); font-size:13px; font-weight:500; color:var(--primary); }
+        .bulk-bar.active { display:flex; }
+        .bulk-bar .bulk-count { font-weight:700; }
 
-        /* ─── CARS GRID ─── */
-        .cars-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px; padding: 0 28px 28px;
-        }
-        .car-card {
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: 14px; overflow: hidden;
-            transition: all var(--transition);
-        }
-        .car-card:hover { border-color: var(--border-hover); transform: translateY(-2px); box-shadow: var(--shadow-md); }
-        .car-img { width: 100%; height: 180px; background: var(--bg-input); overflow: hidden; }
-        .car-img img { width: 100%; height: 100%; object-fit: cover; }
-        .car-body { padding: 16px; }
-        .car-name { font-size: 16px; font-weight: 700; margin-bottom: 2px; }
-        .car-cat { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; }
-        .car-pricing { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; }
-        .car-price { font-size: 20px; font-weight: 700; color: var(--green); }
-        .car-was { font-size: 13px; color: var(--text-muted); text-decoration: line-through; }
-        .car-badge-tag {
-            display: inline-block; background: var(--primary);
-            color: #fff; padding: 3px 8px; border-radius: 6px;
-            font-size: 11px; font-weight: 700; margin-bottom: 10px;
-        }
-        .car-meta { display: flex; gap: 12px; font-size: 12px; color: var(--text-secondary); margin-bottom: 12px; }
-        .car-actions { display: flex; gap: 8px; }
+        /* ─── CARS ─── */
+        .cars-toolbar { display:flex; align-items:center; gap:8px; padding:0 28px 14px; }
+        .toggle-group { display:flex; border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+        .toggle-group .toggle-btn { background:transparent; border:none; color:var(--text-muted); padding:6px 12px; font-size:12px; cursor:pointer; font-family:inherit; transition:all var(--transition); }
+        .toggle-group .toggle-btn.active { background:var(--primary); color:#fff; }
+        .cars-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:16px; padding:0 28px 28px; }
+        .car-card { background:var(--bg-card); border:1px solid var(--border); border-radius:14px; overflow:hidden; transition:all var(--transition); position:relative; }
+        .car-card:hover { border-color:var(--border-hover); transform:translateY(-2px); box-shadow:var(--shadow-md); }
+        .car-card.inactive { opacity:0.5; }
+        .car-card.dragging { opacity:0.4; transform:scale(0.95); }
+        .car-img { width:100%; height:170px; background:var(--bg-input); overflow:hidden; position:relative; }
+        .car-img img { width:100%; height:100%; object-fit:cover; }
+        .car-status-badge { position:absolute; top:8px; right:8px; }
+        .car-body { padding:14px; }
+        .car-name { font-size:15px; font-weight:700; margin-bottom:2px; }
+        .car-cat { font-size:11px; color:var(--text-muted); margin-bottom:8px; }
+        .car-pricing { display:flex; align-items:baseline; gap:6px; margin-bottom:6px; }
+        .car-price { font-size:18px; font-weight:700; color:var(--green); }
+        .car-was { font-size:12px; color:var(--text-muted); text-decoration:line-through; }
+        .car-badge-tag { display:inline-block; background:var(--primary); color:#fff; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:700; margin-bottom:8px; }
+        .car-specs { display:flex; flex-wrap:wrap; gap:8px; font-size:11px; color:var(--text-secondary); margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid var(--border); }
+        .car-spec { display:flex; align-items:center; gap:3px; }
+        .car-actions { display:flex; gap:6px; flex-wrap:wrap; }
+        .car-drag-handle { cursor:grab; padding:4px; color:var(--text-muted); font-size:14px; }
+        .car-drag-handle:active { cursor:grabbing; }
 
         /* ─── MODAL ─── */
-        .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
-            display: none; align-items: center; justify-content: center;
-            z-index: 9000; padding: 20px; backdrop-filter: blur(4px);
-        }
-        .modal-overlay.active { display: flex; }
-        .modal {
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: 16px; width: 100%; max-width: 520px;
-            max-height: 90vh; overflow-y: auto;
-            box-shadow: var(--shadow-lg);
-        }
-        .modal-head {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 20px 24px; border-bottom: 1px solid var(--border);
-        }
-        .modal-title { font-size: 18px; font-weight: 700; }
-        .modal-close {
-            background: transparent; border: none; color: var(--text-muted);
-            font-size: 22px; cursor: pointer; padding: 4px; border-radius: 6px;
-            transition: all var(--transition);
-        }
-        .modal-close:hover { color: var(--text-primary); background: var(--bg-card-hover); }
-        .modal-body { padding: 24px; }
-        .modal-footer {
-            padding: 16px 24px; border-top: 1px solid var(--border);
-            display: flex; justify-content: flex-end; gap: 8px;
-        }
+        .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center; z-index:9000; padding:20px; backdrop-filter:blur(4px); }
+        .modal-overlay.active { display:flex; }
+        .modal { background:var(--bg-card); border:1px solid var(--border); border-radius:16px; width:100%; max-width:600px; max-height:90vh; overflow-y:auto; box-shadow:var(--shadow-lg); }
+        .modal.wide { max-width:800px; }
+        .modal-head { display:flex; justify-content:space-between; align-items:center; padding:18px 24px; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--bg-card); z-index:1; border-radius:16px 16px 0 0; }
+        .modal-title { font-size:17px; font-weight:700; }
+        .modal-close { background:transparent; border:none; color:var(--text-muted); font-size:22px; cursor:pointer; padding:4px 8px; border-radius:6px; }
+        .modal-close:hover { color:var(--text-primary); background:var(--bg-card-hover); }
+        .modal-body { padding:20px 24px; }
 
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        .form-group { margin-bottom: 16px; }
-        .form-group:last-child { margin-bottom: 0; }
+        /* Detail modal tabs */
+        .detail-tabs { display:flex; gap:0; border-bottom:1px solid var(--border); margin-bottom:16px; }
+        .detail-tab { padding:10px 16px; font-size:13px; font-weight:600; color:var(--text-muted); cursor:pointer; border-bottom:2px solid transparent; transition:all var(--transition); }
+        .detail-tab:hover { color:var(--text-secondary); }
+        .detail-tab.active { color:var(--primary); border-bottom-color:var(--primary); }
+        .detail-panel { display:none; }
+        .detail-panel.active { display:block; }
+        .detail-row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); font-size:13px; }
+        .detail-row:last-child { border-bottom:none; }
+        .detail-label { color:var(--text-muted); font-weight:500; }
+        .detail-value { font-weight:600; text-align:right; }
+
+        /* Notes */
+        .note-item { padding:10px; background:var(--bg-input); border-radius:8px; margin-bottom:8px; }
+        .note-meta { font-size:11px; color:var(--text-muted); margin-bottom:4px; }
+        .note-text { font-size:13px; }
+        .note-form { display:flex; gap:8px; margin-top:12px; }
+        .note-form input { flex:1; }
+
+        /* Calendar */
+        .calendar-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:1px; background:var(--border); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+        .cal-header { background:var(--bg-input); padding:10px 4px; text-align:center; font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; }
+        .cal-day { background:var(--bg-card); min-height:80px; padding:4px; font-size:11px; }
+        .cal-day.other-month { opacity:0.3; }
+        .cal-day.today { background:var(--primary-bg); }
+        .cal-day-num { font-weight:600; padding:2px 4px; margin-bottom:2px; }
+        .cal-event { background:var(--blue-bg); color:var(--blue); padding:1px 4px; border-radius:3px; font-size:10px; margin-bottom:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; }
+        .cal-event.confirmed { background:var(--green-bg); color:var(--green); }
+        .cal-event.cancelled { background:var(--red-bg); color:var(--red); }
+        .cal-nav { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+        .cal-nav-title { font-size:16px; font-weight:700; }
+
+        /* Image preview */
+        .img-preview { width:100%; height:160px; background:var(--bg-input); border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-top:6px; display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:12px; }
+        .img-preview img { width:100%; height:100%; object-fit:cover; }
 
         /* ─── TOAST ─── */
-        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 10000; display: flex; flex-direction: column; gap: 8px; }
-        .toast {
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: 12px; padding: 14px 18px;
-            box-shadow: var(--shadow-md);
-            display: flex; align-items: center; gap: 10px;
-            font-size: 13px; font-weight: 500;
-            animation: slideIn 0.3s ease;
-            max-width: 380px;
-        }
-        .toast.success { border-left: 3px solid var(--green); }
-        .toast.error { border-left: 3px solid var(--red); }
-        .toast.info { border-left: 3px solid var(--blue); }
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+        .toast-container { position:fixed; top:20px; right:20px; z-index:10000; display:flex; flex-direction:column; gap:8px; }
+        .toast { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:12px 16px; box-shadow:var(--shadow-md); display:flex; align-items:center; gap:8px; font-size:13px; font-weight:500; animation:slideIn 0.3s ease; max-width:360px; }
+        .toast.success { border-left:3px solid var(--green); }
+        .toast.error { border-left:3px solid var(--red); }
+        .toast.info { border-left:3px solid var(--blue); }
+        @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
+        @keyframes slideOut { from { transform:translateX(0); opacity:1; } to { transform:translateX(100%); opacity:0; } }
 
-        /* ─── SKELETON ─── */
-        .skeleton {
-            background: var(--bg-card);
-            border-radius: 8px;
-            position: relative; overflow: hidden;
-        }
-        .skeleton::after {
-            content: ''; position: absolute; inset: 0;
-            background: linear-gradient(90deg, transparent, var(--bg-card-hover), transparent);
-            animation: shimmer 1.5s infinite;
-        }
-        @keyframes shimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
-        .skeleton-line { height: 14px; margin-bottom: 10px; border-radius: 6px; }
-        .skeleton-line.w50 { width: 50%; }
-        .skeleton-line.w75 { width: 75%; }
-        .skeleton-line.w100 { width: 100%; }
-        .skeleton-card { height: 140px; border-radius: 14px; }
+        /* Settings */
+        .settings-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; padding:0 28px 28px; }
+        .settings-card { background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:22px; }
+        .settings-card-title { font-size:14px; font-weight:700; margin-bottom:4px; }
+        .settings-card-desc { font-size:12px; color:var(--text-secondary); margin-bottom:16px; }
+        .team-card { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); }
+        .team-card:last-child { border-bottom:none; }
+        .team-avatar { width:38px; height:38px; border-radius:10px; background:var(--primary-bg); color:var(--primary); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex-shrink:0; }
+        .team-avatar.inactive { opacity:0.4; }
+        .team-info { flex:1; min-width:0; }
+        .team-name { font-size:13px; font-weight:600; }
+        .team-name .deactivated { color:var(--red); font-weight:400; font-size:11px; margin-left:4px; }
+        .team-email { font-size:11px; color:var(--text-muted); }
+        .team-actions { display:flex; gap:4px; }
+        .activity-item { display:flex; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); }
+        .activity-item:last-child { border-bottom:none; }
+        .activity-dot { width:8px; height:8px; border-radius:50%; background:var(--primary); margin-top:6px; flex-shrink:0; }
+        .activity-text { font-size:13px; }
+        .activity-text strong { font-weight:600; }
+        .activity-time { font-size:11px; color:var(--text-muted); margin-top:2px; }
 
-        /* ─── SETTINGS / TEAM ─── */
-        .settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; padding: 0 28px 28px; }
-        .settings-card {
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: 14px; padding: 24px;
-        }
-        .settings-card-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
-        .settings-card-desc { font-size: 13px; color: var(--text-secondary); margin-bottom: 18px; }
+        .sidebar-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; display:none; }
+        .sidebar-overlay.active { display:block; }
 
-        .team-card {
-            display: flex; align-items: center; gap: 14px;
-            padding: 14px 0; border-bottom: 1px solid var(--border);
+        @media (max-width:768px) {
+            .sidebar { transform:translateX(-100%); width:260px; z-index:200; }
+            .sidebar.mobile-open { transform:translateX(0); }
+            .sidebar.collapsed { width:260px; }
+            .sidebar.collapsed .nav-label,.sidebar.collapsed .sidebar-brand-text,.sidebar.collapsed .nav-badge,.sidebar.collapsed .sidebar-footer-text { display:initial; }
+            .sidebar.collapsed .sidebar-brand { justify-content:initial; padding:20px; }
+            .sidebar.collapsed .nav-item { padding:10px 12px; justify-content:initial; }
+            .sidebar.collapsed .sidebar-footer { justify-content:initial; }
+            .main-area { margin-left:0 !important; }
+            .hamburger-btn { display:flex; }
+            .collapse-btn { display:none; }
+            .header-search { display:none; }
+            .view-header { padding:16px; }
+            .kpi-grid { padding:0 16px 16px; grid-template-columns:1fr 1fr; }
+            .data-section { padding:0 16px 16px; }
+            .filter-bar { padding:0 16px 10px; }
+            .cars-grid,.cars-toolbar { padding-left:16px; padding-right:16px; }
+            .cars-grid { grid-template-columns:1fr; }
+            .settings-grid { padding:0 16px 16px; }
+            .form-row { grid-template-columns:1fr; }
+            .breadcrumbs,.bulk-bar { display:none; }
+            .cal-day { min-height:50px; }
         }
-        .team-card:last-child { border-bottom: none; }
-        .team-avatar {
-            width: 42px; height: 42px; border-radius: 10px;
-            background: var(--primary-bg); color: var(--primary);
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 700; font-size: 15px; flex-shrink: 0;
-        }
-        .team-avatar.inactive { opacity: 0.4; }
-        .team-info { flex: 1; min-width: 0; }
-        .team-name { font-size: 14px; font-weight: 600; }
-        .team-name .deactivated { color: var(--red); font-weight: 400; font-size: 12px; margin-left: 6px; }
-        .team-email { font-size: 12px; color: var(--text-muted); }
-        .team-actions { display: flex; gap: 6px; }
-
-        /* ─── ACTIVITY LOG ─── */
-        .activity-item {
-            display: flex; gap: 12px; padding: 12px 0;
-            border-bottom: 1px solid var(--border);
-        }
-        .activity-item:last-child { border-bottom: none; }
-        .activity-dot {
-            width: 8px; height: 8px; border-radius: 50%;
-            background: var(--primary); margin-top: 6px; flex-shrink: 0;
-        }
-        .activity-content { flex: 1; }
-        .activity-text { font-size: 13px; }
-        .activity-text strong { font-weight: 600; }
-        .activity-time { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-
-        /* ─── MOBILE OVERLAY ─── */
-        .sidebar-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
-            z-index: 99; display: none;
-        }
-        .sidebar-overlay.active { display: block; }
-
-        /* ─── RESPONSIVE ─── */
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-                width: 260px;
-                z-index: 200;
-            }
-            .sidebar.mobile-open { transform: translateX(0); }
-            .sidebar.collapsed { width: 260px; }
-            .sidebar.collapsed .nav-label,
-            .sidebar.collapsed .sidebar-brand-text,
-            .sidebar.collapsed .nav-badge,
-            .sidebar.collapsed .sidebar-footer-text { display: initial; }
-            .sidebar.collapsed .sidebar-brand { justify-content: initial; padding: 20px 20px; }
-            .sidebar.collapsed .nav-item { padding: 10px 12px; justify-content: initial; }
-            .sidebar.collapsed .sidebar-footer { justify-content: initial; }
-
-            .main-area { margin-left: 0 !important; }
-            .hamburger-btn { display: flex; }
-            .collapse-btn { display: none; }
-            .header-search { display: none; }
-            .view-header { padding: 20px 16px 16px; }
-            .kpi-grid { padding: 0 16px 16px; grid-template-columns: 1fr 1fr; }
-            .data-section { padding: 0 16px 16px; }
-            .filter-bar { padding: 0 16px 12px; }
-            .cars-grid { padding: 0 16px 16px; grid-template-columns: 1fr; }
-            .settings-grid { padding: 0 16px 16px; }
-            .form-row { grid-template-columns: 1fr; }
-            .breadcrumbs { display: none; }
-        }
-
-        @media (max-width: 480px) {
-            .kpi-grid { grid-template-columns: 1fr; }
-            .kpi-value { font-size: 24px; }
-            .view-title { font-size: 20px; }
+        @media (max-width:480px) {
+            .kpi-grid { grid-template-columns:1fr; }
+            .kpi-value { font-size:22px; }
         }
     </style>
 </head>
 <body>
-    <!-- TOAST CONTAINER -->
-    <div class="toast-container" id="toastContainer"></div>
+<div class="toast-container" id="toastContainer"></div>
 
-    <!-- LOGIN SCREEN -->
-    <div class="login-screen" id="loginScreen">
-        <div class="login-wrapper">
-            <div class="login-brand">
-                <h1>FASTRACK</h1>
-                <p>Rent a Car &mdash; Admin Dashboard</p>
-            </div>
-            <div class="login-card">
-                <h2>Welcome back</h2>
-                <p class="subtitle">Sign in to manage your business</p>
-                <div class="login-error" id="loginError"></div>
-                <form onsubmit="handleLogin(event)" id="loginForm">
-                    <div class="form-group">
-                        <label for="loginEmail">Email</label>
-                        <input type="email" id="loginEmail" class="form-input" placeholder="admin@fastrack.ae" required autocomplete="email">
-                    </div>
-                    <div class="form-group">
-                        <label for="loginPassword">Password</label>
-                        <input type="password" id="loginPassword" class="form-input" placeholder="Enter your password" required autocomplete="current-password">
-                    </div>
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="rememberMe">
-                        <label for="rememberMe">Remember me for 30 days</label>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-full" id="loginBtn">Sign In</button>
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+    <div class="login-wrapper">
+        <div class="login-brand"><h1>FASTRACK</h1><p>Rent a Car &mdash; Admin Dashboard</p></div>
+        <div class="login-card">
+            <h2>Welcome back</h2><p class="subtitle">Sign in to manage your business</p>
+            <div class="login-error" id="loginError"></div>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group"><label>Email</label><input type="email" id="loginEmail" class="form-input" placeholder="admin@fastrack.ae" required autocomplete="email"></div>
+                <div class="form-group"><label>Password</label><input type="password" id="loginPassword" class="form-input" placeholder="Enter your password" required autocomplete="current-password"></div>
+                <div class="checkbox-group"><input type="checkbox" id="rememberMe"><label for="rememberMe">Remember me for 30 days</label></div>
+                <button type="submit" class="btn btn-primary btn-full" id="loginBtn">Sign In</button>
+            </form>
+            <div class="login-footer"><a href="#" onclick="showForgotPassword(event)">Forgot password?</a></div>
+        </div>
+    </div>
+</div>
+
+<!-- FORGOT PASSWORD -->
+<div class="login-screen hidden" id="forgotScreen">
+    <div class="login-wrapper">
+        <div class="login-brand"><h1>FASTRACK</h1><p>Password Reset</p></div>
+        <div class="login-card">
+            <h2>Reset password</h2><p class="subtitle">Enter your email to receive a reset token</p>
+            <div class="login-error" id="resetError"></div>
+            <form onsubmit="handleResetRequest(event)">
+                <div class="form-group"><label>Email</label><input type="email" id="resetEmail" class="form-input" placeholder="admin@fastrack.ae" required></div>
+                <button type="submit" class="btn btn-primary btn-full">Send Reset Token</button>
+            </form>
+            <div class="login-footer" style="margin-top:12px"><a href="#" onclick="showLogin(event)">Back to Sign In</a></div>
+            <div id="resetTokenDisplay" style="display:none;margin-top:16px;padding:14px;background:var(--primary-bg);border-radius:10px;">
+                <p style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;">Reset token:</p>
+                <code id="resetTokenValue" style="font-size:11px;word-break:break-all;color:var(--primary);"></code>
+                <form onsubmit="handleResetPassword(event)" style="margin-top:12px;">
+                    <div class="form-group"><label>New Password</label><input type="password" id="newPassword" class="form-input" required></div>
+                    <button type="submit" class="btn btn-primary btn-full">Reset Password</button>
                 </form>
-                <div class="login-footer">
-                    <a href="#" onclick="showForgotPassword(event)">Forgot password?</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeMobileSidebar()"></div>
+
+<!-- APP -->
+<div class="app hidden" id="app">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand"><div class="sidebar-brand-logo">F</div><span class="sidebar-brand-text">FASTRACK</span></div>
+        <nav class="sidebar-nav">
+            <div class="nav-section">Main</div>
+            <div class="nav-item active" data-view="dashboard" onclick="switchView('dashboard',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div><span class="nav-label">Dashboard</span></div>
+            <div class="nav-item" data-view="leads" onclick="switchView('leads',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><span class="nav-label">Leads</span><span class="nav-badge" id="leadsNavBadge" style="display:none"></span></div>
+            <div class="nav-item" data-view="bookings" onclick="switchView('bookings',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><span class="nav-label">Bookings</span><span class="nav-badge" id="bookingsNavBadge" style="display:none"></span></div>
+            <div class="nav-item" data-view="cars" onclick="switchView('cars',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div><span class="nav-label">Cars</span></div>
+            <div class="nav-section">Management</div>
+            <div class="nav-item" data-view="team" data-roles="superadmin" onclick="switchView('team',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10z"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/></svg></div><span class="nav-label">Team</span></div>
+            <div class="nav-item" data-view="activity" onclick="switchView('activity',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><span class="nav-label">Activity Log</span></div>
+            <div class="nav-item" data-view="settings" onclick="switchView('settings',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div><span class="nav-label">Settings</span></div>
+        </nav>
+        <div class="sidebar-footer"><div class="sidebar-user-avatar" id="userAvatar"></div><div class="sidebar-user-info sidebar-footer-text"><div class="sidebar-user-name" id="userName"></div><div class="sidebar-user-role" id="userRole"></div></div></div>
+    </aside>
+
+    <div class="main-area">
+        <header class="top-header">
+            <div class="header-left">
+                <button class="hamburger-btn" onclick="toggleMobileSidebar()">&#9776;</button>
+                <button class="collapse-btn" onclick="toggleSidebarCollapse()">&#171;</button>
+                <div class="breadcrumbs"><span>Admin</span><span class="sep">&#8250;</span><span class="current" id="breadcrumbCurrent">Dashboard</span></div>
+            </div>
+            <div class="header-right">
+                <div class="header-search"><span class="header-search-icon">&#128269;</span><input type="text" placeholder="Search..." id="globalSearch" onkeydown="handleGlobalSearch(event)"><span class="kbd">&#8984;K</span></div>
+                <button class="notif-btn">&#128276;<span class="notif-dot" id="notifDot" style="display:none"></span></button>
+                <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">&#9790;</button>
+            </div>
+        </header>
+
+        <div class="content" id="content">
+            <!-- DASHBOARD -->
+            <div class="view active" id="dashboardView">
+                <div class="view-header"><div><h1 class="view-title" id="dashboardGreeting">Good morning</h1><p class="view-subtitle" id="dashboardDate"></p></div></div>
+                <div class="kpi-grid">
+                    <div class="kpi-card"><div class="kpi-top"><div class="kpi-icon-box" style="background:var(--blue-bg);color:var(--blue);">&#128101;</div></div><div class="kpi-value" id="kpiLeads">0</div><div class="kpi-label">Total Leads</div></div>
+                    <div class="kpi-card"><div class="kpi-top"><div class="kpi-icon-box" style="background:var(--green-bg);color:var(--green);">&#128203;</div></div><div class="kpi-value" id="kpiBookings">0</div><div class="kpi-label">Total Bookings</div></div>
+                    <div class="kpi-card"><div class="kpi-top"><div class="kpi-icon-box" style="background:var(--primary-bg);color:var(--primary);">&#128176;</div></div><div class="kpi-value" id="kpiRevenue">AED 0</div><div class="kpi-label">Revenue</div></div>
+                    <div class="kpi-card"><div class="kpi-top"><div class="kpi-icon-box" style="background:var(--purple-bg);color:var(--purple);">&#128200;</div></div><div class="kpi-value" id="kpiConversion">0%</div><div class="kpi-label">Conversion Rate</div></div>
+                    <div class="kpi-card"><div class="kpi-top"><div class="kpi-icon-box" style="background:var(--yellow-bg);color:var(--yellow);">&#9888;</div></div><div class="kpi-value" id="kpiNewLeads">0</div><div class="kpi-label">New Leads</div></div>
+                    <div class="kpi-card"><div class="kpi-top"><div class="kpi-icon-box" style="background:var(--green-bg);color:var(--green);">&#128663;</div></div><div class="kpi-value" id="kpiCars">0</div><div class="kpi-label">Active Cars</div></div>
+                </div>
+                <div class="data-section"><div style="font-size:15px;font-weight:700;margin-bottom:12px;">Recent Activity</div><div class="table-wrap"><table><thead><tr><th>Type</th><th>Date</th><th>Customer</th><th>Details</th><th>Status</th></tr></thead><tbody id="recentActivityTbody"><tr><td colspan="5" class="empty-state"><div class="empty-state-icon">&#128203;</div><div class="empty-state-title">No activity yet</div></td></tr></tbody></table></div></div>
+            </div>
+
+            <!-- LEADS -->
+            <div class="view" id="leadsView">
+                <div class="view-header"><div><h1 class="view-title">Leads</h1><p class="view-subtitle" id="leadsCount">0 leads</p></div>
+                <div class="view-actions"><button class="btn btn-secondary btn-sm" onclick="exportLeads()">Export CSV</button></div></div>
+                <div class="bulk-bar" id="leadsBulkBar"><span class="bulk-count" id="leadsBulkCount">0</span> selected &nbsp;
+                    <select class="filter-select" id="leadsBulkStatus"><option value="new">New</option><option value="contacted">Contacted</option><option value="qualified">Qualified</option><option value="converted">Converted</option><option value="lost">Lost</option></select>
+                    <button class="btn btn-primary btn-xs" onclick="bulkLeadStatus()">Set Status</button>
+                    <button class="btn btn-danger btn-xs" onclick="bulkLeadDelete()">Delete</button>
+                    <button class="btn btn-secondary btn-xs" onclick="clearLeadSelection()">Cancel</button>
+                </div>
+                <div class="filter-bar">
+                    <input type="text" class="search-input" id="leadsSearch" placeholder="Search all fields..." oninput="renderLeads()">
+                    <select class="filter-select" id="leadsStatusFilter" onchange="renderLeads()"><option value="">All statuses</option><option value="new">New</option><option value="contacted">Contacted</option><option value="qualified">Qualified</option><option value="converted">Converted</option><option value="lost">Lost</option></select>
+                    <select class="filter-select" id="leadsSourceFilter" onchange="renderLeads()"><option value="">All sources</option><option value="popup">Popup</option><option value="direct">Direct</option><option value="whatsapp">WhatsApp</option><option value="referral">Referral</option></select>
+                    <input type="date" class="filter-select" id="leadsDateFrom" onchange="renderLeads()" title="From date">
+                    <input type="date" class="filter-select" id="leadsDateTo" onchange="renderLeads()" title="To date">
+                </div>
+                <div class="data-section"><div class="table-wrap"><table><thead><tr>
+                    <th style="width:30px"><input type="checkbox" class="row-checkbox" onchange="toggleAllLeads(this)"></th>
+                    <th onclick="sortLeads('createdAt')">Date <span class="sort-arrow" id="leadSort_createdAt"></span></th>
+                    <th onclick="sortLeads('fullName')">Name <span class="sort-arrow" id="leadSort_fullName"></span></th>
+                    <th onclick="sortLeads('phone')">Phone <span class="sort-arrow" id="leadSort_phone"></span></th>
+                    <th>WhatsApp</th>
+                    <th onclick="sortLeads('interest')">Interest <span class="sort-arrow" id="leadSort_interest"></span></th>
+                    <th onclick="sortLeads('source')">Source <span class="sort-arrow" id="leadSort_source"></span></th>
+                    <th onclick="sortLeads('status')">Status <span class="sort-arrow" id="leadSort_status"></span></th>
+                    <th>Actions</th>
+                </tr></thead><tbody id="leadsTbody"></tbody></table></div></div>
+            </div>
+
+            <!-- BOOKINGS -->
+            <div class="view" id="bookingsView">
+                <div class="view-header"><div><h1 class="view-title">Bookings</h1><p class="view-subtitle" id="bookingsCount">0 bookings</p></div>
+                <div class="view-actions">
+                    <div class="toggle-group"><button class="toggle-btn active" onclick="setBookingView('table',this)">Table</button><button class="toggle-btn" onclick="setBookingView('calendar',this)">Calendar</button></div>
+                    <button class="btn btn-secondary btn-sm" onclick="exportBookings()">Export CSV</button>
+                </div></div>
+                <div class="bulk-bar" id="bookingsBulkBar"><span class="bulk-count" id="bookingsBulkCount">0</span> selected &nbsp;
+                    <select class="filter-select" id="bookingsBulkStatus"><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="active">Active</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select>
+                    <button class="btn btn-primary btn-xs" onclick="bulkBookingStatus()">Set Status</button>
+                    <button class="btn btn-danger btn-xs" onclick="bulkBookingDelete()">Delete</button>
+                    <button class="btn btn-secondary btn-xs" onclick="clearBookingSelection()">Cancel</button>
+                </div>
+                <div class="filter-bar" id="bookingsFilterBar">
+                    <input type="text" class="search-input" id="bookingsSearch" placeholder="Search bookings..." oninput="renderBookings()">
+                    <select class="filter-select" id="bookingsStatusFilter" onchange="renderBookings()"><option value="">All statuses</option><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="active">Active</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select>
+                    <input type="date" class="filter-select" id="bookingsDateFrom" onchange="renderBookings()" title="From date">
+                    <input type="date" class="filter-select" id="bookingsDateTo" onchange="renderBookings()" title="To date">
+                </div>
+                <div class="data-section" id="bookingsTableSection"><div class="table-wrap"><table><thead><tr>
+                    <th style="width:30px"><input type="checkbox" class="row-checkbox" onchange="toggleAllBookings(this)"></th>
+                    <th onclick="sortBookings('ref')">Ref <span class="sort-arrow" id="bookSort_ref"></span></th>
+                    <th onclick="sortBookings('createdAt')">Date <span class="sort-arrow" id="bookSort_createdAt"></span></th>
+                    <th onclick="sortBookings('fullName')">Customer <span class="sort-arrow" id="bookSort_fullName"></span></th>
+                    <th>Phone</th>
+                    <th onclick="sortBookings('carName')">Car <span class="sort-arrow" id="bookSort_carName"></span></th>
+                    <th>Dates</th>
+                    <th onclick="sortBookings('duration')">Duration <span class="sort-arrow" id="bookSort_duration"></span></th>
+                    <th>Location</th>
+                    <th onclick="sortBookings('totalAed')">Total <span class="sort-arrow" id="bookSort_totalAed"></span></th>
+                    <th onclick="sortBookings('status')">Status <span class="sort-arrow" id="bookSort_status"></span></th>
+                    <th>Actions</th>
+                </tr></thead><tbody id="bookingsTbody"></tbody></table></div></div>
+                <div class="data-section" id="bookingsCalSection" style="display:none"><div id="calendarContainer"></div></div>
+            </div>
+
+            <!-- CARS -->
+            <div class="view" id="carsView">
+                <div class="view-header"><div><h1 class="view-title">Fleet Management</h1><p class="view-subtitle" id="carsCount">0 cars</p></div>
+                <div class="view-actions" id="carsActions">
+                    <div class="toggle-group"><button class="toggle-btn active" onclick="setCarsViewMode('grid',this)">Grid</button><button class="toggle-btn" onclick="setCarsViewMode('table',this)">Table</button></div>
+                    <button class="btn btn-primary btn-sm" onclick="openCarModal()">+ Add Car</button>
+                </div></div>
+                <div id="carsContent"></div>
+            </div>
+
+            <!-- TEAM -->
+            <div class="view" id="teamView">
+                <div class="view-header"><div><h1 class="view-title">Team Management</h1><p class="view-subtitle">Manage team members and roles</p></div><div class="view-actions"><button class="btn btn-primary btn-sm" onclick="openTeamModal()">+ Add Member</button></div></div>
+                <div class="data-section"><div class="table-wrap" style="padding:16px" id="teamList"></div></div>
+            </div>
+
+            <!-- ACTIVITY -->
+            <div class="view" id="activityView">
+                <div class="view-header"><div><h1 class="view-title">Activity Log</h1><p class="view-subtitle">Track all dashboard actions</p></div></div>
+                <div class="data-section"><div class="table-wrap" style="padding:16px" id="activityList"></div></div>
+            </div>
+
+            <!-- SETTINGS -->
+            <div class="view" id="settingsView">
+                <div class="view-header"><div><h1 class="view-title">Settings</h1><p class="view-subtitle">Dashboard preferences</p></div></div>
+                <div class="settings-grid">
+                    <div class="settings-card"><div class="settings-card-title">Appearance</div><div class="settings-card-desc">Toggle light/dark mode</div><div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:13px" id="themeLabel">Dark Mode</span><button class="btn btn-secondary btn-sm" onclick="toggleTheme()">Switch</button></div></div>
+                    <div class="settings-card"><div class="settings-card-title">Account</div><div class="settings-card-desc">Manage session</div><p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px">Signed in as <strong id="settingsEmail"></strong></p><p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px">Role: <span class="badge" id="settingsRole"></span></p><button class="btn btn-danger btn-sm" onclick="handleLogout()">Sign Out</button></div>
+                    <div class="settings-card"><div class="settings-card-title">Live Site</div><div class="settings-card-desc">Open landing page</div><button class="btn btn-secondary btn-sm" onclick="window.open('/','_blank')">View Live Site</button></div>
+                    <div class="settings-card"><div class="settings-card-title">About</div><div class="settings-card-desc">Fastrack Admin v2.0</div><p style="font-size:11px;color:var(--text-muted)">Professional car rental management for Fastrack Rent a Car, Dubai.</p></div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- FORGOT PASSWORD SCREEN -->
-    <div class="login-screen hidden" id="forgotScreen">
-        <div class="login-wrapper">
-            <div class="login-brand">
-                <h1>FASTRACK</h1>
-                <p>Password Reset</p>
-            </div>
-            <div class="login-card">
-                <h2>Reset password</h2>
-                <p class="subtitle">Enter your email to receive a reset token</p>
-                <div class="login-error" id="resetError"></div>
-                <form onsubmit="handleResetRequest(event)" id="resetForm">
-                    <div class="form-group">
-                        <label for="resetEmail">Email</label>
-                        <input type="email" id="resetEmail" class="form-input" placeholder="admin@fastrack.ae" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-full">Send Reset Token</button>
-                </form>
-                <div class="login-footer" style="margin-top:12px">
-                    <a href="#" onclick="showLogin(event)">Back to Sign In</a>
-                </div>
-                <!-- Reset token display -->
-                <div id="resetTokenDisplay" style="display:none; margin-top:20px; padding:16px; background:var(--primary-bg); border-radius:10px;">
-                    <p style="font-size:13px; color:var(--text-secondary); margin-bottom:8px;">Your reset token (in production this would be emailed):</p>
-                    <code id="resetTokenValue" style="font-size:12px; word-break:break-all; color:var(--primary);"></code>
-                    <form onsubmit="handleResetPassword(event)" style="margin-top:16px;">
-                        <div class="form-group">
-                            <label>New Password</label>
-                            <input type="password" id="newPassword" class="form-input" placeholder="New password" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-full">Reset Password</button>
-                    </form>
-                </div>
-            </div>
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal" id="modal">
+        <div class="modal-head"><span class="modal-title" id="modalTitle"></span><button class="modal-close" onclick="closeModal()">&times;</button></div>
+        <div class="modal-body" id="modalBody"></div>
+    </div>
+</div>
+
+<script>
+// ═══════ STATE ═══════
+const API='/api';
+let currentUser=null, accessToken=null, refreshToken=null;
+let leadsData=[], bookingsData=[], carsData=[], teamData=[], statsData={};
+let currentView='dashboard';
+let leadSort={field:'createdAt',dir:'desc'}, bookSort={field:'createdAt',dir:'desc'};
+let selectedLeads=new Set(), selectedBookings=new Set();
+let carsViewMode='grid', bookingViewMode='table';
+let calMonth=new Date().getMonth(), calYear=new Date().getFullYear();
+
+// ═══════ THEME ═══════
+function initTheme(){ applyTheme(localStorage.getItem('ft_theme')||'dark'); }
+function applyTheme(t){ document.documentElement.className=t==='light'?'light-mode':''; document.body.className=t==='light'?'light-mode':''; localStorage.setItem('ft_theme',t); const b=document.getElementById('themeBtn'); if(b) b.textContent=t==='dark'?'\u263E':'\u2600'; const l=document.getElementById('themeLabel'); if(l) l.textContent=t==='dark'?'Dark Mode':'Light Mode'; }
+function toggleTheme(){ applyTheme((localStorage.getItem('ft_theme')||'dark')==='dark'?'light':'dark'); }
+
+// ═══════ API ═══════
+async function api(method,endpoint,body){
+    const opts={method,headers:{'Content-Type':'application/json'}};
+    if(accessToken) opts.headers['Authorization']='Bearer '+accessToken;
+    if(body) opts.body=JSON.stringify(body);
+    const res=await fetch(API+endpoint,opts);
+    if(res.status===401 && refreshToken){ if(await tryRefresh()){ opts.headers['Authorization']='Bearer '+accessToken; const r2=await fetch(API+endpoint,opts); const d2=await r2.json(); if(!r2.ok) throw new Error(d2.error||'Failed'); return d2; } handleLogout(); }
+    const data=await res.json();
+    if(!res.ok) throw new Error(data.error||'Failed');
+    return data;
+}
+async function tryRefresh(){ try{ const r=await fetch(API+'/auth/refresh',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({refreshToken})}); const d=await r.json(); if(d.success){accessToken=d.accessToken;saveSession();return true;} }catch(e){} return false; }
+
+// ═══════ AUTH ═══════
+async function handleLogin(e){
+    e.preventDefault(); const btn=document.getElementById('loginBtn'),err=document.getElementById('loginError');
+    err.style.display='none'; btn.disabled=true; btn.textContent='Signing in...';
+    try{ const d=await api('POST','/auth/login',{email:document.getElementById('loginEmail').value.trim(),password:document.getElementById('loginPassword').value,rememberMe:document.getElementById('rememberMe').checked}); accessToken=d.accessToken; refreshToken=d.refreshToken; currentUser=d.user; saveSession(); enterDashboard(); }
+    catch(er){ err.textContent=er.message; err.style.display='block'; }
+    finally{ btn.disabled=false; btn.textContent='Sign In'; }
+}
+function saveSession(){ const s=document.getElementById('rememberMe')?.checked?localStorage:sessionStorage; s.setItem('ft_access',accessToken); s.setItem('ft_refresh',refreshToken); if(currentUser) s.setItem('ft_user',JSON.stringify(currentUser)); }
+function loadSession(){ let s=localStorage,a=s.getItem('ft_access'); if(!a){s=sessionStorage;a=s.getItem('ft_access');} if(a){accessToken=a;refreshToken=s.getItem('ft_refresh');try{currentUser=JSON.parse(s.getItem('ft_user'));}catch(e){} return true;} return false; }
+function clearSession(){ accessToken=null;refreshToken=null;currentUser=null; ['ft_access','ft_refresh','ft_user'].forEach(k=>{localStorage.removeItem(k);sessionStorage.removeItem(k);}); }
+async function handleLogout(){ try{await api('POST','/auth/logout',{refreshToken});}catch(e){} clearSession(); document.getElementById('app').classList.add('hidden'); document.getElementById('loginScreen').classList.remove('hidden'); document.getElementById('loginPassword').value=''; toast('Signed out','info'); }
+function showForgotPassword(e){ e.preventDefault(); document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('forgotScreen').classList.remove('hidden'); }
+function showLogin(e){ e.preventDefault(); document.getElementById('forgotScreen').classList.add('hidden'); document.getElementById('loginScreen').classList.remove('hidden'); }
+async function handleResetRequest(e){ e.preventDefault(); try{ const d=await api('POST','/auth/reset-request',{email:document.getElementById('resetEmail').value.trim()}); if(d.resetToken){document.getElementById('resetTokenDisplay').style.display='block';document.getElementById('resetTokenValue').textContent=d.resetToken;window._resetToken=d.resetToken;} toast('Reset token generated','success'); }catch(er){ document.getElementById('resetError').textContent=er.message;document.getElementById('resetError').style.display='block'; } }
+async function handleResetPassword(e){ e.preventDefault(); try{ await api('POST','/auth/reset-password',{token:window._resetToken,newPassword:document.getElementById('newPassword').value}); toast('Password reset!','success'); showLogin(new Event('click')); }catch(er){ toast(er.message,'error'); } }
+
+// ═══════ DASHBOARD ENTRY ═══════
+async function enterDashboard(){
+    document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('forgotScreen').classList.add('hidden'); document.getElementById('app').classList.remove('hidden');
+    try{ currentUser=await api('GET','/auth/me'); saveSession(); }catch(e){ clearSession(); document.getElementById('app').classList.add('hidden'); document.getElementById('loginScreen').classList.remove('hidden'); return; }
+    updateUserUI(); applyRBAC(); updateGreeting(); loadAllData();
+    if(window._ri) clearInterval(window._ri); window._ri=setInterval(loadAllData,30000);
+}
+function updateUserUI(){ if(!currentUser)return; const i=currentUser.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); document.getElementById('userAvatar').textContent=i; document.getElementById('userName').textContent=currentUser.name; document.getElementById('userRole').textContent=currentUser.role; document.getElementById('settingsEmail').textContent=currentUser.email; const r=document.getElementById('settingsRole'); r.textContent=currentUser.role; r.className='badge badge-'+currentUser.role; }
+function applyRBAC(){ if(!currentUser)return; document.querySelectorAll('.nav-item[data-roles]').forEach(n=>{n.style.display=n.dataset.roles.split(',').includes(currentUser.role)?'':'none';}); if(currentUser.role==='viewer') document.getElementById('carsActions').style.display='none'; }
+function canEdit(){ return currentUser&&(currentUser.role==='superadmin'||currentUser.role==='manager'); }
+function isSuperAdmin(){ return currentUser&&currentUser.role==='superadmin'; }
+
+// ═══════ DATA LOAD ═══════
+function loadAllData(){ loadStats(); loadLeads(); loadBookings(); loadCars(); if(currentView==='team'&&isSuperAdmin())loadTeam(); if(currentView==='activity')loadActivity(); }
+async function loadStats(){ try{ statsData=await api('GET','/stats'); document.getElementById('kpiLeads').textContent=statsData.totalLeads||0; document.getElementById('kpiBookings').textContent=statsData.totalBookings||0; document.getElementById('kpiRevenue').textContent='AED '+(statsData.totalRevenue||0).toLocaleString(); document.getElementById('kpiConversion').textContent=(statsData.conversionRate||0)+'%'; document.getElementById('kpiNewLeads').textContent=statsData.newLeads||0; document.getElementById('kpiCars').textContent=statsData.totalCars||0; const lb=document.getElementById('leadsNavBadge'); if(statsData.newLeads>0){lb.textContent=statsData.newLeads;lb.style.display='';}else lb.style.display='none'; const bb=document.getElementById('bookingsNavBadge'); if(statsData.newBookings>0){bb.textContent=statsData.newBookings;bb.style.display='';}else bb.style.display='none'; }catch(e){} }
+async function loadLeads(){ try{ leadsData=await api('GET','/leads'); if(!Array.isArray(leadsData))leadsData=[]; document.getElementById('leadsCount').textContent=leadsData.length+' leads'; renderLeads(); renderRecentActivity(); }catch(e){} }
+async function loadBookings(){ try{ bookingsData=await api('GET','/bookings'); if(!Array.isArray(bookingsData))bookingsData=[]; document.getElementById('bookingsCount').textContent=bookingsData.length+' bookings'; renderBookings(); renderRecentActivity(); if(bookingViewMode==='calendar')renderCalendar(); }catch(e){} }
+async function loadCars(){ try{ carsData=await api('GET','/cars/admin').catch(()=>api('GET','/cars')); if(!Array.isArray(carsData))carsData=[]; document.getElementById('carsCount').textContent=carsData.length+' cars'; renderCars(); }catch(e){} }
+async function loadTeam(){ try{ teamData=await api('GET','/team'); if(!Array.isArray(teamData))teamData=[]; renderTeam(); }catch(e){} }
+async function loadActivity(){ try{ const d=await api('GET','/activity-log?limit=100'); renderActivityLog(d.items||[]); }catch(e){} }
+
+// ═══════ RECENT ACTIVITY ═══════
+function renderRecentActivity(){
+    const tb=document.getElementById('recentActivityTbody'), items=[];
+    leadsData.slice(0,8).forEach(l=>items.push({type:'Lead',date:l.createdAt,name:l.fullName,detail:l.interest||'-',status:l.status}));
+    bookingsData.slice(0,8).forEach(b=>items.push({type:'Booking',date:b.createdAt,name:b.fullName,detail:b.carName+' ('+b.ref+')',status:b.status}));
+    items.sort((a,b)=>new Date(b.date)-new Date(a.date));
+    const r=items.slice(0,10);
+    if(!r.length){tb.innerHTML='<tr><td colspan="5" class="empty-state"><div class="empty-state-icon">&#128203;</div><div class="empty-state-title">No activity yet</div></td></tr>';return;}
+    tb.innerHTML=r.map(i=>`<tr><td><span class="badge badge-${i.type==='Lead'?'new':'confirmed'}">${esc(i.type)}</span></td><td>${fmtDate(i.date)}</td><td><strong>${esc(i.name)}</strong></td><td>${esc(i.detail)}</td><td><span class="badge badge-${i.status}">${cap(i.status)}</span></td></tr>`).join('');
+}
+
+// ═══════ LEADS ═══════
+function getFilteredLeads(){
+    const s=(document.getElementById('leadsSearch').value||'').toLowerCase();
+    const sf=document.getElementById('leadsStatusFilter').value;
+    const src=document.getElementById('leadsSourceFilter').value;
+    const df=document.getElementById('leadsDateFrom').value;
+    const dt=document.getElementById('leadsDateTo').value;
+    let f=leadsData.filter(l=>{
+        if(s&&!`${l.fullName} ${l.phone} ${l.whatsapp||''} ${l.email||''} ${l.interest} ${l.source}`.toLowerCase().includes(s))return false;
+        if(sf&&l.status!==sf)return false;
+        if(src&&l.source!==src)return false;
+        if(df&&new Date(l.createdAt)<new Date(df))return false;
+        if(dt&&new Date(l.createdAt)>new Date(dt+'T23:59:59'))return false;
+        return true;
+    });
+    f.sort((a,b)=>{const d=leadSort.dir==='asc'?1:-1;const va=a[leadSort.field]||'';const vb=b[leadSort.field]||'';if(leadSort.field==='createdAt')return d*(new Date(va)-new Date(vb));return d*String(va).localeCompare(String(vb));});
+    return f;
+}
+function sortLeads(field){ if(leadSort.field===field)leadSort.dir=leadSort.dir==='asc'?'desc':'asc'; else{leadSort.field=field;leadSort.dir='asc';} renderLeads(); }
+function renderLeads(){
+    const tb=document.getElementById('leadsTbody'),f=getFilteredLeads(),ed=canEdit();
+    updateSortArrows('leadSort_',leadSort);
+    if(!f.length){tb.innerHTML='<tr><td colspan="9" class="empty-state"><div class="empty-state-icon">&#128101;</div><div class="empty-state-title">No leads found</div></td></tr>';return;}
+    tb.innerHTML=f.map(l=>{
+        const checked=selectedLeads.has(l.id)?'checked':'';
+        return `<tr>
+        <td><input type="checkbox" class="row-checkbox" ${checked} onchange="toggleLeadSelect(${l.id},this.checked)"></td>
+        <td>${fmtDate(l.createdAt)}</td>
+        <td>${ed?`<input class="inline-edit" value="${esc(l.fullName)}" onblur="inlineEditLead(${l.id},'fullName',this.value)" onkeydown="if(event.key==='Enter')this.blur()">`:`<strong>${esc(l.fullName)}</strong>`}</td>
+        <td>${ed?`<input class="inline-edit" value="${esc(l.phone)}" onblur="inlineEditLead(${l.id},'phone',this.value)" onkeydown="if(event.key==='Enter')this.blur()">`:`<a href="tel:${esc(l.phone)}" style="color:var(--primary);text-decoration:none">${esc(l.phone)}</a>`}</td>
+        <td><a href="https://wa.me/${(l.whatsapp||l.phone).replace(/[^0-9]/g,'')}" target="_blank" style="color:var(--green);text-decoration:none;font-size:12px">${esc(l.whatsapp||l.phone)}</a></td>
+        <td>${ed?`<input class="inline-edit" value="${esc(l.interest||'')}" onblur="inlineEditLead(${l.id},'interest',this.value)" onkeydown="if(event.key==='Enter')this.blur()">`:`${esc(l.interest||'-')}`}</td>
+        <td>${esc(l.source||'-')}</td>
+        <td>${ed?`<select class="status-select" onchange="updateLeadStatus(${l.id},this.value)"><option value="new" ${l.status==='new'?'selected':''}>New</option><option value="contacted" ${l.status==='contacted'?'selected':''}>Contacted</option><option value="qualified" ${l.status==='qualified'?'selected':''}>Qualified</option><option value="converted" ${l.status==='converted'?'selected':''}>Converted</option><option value="lost" ${l.status==='lost'?'selected':''}>Lost</option></select>`:`<span class="badge badge-${l.status}">${cap(l.status)}</span>`}</td>
+        <td><div style="display:flex;gap:3px">
+            <button class="btn btn-ghost btn-xs" onclick="openLeadDetail(${l.id})" title="Details">&#128269;</button>
+            <a href="tel:${esc(l.phone)}" class="btn btn-ghost btn-xs" title="Call">&#128222;</a>
+            <a href="https://wa.me/${(l.whatsapp||l.phone).replace(/[^0-9]/g,'')}" target="_blank" class="btn btn-ghost btn-xs" title="WhatsApp">&#128172;</a>
+            ${l.email?`<a href="mailto:${esc(l.email)}" class="btn btn-ghost btn-xs" title="Email">&#9993;</a>`:''}
+            ${ed?`<button class="btn btn-danger btn-xs" onclick="deleteLead(${l.id})">&#128465;</button>`:''}
+        </div></td></tr>`;
+    }).join('');
+    updateBulkBar('leads');
+}
+function toggleLeadSelect(id,checked){ if(checked)selectedLeads.add(id);else selectedLeads.delete(id); updateBulkBar('leads'); }
+function toggleAllLeads(cb){ const f=getFilteredLeads(); if(cb.checked)f.forEach(l=>selectedLeads.add(l.id));else selectedLeads.clear(); renderLeads(); }
+function clearLeadSelection(){ selectedLeads.clear(); renderLeads(); }
+function updateBulkBar(type){ if(type==='leads'){const bar=document.getElementById('leadsBulkBar');document.getElementById('leadsBulkCount').textContent=selectedLeads.size;bar.classList.toggle('active',selectedLeads.size>0);}else{const bar=document.getElementById('bookingsBulkBar');document.getElementById('bookingsBulkCount').textContent=selectedBookings.size;bar.classList.toggle('active',selectedBookings.size>0);} }
+async function bulkLeadStatus(){ const s=document.getElementById('leadsBulkStatus').value; try{await api('POST','/leads/bulk',{ids:[...selectedLeads],action:'status',status:s});selectedLeads.clear();await loadLeads();loadStats();toast(`Leads updated to ${s}`,'success');}catch(e){toast(e.message,'error');} }
+async function bulkLeadDelete(){ if(!confirm(`Delete ${selectedLeads.size} leads?`))return; try{await api('POST','/leads/bulk',{ids:[...selectedLeads],action:'delete'});selectedLeads.clear();await loadLeads();loadStats();toast('Leads deleted','success');}catch(e){toast(e.message,'error');} }
+async function inlineEditLead(id,field,value){ try{await api('PATCH','/leads/'+id,{[field]:value});}catch(e){toast(e.message,'error');await loadLeads();} }
+async function updateLeadStatus(id,status){ try{await api('PATCH','/leads/'+id,{status});await loadLeads();loadStats();toast('Status updated','success');}catch(e){toast(e.message,'error');} }
+async function deleteLead(id){ if(!confirm('Delete this lead?'))return; try{await api('DELETE','/leads/'+id);await loadLeads();loadStats();toast('Lead deleted','success');}catch(e){toast(e.message,'error');} }
+function exportLeads(){ let c='Date,Name,Phone,WhatsApp,Email,Interest,Source,Status\n'; getFilteredLeads().forEach(l=>{c+=`"${fmtDate(l.createdAt)}","${l.fullName}","${l.phone}","${l.whatsapp||''}","${l.email||''}","${l.interest||''}","${l.source||''}","${l.status}"\n`;}); downloadCSV(c,'leads.csv'); }
+
+function openLeadDetail(id){
+    const l=leadsData.find(x=>x.id===id); if(!l)return;
+    document.getElementById('modal').classList.add('wide');
+    document.getElementById('modalTitle').textContent='Lead: '+l.fullName;
+    document.getElementById('modalBody').innerHTML=`
+    <div class="detail-tabs"><div class="detail-tab active" onclick="switchDetailTab(this,'ld-info')">Info</div><div class="detail-tab" onclick="switchDetailTab(this,'ld-notes')">Notes (${(l.notes||[]).length})</div></div>
+    <div class="detail-panel active" id="ld-info">
+        <div class="detail-row"><span class="detail-label">Full Name</span><span class="detail-value">${esc(l.fullName)}</span></div>
+        <div class="detail-row"><span class="detail-label">Phone</span><span class="detail-value"><a href="tel:${esc(l.phone)}" style="color:var(--primary)">${esc(l.phone)}</a></span></div>
+        <div class="detail-row"><span class="detail-label">WhatsApp</span><span class="detail-value"><a href="https://wa.me/${(l.whatsapp||l.phone).replace(/[^0-9]/g,'')}" target="_blank" style="color:var(--green)">${esc(l.whatsapp||l.phone)}</a></span></div>
+        ${l.email?`<div class="detail-row"><span class="detail-label">Email</span><span class="detail-value"><a href="mailto:${esc(l.email)}" style="color:var(--primary)">${esc(l.email)}</a></span></div>`:''}
+        <div class="detail-row"><span class="detail-label">Interest</span><span class="detail-value">${esc(l.interest||'-')}</span></div>
+        <div class="detail-row"><span class="detail-label">Source</span><span class="detail-value">${esc(l.source||'-')}</span></div>
+        <div class="detail-row"><span class="detail-label">Status</span><span class="detail-value"><span class="badge badge-${l.status}">${cap(l.status)}</span></span></div>
+        <div class="detail-row"><span class="detail-label">Date</span><span class="detail-value">${fmtDateTime(l.createdAt)}</span></div>
+    </div>
+    <div class="detail-panel" id="ld-notes">
+        ${(l.notes||[]).map(n=>`<div class="note-item"><div class="note-meta">${esc(n.author)} &middot; ${fmtDateTime(n.createdAt)}</div><div class="note-text">${esc(n.text)}</div></div>`).join('')||'<p style="color:var(--text-muted);font-size:13px">No notes yet</p>'}
+        ${canEdit()?`<div class="note-form"><input class="form-input" id="leadNoteInput" placeholder="Add a note..."><button class="btn btn-primary btn-sm" onclick="addLeadNote(${l.id})">Add</button></div>`:''}
+    </div>`;
+    openModal();
+}
+async function addLeadNote(id){ const t=document.getElementById('leadNoteInput').value.trim(); if(!t)return; try{await api('POST','/leads/'+id+'/notes',{text:t});await loadLeads();openLeadDetail(id);toast('Note added','success');}catch(e){toast(e.message,'error');} }
+
+// ═══════ BOOKINGS ═══════
+function getFilteredBookings(){
+    const s=(document.getElementById('bookingsSearch').value||'').toLowerCase();
+    const sf=document.getElementById('bookingsStatusFilter').value;
+    const df=document.getElementById('bookingsDateFrom').value;
+    const dt=document.getElementById('bookingsDateTo').value;
+    let f=bookingsData.filter(b=>{
+        if(s&&!`${b.fullName} ${b.phone} ${b.ref} ${b.carName} ${b.email||''} ${b.location||''}`.toLowerCase().includes(s))return false;
+        if(sf&&b.status!==sf)return false;
+        if(df&&new Date(b.createdAt)<new Date(df))return false;
+        if(dt&&new Date(b.createdAt)>new Date(dt+'T23:59:59'))return false;
+        return true;
+    });
+    f.sort((a,b)=>{const d=bookSort.dir==='asc'?1:-1;const va=a[bookSort.field]||'';const vb=b[bookSort.field]||'';if(bookSort.field==='createdAt'||bookSort.field==='startDate')return d*(new Date(va)-new Date(vb));if(bookSort.field==='totalAed'||bookSort.field==='duration')return d*(Number(va)-Number(vb));return d*String(va).localeCompare(String(vb));});
+    return f;
+}
+function sortBookings(field){ if(bookSort.field===field)bookSort.dir=bookSort.dir==='asc'?'desc':'asc'; else{bookSort.field=field;bookSort.dir='asc';} renderBookings(); }
+function setBookingView(mode,btn){ bookingViewMode=mode; btn.parentElement.querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); document.getElementById('bookingsTableSection').style.display=mode==='table'?'':'none'; document.getElementById('bookingsCalSection').style.display=mode==='calendar'?'':'none'; document.getElementById('bookingsFilterBar').style.display=mode==='table'?'':'none'; if(mode==='calendar')renderCalendar(); }
+function renderBookings(){
+    const tb=document.getElementById('bookingsTbody'),f=getFilteredBookings(),ed=canEdit();
+    updateSortArrows('bookSort_',bookSort);
+    if(!f.length){tb.innerHTML='<tr><td colspan="12" class="empty-state"><div class="empty-state-icon">&#128203;</div><div class="empty-state-title">No bookings found</div></td></tr>';return;}
+    tb.innerHTML=f.map(b=>{
+        const ck=selectedBookings.has(b.id)?'checked':'';
+        return `<tr>
+        <td><input type="checkbox" class="row-checkbox" ${ck} onchange="toggleBookingSelect(${b.id},this.checked)"></td>
+        <td><strong style="color:var(--primary);cursor:pointer" onclick="openBookingDetail(${b.id})">${esc(b.ref)}</strong></td>
+        <td>${fmtDate(b.createdAt)}</td>
+        <td>${esc(b.fullName)}</td>
+        <td><a href="tel:${esc(b.phone)}" style="color:var(--primary);text-decoration:none">${esc(b.phone)}</a></td>
+        <td>${esc(b.carName)}</td>
+        <td style="font-size:11px">${b.startDate?fmtDate(b.startDate):'—'}${b.endDate?' → '+fmtDate(b.endDate):''}</td>
+        <td>${esc(b.duration)}d</td>
+        <td>${esc(b.location||'—')}</td>
+        <td>AED ${(Number(b.totalAed)||0).toLocaleString()}</td>
+        <td>${ed?`<select class="status-select" onchange="updateBookingStatus(${b.id},this.value)"><option value="pending" ${b.status==='pending'?'selected':''}>Pending</option><option value="confirmed" ${b.status==='confirmed'?'selected':''}>Confirmed</option><option value="active" ${b.status==='active'?'selected':''}>Active</option><option value="completed" ${b.status==='completed'?'selected':''}>Completed</option><option value="cancelled" ${b.status==='cancelled'?'selected':''}>Cancelled</option></select>`:`<span class="badge badge-${b.status}">${cap(b.status)}</span>`}</td>
+        <td><div style="display:flex;gap:3px">
+            <button class="btn btn-ghost btn-xs" onclick="openBookingDetail(${b.id})" title="Details">&#128269;</button>
+            <a href="https://wa.me/${(b.whatsapp||b.phone).replace(/[^0-9]/g,'')}" target="_blank" class="btn btn-ghost btn-xs" title="WhatsApp">&#128172;</a>
+            ${ed?`<button class="btn btn-danger btn-xs" onclick="deleteBooking(${b.id})">&#128465;</button>`:''}
+        </div></td></tr>`;
+    }).join('');
+    updateBulkBar('bookings');
+}
+function toggleBookingSelect(id,checked){ if(checked)selectedBookings.add(id);else selectedBookings.delete(id); updateBulkBar('bookings'); }
+function toggleAllBookings(cb){ const f=getFilteredBookings(); if(cb.checked)f.forEach(b=>selectedBookings.add(b.id));else selectedBookings.clear(); renderBookings(); }
+function clearBookingSelection(){ selectedBookings.clear(); renderBookings(); }
+async function bulkBookingStatus(){ const s=document.getElementById('bookingsBulkStatus').value; try{await api('POST','/bookings/bulk',{ids:[...selectedBookings],action:'status',status:s});selectedBookings.clear();await loadBookings();loadStats();toast('Bookings updated','success');}catch(e){toast(e.message,'error');} }
+async function bulkBookingDelete(){ if(!confirm(`Delete ${selectedBookings.size} bookings?`))return; try{await api('POST','/bookings/bulk',{ids:[...selectedBookings],action:'delete'});selectedBookings.clear();await loadBookings();loadStats();toast('Bookings deleted','success');}catch(e){toast(e.message,'error');} }
+async function updateBookingStatus(id,status){ try{await api('PATCH','/bookings/'+id,{status});await loadBookings();loadStats();toast('Status updated','success');}catch(e){toast(e.message,'error');} }
+async function deleteBooking(id){ if(!confirm('Delete this booking?'))return; try{await api('DELETE','/bookings/'+id);await loadBookings();loadStats();toast('Booking deleted','success');}catch(e){toast(e.message,'error');} }
+function exportBookings(){ let c='Ref,Date,Name,Phone,Car,Start,Duration,Location,Total,Status\n'; getFilteredBookings().forEach(b=>{c+=`"${b.ref}","${fmtDate(b.createdAt)}","${b.fullName}","${b.phone}","${b.carName}","${b.startDate||''}","${b.duration}","${b.location||''}","${b.totalAed}","${b.status}"\n`;}); downloadCSV(c,'bookings.csv'); }
+
+function openBookingDetail(id){
+    const b=bookingsData.find(x=>x.id===id); if(!b)return;
+    const ed=canEdit();
+    document.getElementById('modal').classList.add('wide');
+    document.getElementById('modalTitle').textContent='Booking: '+b.ref;
+    document.getElementById('modalBody').innerHTML=`
+    <div class="detail-tabs"><div class="detail-tab active" onclick="switchDetailTab(this,'bk-info')">Info</div><div class="detail-tab" onclick="switchDetailTab(this,'bk-edit')">Edit</div><div class="detail-tab" onclick="switchDetailTab(this,'bk-notes')">Notes (${(b.notes||[]).length})</div></div>
+    <div class="detail-panel active" id="bk-info">
+        <div class="detail-row"><span class="detail-label">Reference</span><span class="detail-value" style="color:var(--primary)">${esc(b.ref)}</span></div>
+        <div class="detail-row"><span class="detail-label">Customer</span><span class="detail-value">${esc(b.fullName)}</span></div>
+        <div class="detail-row"><span class="detail-label">Phone</span><span class="detail-value"><a href="tel:${esc(b.phone)}" style="color:var(--primary)">${esc(b.phone)}</a></span></div>
+        <div class="detail-row"><span class="detail-label">Email</span><span class="detail-value">${esc(b.email||'—')}</span></div>
+        <div class="detail-row"><span class="detail-label">Car</span><span class="detail-value">${esc(b.carName)}</span></div>
+        <div class="detail-row"><span class="detail-label">Start Date</span><span class="detail-value">${b.startDate?fmtDate(b.startDate):'—'}</span></div>
+        <div class="detail-row"><span class="detail-label">Duration</span><span class="detail-value">${esc(b.duration)} days</span></div>
+        <div class="detail-row"><span class="detail-label">Location</span><span class="detail-value">${esc(b.location||'—')}</span></div>
+        <div class="detail-row"><span class="detail-label">Total</span><span class="detail-value" style="color:var(--green);font-size:16px">AED ${(Number(b.totalAed)||0).toLocaleString()}</span></div>
+        <div class="detail-row"><span class="detail-label">Saved</span><span class="detail-value">AED ${(Number(b.savedAed)||0).toLocaleString()}</span></div>
+        <div class="detail-row"><span class="detail-label">Status</span><span class="detail-value"><span class="badge badge-${b.status}">${cap(b.status)}</span></span></div>
+        <div class="detail-row"><span class="detail-label">Created</span><span class="detail-value">${fmtDateTime(b.createdAt)}</span></div>
+        <div style="display:flex;gap:6px;margin-top:16px;flex-wrap:wrap">
+            ${ed&&b.status==='pending'?`<button class="btn btn-success btn-sm" onclick="quickBookingAction(${b.id},'confirmed')">Confirm</button>`:``}
+            ${ed&&b.status!=='cancelled'?`<button class="btn btn-danger btn-sm" onclick="quickBookingAction(${b.id},'cancelled')">Cancel</button>`:``}
+            <a href="https://wa.me/${(b.whatsapp||b.phone).replace(/[^0-9]/g,'')}" target="_blank" class="btn btn-secondary btn-sm">WhatsApp</a>
+            <a href="tel:${esc(b.phone)}" class="btn btn-secondary btn-sm">Call</a>
         </div>
     </div>
-
-    <!-- SIDEBAR OVERLAY (mobile) -->
-    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeMobileSidebar()"></div>
-
-    <!-- MAIN APP -->
-    <div class="app hidden" id="app">
-        <!-- SIDEBAR -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-brand">
-                <div class="sidebar-brand-logo">F</div>
-                <span class="sidebar-brand-text">FASTRACK</span>
-            </div>
-            <nav class="sidebar-nav" id="sidebarNav">
-                <div class="nav-section">Main</div>
-                <div class="nav-item active" data-view="dashboard" onclick="switchView('dashboard', this)">
-                    <div class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
-                    <span class="nav-label">Dashboard</span>
-                </div>
-                <div class="nav-item" data-view="leads" onclick="switchView('leads', this)">
-                    <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-                    <span class="nav-label">Leads</span>
-                    <span class="nav-badge" id="leadsNavBadge" style="display:none"></span>
-                </div>
-                <div class="nav-item" data-view="bookings" onclick="switchView('bookings', this)">
-                    <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
-                    <span class="nav-label">Bookings</span>
-                    <span class="nav-badge" id="bookingsNavBadge" style="display:none"></span>
-                </div>
-                <div class="nav-item" data-view="cars" onclick="switchView('cars', this)">
-                    <div class="nav-icon"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
-                    <span class="nav-label">Cars</span>
-                </div>
-
-                <div class="nav-section">Management</div>
-                <div class="nav-item" data-view="team" data-roles="superadmin" onclick="switchView('team', this)">
-                    <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10z"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/></svg></div>
-                    <span class="nav-label">Team</span>
-                </div>
-                <div class="nav-item" data-view="activity" onclick="switchView('activity', this)">
-                    <div class="nav-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-                    <span class="nav-label">Activity Log</span>
-                </div>
-                <div class="nav-item" data-view="settings" onclick="switchView('settings', this)">
-                    <div class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
-                    <span class="nav-label">Settings</span>
-                </div>
-            </nav>
-            <div class="sidebar-footer" id="sidebarFooter">
-                <div class="sidebar-user-avatar" id="userAvatar"></div>
-                <div class="sidebar-user-info sidebar-footer-text">
-                    <div class="sidebar-user-name" id="userName"></div>
-                    <div class="sidebar-user-role" id="userRole"></div>
-                </div>
-            </div>
-        </aside>
-
-        <!-- MAIN AREA -->
-        <div class="main-area">
-            <!-- TOP HEADER -->
-            <header class="top-header">
-                <div class="header-left">
-                    <button class="hamburger-btn" onclick="toggleMobileSidebar()">&#9776;</button>
-                    <button class="collapse-btn" onclick="toggleSidebarCollapse()" title="Toggle sidebar">&#171;</button>
-                    <div class="breadcrumbs">
-                        <span>Admin</span>
-                        <span class="sep">&#8250;</span>
-                        <span class="current" id="breadcrumbCurrent">Dashboard</span>
-                    </div>
-                </div>
-                <div class="header-right">
-                    <div class="header-search">
-                        <span class="header-search-icon">&#128269;</span>
-                        <input type="text" placeholder="Search..." id="globalSearch" onkeydown="handleGlobalSearch(event)">
-                        <span class="kbd">&#8984;K</span>
-                    </div>
-                    <button class="notif-btn" title="Notifications">
-                        &#128276;
-                        <span class="notif-dot" id="notifDot" style="display:none"></span>
-                    </button>
-                    <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme" id="themeBtn">&#9790;</button>
-                </div>
-            </header>
-
-            <!-- CONTENT -->
-            <div class="content" id="content">
-                <!-- ── DASHBOARD VIEW ── -->
-                <div class="view active" id="dashboardView">
-                    <div class="view-header">
-                        <div>
-                            <h1 class="view-title" id="dashboardGreeting">Good morning</h1>
-                            <p class="view-subtitle" id="dashboardDate"></p>
-                        </div>
-                    </div>
-                    <div class="kpi-grid" id="kpiGrid">
-                        <div class="kpi-card">
-                            <div class="kpi-top">
-                                <div class="kpi-icon-box" style="background:var(--blue-bg); color:var(--blue);">&#128101;</div>
-                            </div>
-                            <div class="kpi-value" id="kpiLeads">0</div>
-                            <div class="kpi-label">Total Leads</div>
-                        </div>
-                        <div class="kpi-card">
-                            <div class="kpi-top">
-                                <div class="kpi-icon-box" style="background:var(--green-bg); color:var(--green);">&#128203;</div>
-                            </div>
-                            <div class="kpi-value" id="kpiBookings">0</div>
-                            <div class="kpi-label">Total Bookings</div>
-                        </div>
-                        <div class="kpi-card">
-                            <div class="kpi-top">
-                                <div class="kpi-icon-box" style="background:var(--primary-bg); color:var(--primary);">&#128176;</div>
-                            </div>
-                            <div class="kpi-value" id="kpiRevenue">AED 0</div>
-                            <div class="kpi-label">Revenue</div>
-                        </div>
-                        <div class="kpi-card">
-                            <div class="kpi-top">
-                                <div class="kpi-icon-box" style="background:var(--purple-bg); color:var(--purple);">&#128200;</div>
-                            </div>
-                            <div class="kpi-value" id="kpiConversion">0%</div>
-                            <div class="kpi-label">Conversion Rate</div>
-                        </div>
-                        <div class="kpi-card">
-                            <div class="kpi-top">
-                                <div class="kpi-icon-box" style="background:var(--yellow-bg); color:var(--yellow);">&#9888;&#65039;</div>
-                            </div>
-                            <div class="kpi-value" id="kpiNewLeads">0</div>
-                            <div class="kpi-label">New Leads</div>
-                        </div>
-                        <div class="kpi-card">
-                            <div class="kpi-top">
-                                <div class="kpi-icon-box" style="background:var(--green-bg); color:var(--green);">&#128663;</div>
-                            </div>
-                            <div class="kpi-value" id="kpiCars">0</div>
-                            <div class="kpi-label">Active Cars</div>
-                        </div>
-                    </div>
-                    <div class="data-section">
-                        <div class="data-header">
-                            <h3 class="data-title">Recent Activity</h3>
-                        </div>
-                        <div class="table-wrap">
-                            <table>
-                                <thead>
-                                    <tr><th>Type</th><th>Date</th><th>Customer</th><th>Details</th><th>Status</th></tr>
-                                </thead>
-                                <tbody id="recentActivityTbody">
-                                    <tr><td colspan="5" class="empty-state"><div class="empty-state-icon">&#128203;</div><div class="empty-state-title">No activity yet</div></td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ── LEADS VIEW ── -->
-                <div class="view" id="leadsView">
-                    <div class="view-header">
-                        <div>
-                            <h1 class="view-title">Leads</h1>
-                            <p class="view-subtitle" id="leadsCount">0 total leads</p>
-                        </div>
-                        <div class="view-actions">
-                            <button class="btn btn-secondary btn-sm" onclick="exportLeads()">Export CSV</button>
-                        </div>
-                    </div>
-                    <div class="filter-bar">
-                        <input type="text" class="search-input" id="leadsSearch" placeholder="Search leads..." oninput="renderLeads()">
-                        <select class="filter-select" id="leadsStatusFilter" onchange="renderLeads()">
-                            <option value="">All statuses</option>
-                            <option value="new">New</option>
-                            <option value="contacted">Contacted</option>
-                            <option value="qualified">Qualified</option>
-                            <option value="converted">Converted</option>
-                            <option value="lost">Lost</option>
-                        </select>
-                    </div>
-                    <div class="data-section">
-                        <div class="table-wrap">
-                            <table>
-                                <thead>
-                                    <tr><th>Date</th><th>Name</th><th>Phone</th><th>Interest</th><th>Source</th><th>Status</th><th>Actions</th></tr>
-                                </thead>
-                                <tbody id="leadsTbody"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ── BOOKINGS VIEW ── -->
-                <div class="view" id="bookingsView">
-                    <div class="view-header">
-                        <div>
-                            <h1 class="view-title">Bookings</h1>
-                            <p class="view-subtitle" id="bookingsCount">0 total bookings</p>
-                        </div>
-                        <div class="view-actions">
-                            <button class="btn btn-secondary btn-sm" onclick="exportBookings()">Export CSV</button>
-                        </div>
-                    </div>
-                    <div class="filter-bar">
-                        <input type="text" class="search-input" id="bookingsSearch" placeholder="Search bookings..." oninput="renderBookings()">
-                        <select class="filter-select" id="bookingsStatusFilter" onchange="renderBookings()">
-                            <option value="">All statuses</option>
-                            <option value="pending">Pending</option>
-                            <option value="confirmed">Confirmed</option>
-                            <option value="active">Active</option>
-                            <option value="completed">Completed</option>
-                            <option value="cancelled">Cancelled</option>
-                        </select>
-                    </div>
-                    <div class="data-section">
-                        <div class="table-wrap">
-                            <table>
-                                <thead>
-                                    <tr><th>Ref</th><th>Date</th><th>Customer</th><th>Phone</th><th>Car</th><th>Duration</th><th>Total</th><th>Status</th><th>Actions</th></tr>
-                                </thead>
-                                <tbody id="bookingsTbody"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ── CARS VIEW ── -->
-                <div class="view" id="carsView">
-                    <div class="view-header">
-                        <div>
-                            <h1 class="view-title">Fleet Management</h1>
-                            <p class="view-subtitle" id="carsCount">0 cars</p>
-                        </div>
-                        <div class="view-actions" id="carsActions">
-                            <button class="btn btn-primary btn-sm" onclick="openCarModal()">+ Add Car</button>
-                        </div>
-                    </div>
-                    <div class="cars-grid" id="carsGrid"></div>
-                </div>
-
-                <!-- ── TEAM VIEW ── -->
-                <div class="view" id="teamView">
-                    <div class="view-header">
-                        <div>
-                            <h1 class="view-title">Team Management</h1>
-                            <p class="view-subtitle">Manage team members and roles</p>
-                        </div>
-                        <div class="view-actions">
-                            <button class="btn btn-primary btn-sm" onclick="openTeamModal()">+ Add Member</button>
-                        </div>
-                    </div>
-                    <div class="data-section">
-                        <div class="table-wrap" style="padding: 16px;" id="teamList"></div>
-                    </div>
-                </div>
-
-                <!-- ── ACTIVITY LOG VIEW ── -->
-                <div class="view" id="activityView">
-                    <div class="view-header">
-                        <div>
-                            <h1 class="view-title">Activity Log</h1>
-                            <p class="view-subtitle">Track all actions performed in the dashboard</p>
-                        </div>
-                    </div>
-                    <div class="data-section">
-                        <div class="table-wrap" style="padding: 20px;" id="activityList"></div>
-                    </div>
-                </div>
-
-                <!-- ── SETTINGS VIEW ── -->
-                <div class="view" id="settingsView">
-                    <div class="view-header">
-                        <div>
-                            <h1 class="view-title">Settings</h1>
-                            <p class="view-subtitle">Dashboard preferences and account settings</p>
-                        </div>
-                    </div>
-                    <div class="settings-grid">
-                        <div class="settings-card">
-                            <div class="settings-card-title">Appearance</div>
-                            <div class="settings-card-desc">Toggle between light and dark mode</div>
-                            <div style="display:flex; align-items:center; justify-content:space-between;">
-                                <span style="font-size:14px;" id="themeLabel">Dark Mode</span>
-                                <button class="btn btn-secondary btn-sm" onclick="toggleTheme()">Switch Theme</button>
-                            </div>
-                        </div>
-                        <div class="settings-card">
-                            <div class="settings-card-title">Account</div>
-                            <div class="settings-card-desc">Manage your session</div>
-                            <p style="font-size:13px; color:var(--text-secondary); margin-bottom:14px;">Signed in as <strong id="settingsEmail"></strong></p>
-                            <p style="font-size:13px; color:var(--text-secondary); margin-bottom:14px;">Role: <span class="badge" id="settingsRole"></span></p>
-                            <button class="btn btn-danger btn-sm" onclick="handleLogout()">Sign Out</button>
-                        </div>
-                        <div class="settings-card">
-                            <div class="settings-card-title">Live Site</div>
-                            <div class="settings-card-desc">Open the customer-facing landing page</div>
-                            <button class="btn btn-secondary btn-sm" onclick="window.open('/', '_blank')">View Live Site</button>
-                        </div>
-                        <div class="settings-card">
-                            <div class="settings-card-title">About</div>
-                            <div class="settings-card-desc">Fastrack Admin Dashboard v2.0</div>
-                            <p style="font-size:12px; color:var(--text-muted);">Professional car rental management system for Fastrack Rent a Car, Dubai.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="detail-panel" id="bk-edit">
+        ${ed?`<form onsubmit="submitBookingEdit(event,${b.id})">
+            <div class="form-row"><div class="form-group"><label>Customer</label><input class="form-input" id="beFullName" value="${esc(b.fullName)}"></div><div class="form-group"><label>Phone</label><input class="form-input" id="bePhone" value="${esc(b.phone)}"></div></div>
+            <div class="form-row"><div class="form-group"><label>Car</label><input class="form-input" id="beCarName" value="${esc(b.carName)}"></div><div class="form-group"><label>Location</label><input class="form-input" id="beLocation" value="${esc(b.location||'')}"></div></div>
+            <div class="form-row"><div class="form-group"><label>Start Date</label><input type="date" class="form-input" id="beStartDate" value="${b.startDate?b.startDate.split('T')[0]:''}"></div><div class="form-group"><label>Duration (days)</label><input type="number" class="form-input" id="beDuration" value="${b.duration}"></div></div>
+            <div class="form-row"><div class="form-group"><label>Total (AED)</label><input type="number" class="form-input" id="beTotalAed" value="${b.totalAed}"></div><div class="form-group"><label>Status</label><select class="form-input" id="beStatus"><option value="pending" ${b.status==='pending'?'selected':''}>Pending</option><option value="confirmed" ${b.status==='confirmed'?'selected':''}>Confirmed</option><option value="active" ${b.status==='active'?'selected':''}>Active</option><option value="completed" ${b.status==='completed'?'selected':''}>Completed</option><option value="cancelled" ${b.status==='cancelled'?'selected':''}>Cancelled</option></select></div></div>
+            <button type="submit" class="btn btn-primary btn-full" style="margin-top:12px">Save Changes</button>
+        </form>`:'<p style="color:var(--text-muted)">Read-only access</p>'}
     </div>
+    <div class="detail-panel" id="bk-notes">
+        ${(b.notes||[]).map(n=>`<div class="note-item"><div class="note-meta">${esc(n.author)} &middot; ${fmtDateTime(n.createdAt)}</div><div class="note-text">${esc(n.text)}</div></div>`).join('')||'<p style="color:var(--text-muted);font-size:13px">No notes yet</p>'}
+        ${ed?`<div class="note-form"><input class="form-input" id="bookNoteInput" placeholder="Add a note..."><button class="btn btn-primary btn-sm" onclick="addBookingNote(${b.id})">Add</button></div>`:''}
+    </div>`;
+    openModal();
+}
+async function submitBookingEdit(e,id){ e.preventDefault(); try{await api('PATCH','/bookings/'+id,{fullName:document.getElementById('beFullName').value,phone:document.getElementById('bePhone').value,carName:document.getElementById('beCarName').value,location:document.getElementById('beLocation').value,startDate:document.getElementById('beStartDate').value,duration:document.getElementById('beDuration').value,totalAed:Number(document.getElementById('beTotalAed').value),status:document.getElementById('beStatus').value});closeModal();await loadBookings();loadStats();toast('Booking updated','success');}catch(e){toast(e.message,'error');} }
+async function quickBookingAction(id,status){ try{await api('PATCH','/bookings/'+id,{status});closeModal();await loadBookings();loadStats();toast('Booking '+status,'success');}catch(e){toast(e.message,'error');} }
+async function addBookingNote(id){ const t=document.getElementById('bookNoteInput').value.trim(); if(!t)return; try{await api('POST','/bookings/'+id+'/notes',{text:t});await loadBookings();openBookingDetail(id);toast('Note added','success');}catch(e){toast(e.message,'error');} }
 
-    <!-- MODAL -->
-    <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
-        <div class="modal" id="modal">
-            <div class="modal-head">
-                <span class="modal-title" id="modalTitle"></span>
-                <button class="modal-close" onclick="closeModal()">&times;</button>
-            </div>
-            <div class="modal-body" id="modalBody"></div>
-        </div>
-    </div>
-
-    <script>
-    // ╔══════════════════════════════════════╗
-    // ║         GLOBAL STATE                 ║
-    // ╚══════════════════════════════════════╝
-    const API = '/api';
-    let currentUser = null;
-    let accessToken = null;
-    let refreshToken = null;
-    let leadsData = [];
-    let bookingsData = [];
-    let carsData = [];
-    let teamData = [];
-    let statsData = {};
-    let currentView = 'dashboard';
-
-    // ╔══════════════════════════════════════╗
-    // ║         THEME                        ║
-    // ╚══════════════════════════════════════╝
-    function initTheme() {
-        const saved = localStorage.getItem('ft_theme') || 'dark';
-        applyTheme(saved);
+// Calendar
+function renderCalendar(){
+    const c=document.getElementById('calendarContainer');
+    const first=new Date(calYear,calMonth,1), last=new Date(calYear,calMonth+1,0);
+    const startDay=first.getDay(), totalDays=last.getDate();
+    const monthName=first.toLocaleString('en',{month:'long',year:'numeric'});
+    let html=`<div class="cal-nav"><button class="btn btn-ghost btn-sm" onclick="calMonth--;if(calMonth<0){calMonth=11;calYear--;}renderCalendar()">&#9664;</button><span class="cal-nav-title">${monthName}</span><button class="btn btn-ghost btn-sm" onclick="calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderCalendar()">&#9654;</button></div>`;
+    html+='<div class="calendar-grid">';
+    ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d=>html+=`<div class="cal-header">${d}</div>`);
+    const today=new Date(); const todayStr=today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+    for(let i=0;i<startDay;i++){const d=new Date(calYear,calMonth,1-startDay+i);html+=`<div class="cal-day other-month"><div class="cal-day-num">${d.getDate()}</div></div>`;}
+    for(let d=1;d<=totalDays;d++){
+        const dateStr=calYear+'-'+(calMonth+1)+'-'+d;
+        const isToday=dateStr===todayStr;
+        const dayBookings=bookingsData.filter(b=>{if(!b.startDate)return false;const sd=new Date(b.startDate);return sd.getFullYear()===calYear&&sd.getMonth()===calMonth&&sd.getDate()===d;});
+        html+=`<div class="cal-day${isToday?' today':''}"><div class="cal-day-num">${d}</div>`;
+        dayBookings.slice(0,3).forEach(b=>html+=`<div class="cal-event ${b.status}" onclick="openBookingDetail(${b.id})" title="${esc(b.ref+' - '+b.fullName)}">${esc(b.ref.slice(0,8))}</div>`);
+        if(dayBookings.length>3)html+=`<div style="font-size:10px;color:var(--text-muted)">+${dayBookings.length-3} more</div>`;
+        html+=`</div>`;
     }
-    function applyTheme(t) {
-        document.documentElement.className = t === 'light' ? 'light-mode' : '';
-        document.body.className = t === 'light' ? 'light-mode' : '';
-        localStorage.setItem('ft_theme', t);
-        const btn = document.getElementById('themeBtn');
-        if (btn) btn.textContent = t === 'dark' ? '\u263E' : '\u2600';
-        const label = document.getElementById('themeLabel');
-        if (label) label.textContent = t === 'dark' ? 'Dark Mode' : 'Light Mode';
-    }
-    function toggleTheme() {
-        const current = localStorage.getItem('ft_theme') || 'dark';
-        applyTheme(current === 'dark' ? 'light' : 'dark');
-    }
+    const remaining=7-((startDay+totalDays)%7); if(remaining<7)for(let i=1;i<=remaining;i++) html+=`<div class="cal-day other-month"><div class="cal-day-num">${i}</div></div>`;
+    html+='</div>';
+    c.innerHTML=html;
+}
 
-    // ╔══════════════════════════════════════╗
-    // ║         API HELPERS                  ║
-    // ╚══════════════════════════════════════╝
-    async function api(method, endpoint, body) {
-        const opts = { method, headers: { 'Content-Type': 'application/json' } };
-        if (accessToken) opts.headers['Authorization'] = 'Bearer ' + accessToken;
-        if (body) opts.body = JSON.stringify(body);
-        const res = await fetch(API + endpoint, opts);
-        const data = await res.json();
-        if (res.status === 401 && refreshToken) {
-            const refreshed = await tryRefresh();
-            if (refreshed) {
-                opts.headers['Authorization'] = 'Bearer ' + accessToken;
-                const retry = await fetch(API + endpoint, opts);
-                return retry.json();
-            }
-            handleLogout();
-        }
-        if (!res.ok) throw new Error(data.error || 'Request failed');
-        return data;
-    }
-
-    async function tryRefresh() {
-        try {
-            const res = await fetch(API + '/auth/refresh', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ refreshToken })
-            });
-            const data = await res.json();
-            if (data.success) {
-                accessToken = data.accessToken;
-                saveSession();
-                return true;
-            }
-        } catch (e) {}
-        return false;
-    }
-
-    // ╔══════════════════════════════════════╗
-    // ║         AUTH                         ║
-    // ╚══════════════════════════════════════╝
-    async function handleLogin(e) {
-        e.preventDefault();
-        const btn = document.getElementById('loginBtn');
-        const errEl = document.getElementById('loginError');
-        errEl.style.display = 'none';
-        btn.disabled = true; btn.textContent = 'Signing in...';
-
-        try {
-            const data = await api('POST', '/auth/login', {
-                email: document.getElementById('loginEmail').value.trim(),
-                password: document.getElementById('loginPassword').value,
-                rememberMe: document.getElementById('rememberMe').checked
-            });
-            accessToken = data.accessToken;
-            refreshToken = data.refreshToken;
-            currentUser = data.user;
-            saveSession();
-            enterDashboard();
-        } catch (err) {
-            errEl.textContent = err.message || 'Invalid credentials';
-            errEl.style.display = 'block';
-        } finally {
-            btn.disabled = false; btn.textContent = 'Sign In';
-        }
-    }
-
-    function saveSession() {
-        const store = document.getElementById('rememberMe')?.checked ? localStorage : sessionStorage;
-        store.setItem('ft_access', accessToken);
-        store.setItem('ft_refresh', refreshToken);
-        if (currentUser) store.setItem('ft_user', JSON.stringify(currentUser));
-    }
-
-    function loadSession() {
-        let store = localStorage;
-        let at = store.getItem('ft_access');
-        if (!at) { store = sessionStorage; at = store.getItem('ft_access'); }
-        if (at) {
-            accessToken = at;
-            refreshToken = store.getItem('ft_refresh');
-            try { currentUser = JSON.parse(store.getItem('ft_user')); } catch(e) {}
-            return true;
-        }
-        return false;
-    }
-
-    function clearSession() {
-        accessToken = null; refreshToken = null; currentUser = null;
-        localStorage.removeItem('ft_access'); localStorage.removeItem('ft_refresh'); localStorage.removeItem('ft_user');
-        sessionStorage.removeItem('ft_access'); sessionStorage.removeItem('ft_refresh'); sessionStorage.removeItem('ft_user');
-    }
-
-    async function handleLogout() {
-        try { await api('POST', '/auth/logout', { refreshToken }); } catch(e) {}
-        clearSession();
-        document.getElementById('app').classList.add('hidden');
-        document.getElementById('loginScreen').classList.remove('hidden');
-        document.getElementById('loginPassword').value = '';
-        toast('Signed out successfully', 'info');
-    }
-
-    function showForgotPassword(e) {
-        e.preventDefault();
-        document.getElementById('loginScreen').classList.add('hidden');
-        document.getElementById('forgotScreen').classList.remove('hidden');
-    }
-    function showLogin(e) {
-        e.preventDefault();
-        document.getElementById('forgotScreen').classList.add('hidden');
-        document.getElementById('loginScreen').classList.remove('hidden');
-    }
-
-    async function handleResetRequest(e) {
-        e.preventDefault();
-        try {
-            const data = await api('POST', '/auth/reset-request', {
-                email: document.getElementById('resetEmail').value.trim()
-            });
-            if (data.resetToken) {
-                document.getElementById('resetTokenDisplay').style.display = 'block';
-                document.getElementById('resetTokenValue').textContent = data.resetToken;
-                window._resetToken = data.resetToken;
-            }
-            toast('Reset token generated', 'success');
-        } catch(err) {
-            document.getElementById('resetError').textContent = err.message;
-            document.getElementById('resetError').style.display = 'block';
-        }
-    }
-
-    async function handleResetPassword(e) {
-        e.preventDefault();
-        try {
-            await api('POST', '/auth/reset-password', {
-                token: window._resetToken,
-                newPassword: document.getElementById('newPassword').value
-            });
-            toast('Password reset successfully! Please sign in.', 'success');
-            showLogin(new Event('click'));
-        } catch(err) {
-            toast(err.message, 'error');
-        }
-    }
-
-    // ╔══════════════════════════════════════╗
-    // ║         DASHBOARD ENTRY              ║
-    // ╚══════════════════════════════════════╝
-    async function enterDashboard() {
-        document.getElementById('loginScreen').classList.add('hidden');
-        document.getElementById('forgotScreen').classList.add('hidden');
-        document.getElementById('app').classList.remove('hidden');
-
-        // Verify session with /auth/me
-        try {
-            const me = await api('GET', '/auth/me');
-            currentUser = me;
-            saveSession();
-        } catch (e) {
-            clearSession();
-            document.getElementById('app').classList.add('hidden');
-            document.getElementById('loginScreen').classList.remove('hidden');
-            return;
-        }
-
-        updateUserUI();
-        applyRBAC();
-        updateGreeting();
-        loadAllData();
-
-        // Refresh data every 30s
-        if (window._refreshInterval) clearInterval(window._refreshInterval);
-        window._refreshInterval = setInterval(loadAllData, 30000);
-    }
-
-    function updateUserUI() {
-        if (!currentUser) return;
-        const initials = currentUser.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
-        document.getElementById('userAvatar').textContent = initials;
-        document.getElementById('userName').textContent = currentUser.name;
-        document.getElementById('userRole').textContent = currentUser.role;
-        document.getElementById('settingsEmail').textContent = currentUser.email;
-        const roleEl = document.getElementById('settingsRole');
-        roleEl.textContent = currentUser.role;
-        roleEl.className = 'badge badge-' + currentUser.role;
-    }
-
-    function applyRBAC() {
-        if (!currentUser) return;
-        const role = currentUser.role;
-        // Hide nav items based on role
-        document.querySelectorAll('.nav-item[data-roles]').forEach(item => {
-            const roles = item.dataset.roles.split(',');
-            item.style.display = roles.includes(role) ? '' : 'none';
-        });
-        // Viewers can't see action buttons for mutations
-        if (role === 'viewer') {
-            document.getElementById('carsActions').style.display = 'none';
-        }
-    }
-
-    function canEdit() {
-        return currentUser && (currentUser.role === 'superadmin' || currentUser.role === 'manager');
-    }
-    function isSuperAdmin() {
-        return currentUser && currentUser.role === 'superadmin';
-    }
-
-    // ╔══════════════════════════════════════╗
-    // ║         DATA LOADING                 ║
-    // ╚══════════════════════════════════════╝
-    function loadAllData() {
-        loadStats();
-        loadLeads();
-        loadBookings();
-        loadCars();
-        if (currentView === 'team' && isSuperAdmin()) loadTeam();
-        if (currentView === 'activity') loadActivity();
-    }
-
-    async function loadStats() {
-        try {
-            statsData = await api('GET', '/stats');
-            document.getElementById('kpiLeads').textContent = statsData.totalLeads || 0;
-            document.getElementById('kpiBookings').textContent = statsData.totalBookings || 0;
-            document.getElementById('kpiRevenue').textContent = 'AED ' + (statsData.totalRevenue || 0).toLocaleString();
-            document.getElementById('kpiConversion').textContent = (statsData.conversionRate || 0) + '%';
-            document.getElementById('kpiNewLeads').textContent = statsData.newLeads || 0;
-            document.getElementById('kpiCars').textContent = statsData.totalCars || 0;
-
-            // Nav badges
-            const lb = document.getElementById('leadsNavBadge');
-            if (statsData.newLeads > 0) { lb.textContent = statsData.newLeads; lb.style.display = ''; }
-            else lb.style.display = 'none';
-
-            const bb = document.getElementById('bookingsNavBadge');
-            if (statsData.newBookings > 0) { bb.textContent = statsData.newBookings; bb.style.display = ''; }
-            else bb.style.display = 'none';
-        } catch(e) { console.error('Stats:', e); }
-    }
-
-    async function loadLeads() {
-        try {
-            leadsData = await api('GET', '/leads');
-            if (!Array.isArray(leadsData)) leadsData = [];
-            document.getElementById('leadsCount').textContent = leadsData.length + ' total leads';
-            renderLeads();
-            renderRecentActivity();
-        } catch(e) { console.error('Leads:', e); }
-    }
-
-    async function loadBookings() {
-        try {
-            bookingsData = await api('GET', '/bookings');
-            if (!Array.isArray(bookingsData)) bookingsData = [];
-            document.getElementById('bookingsCount').textContent = bookingsData.length + ' total bookings';
-            renderBookings();
-            renderRecentActivity();
-        } catch(e) { console.error('Bookings:', e); }
-    }
-
-    async function loadCars() {
-        try {
-            carsData = await api('GET', '/cars');
-            if (!Array.isArray(carsData)) carsData = [];
-            document.getElementById('carsCount').textContent = carsData.length + ' cars';
-            renderCars();
-        } catch(e) { console.error('Cars:', e); }
-    }
-
-    async function loadTeam() {
-        try {
-            teamData = await api('GET', '/team');
-            if (!Array.isArray(teamData)) teamData = [];
-            renderTeam();
-        } catch(e) { console.error('Team:', e); }
-    }
-
-    async function loadActivity() {
-        try {
-            const data = await api('GET', '/activity-log?limit=100');
-            renderActivity(data.items || []);
-        } catch(e) { console.error('Activity:', e); }
-    }
-
-    // ╔══════════════════════════════════════╗
-    // ║         RENDER: RECENT ACTIVITY      ║
-    // ╚══════════════════════════════════════╝
-    function renderRecentActivity() {
-        const tbody = document.getElementById('recentActivityTbody');
-        const items = [];
-        leadsData.slice(0, 10).forEach(l => items.push({ type: 'Lead', date: l.createdAt, name: l.fullName, detail: l.interest || '-', status: l.status }));
-        bookingsData.slice(0, 10).forEach(b => items.push({ type: 'Booking', date: b.createdAt, name: b.fullName, detail: b.carName + ' (' + b.ref + ')', status: b.status }));
-        items.sort((a, b) => new Date(b.date) - new Date(a.date));
-        const recent = items.slice(0, 12);
-
-        if (!recent.length) {
-            tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><div class="empty-state-icon">&#128203;</div><div class="empty-state-title">No activity yet</div></td></tr>';
-            return;
-        }
-        tbody.innerHTML = recent.map(i => `<tr>
-            <td><span class="badge badge-${i.type === 'Lead' ? 'new' : 'confirmed'}">${esc(i.type)}</span></td>
-            <td>${fmtDate(i.date)}</td>
-            <td><strong>${esc(i.name)}</strong></td>
-            <td>${esc(i.detail)}</td>
-            <td><span class="badge badge-${i.status}">${cap(i.status)}</span></td>
-        </tr>`).join('');
-    }
-
-    // ╔══════════════════════════════════════╗
-    // ║         RENDER: LEADS                ║
-    // ╚══════════════════════════════════════╝
-    function renderLeads() {
-        const tbody = document.getElementById('leadsTbody');
-        const search = (document.getElementById('leadsSearch').value || '').toLowerCase();
-        const statusFilter = document.getElementById('leadsStatusFilter').value;
-
-        let filtered = leadsData.filter(l => {
-            const matchSearch = !search || `${l.fullName} ${l.phone} ${l.interest}`.toLowerCase().includes(search);
-            const matchStatus = !statusFilter || l.status === statusFilter;
-            return matchSearch && matchStatus;
-        });
-
-        if (!filtered.length) {
-            tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><div class="empty-state-icon">&#128101;</div><div class="empty-state-title">No leads found</div></td></tr>';
-            return;
-        }
-
-        const editable = canEdit();
-        tbody.innerHTML = filtered.map(l => `<tr>
-            <td>${fmtDate(l.createdAt)}</td>
-            <td><strong>${esc(l.fullName)}</strong></td>
-            <td><a href="tel:${esc(l.phone)}" style="color:var(--primary); text-decoration:none;">${esc(l.phone)}</a></td>
-            <td>${esc(l.interest || '-')}</td>
-            <td>${esc(l.source || '-')}</td>
-            <td>${editable ? `<select class="status-select" onchange="updateLeadStatus(${l.id}, this.value)">
-                <option value="new" ${l.status==='new'?'selected':''}>New</option>
-                <option value="contacted" ${l.status==='contacted'?'selected':''}>Contacted</option>
-                <option value="qualified" ${l.status==='qualified'?'selected':''}>Qualified</option>
-                <option value="converted" ${l.status==='converted'?'selected':''}>Converted</option>
-                <option value="lost" ${l.status==='lost'?'selected':''}>Lost</option>
-            </select>` : `<span class="badge badge-${l.status}">${cap(l.status)}</span>`}</td>
-            <td><div style="display:flex;gap:4px;">
-                <a href="https://wa.me/${esc(l.phone.replace(/[^0-9]/g,''))}" target="_blank" class="btn btn-ghost btn-sm" title="WhatsApp">&#128172;</a>
-                ${editable ? `<button class="btn btn-danger btn-sm" onclick="deleteLead(${l.id})">&#128465;</button>` : ''}
-            </div></td>
-        </tr>`).join('');
-    }
-
-    async function updateLeadStatus(id, status) {
-        try {
-            await api('PATCH', '/leads/' + id, { status });
-            await loadLeads(); loadStats();
-            toast('Lead status updated', 'success');
-        } catch(e) { toast(e.message, 'error'); }
-    }
-
-    async function deleteLead(id) {
-        if (!confirm('Delete this lead? This cannot be undone.')) return;
-        try {
-            await api('DELETE', '/leads/' + id);
-            await loadLeads(); loadStats();
-            toast('Lead deleted', 'success');
-        } catch(e) { toast(e.message, 'error'); }
-    }
-
-    function exportLeads() {
-        let csv = 'Date,Name,Phone,Interest,Source,Status\n';
-        leadsData.forEach(l => {
-            csv += `"${fmtDate(l.createdAt)}","${l.fullName}","${l.phone}","${l.interest || ''}","${l.source || ''}","${l.status}"\n`;
-        });
-        downloadCSV(csv, 'leads.csv');
-    }
-
-    // ╔══════════════════════════════════════╗
-    // ║         RENDER: BOOKINGS             ║
-    // ╚══════════════════════════════════════╝
-    function renderBookings() {
-        const tbody = document.getElementById('bookingsTbody');
-        const search = (document.getElementById('bookingsSearch').value || '').toLowerCase();
-        const statusFilter = document.getElementById('bookingsStatusFilter').value;
-
-        let filtered = bookingsData.filter(b => {
-            const matchSearch = !search || `${b.fullName} ${b.phone} ${b.ref} ${b.carName}`.toLowerCase().includes(search);
-            const matchStatus = !statusFilter || b.status === statusFilter;
-            return matchSearch && matchStatus;
-        });
-
-        if (!filtered.length) {
-            tbody.innerHTML = '<tr><td colspan="9" class="empty-state"><div class="empty-state-icon">&#128203;</div><div class="empty-state-title">No bookings found</div></td></tr>';
-            return;
-        }
-
-        const editable = canEdit();
-        tbody.innerHTML = filtered.map(b => `<tr>
-            <td><strong>${esc(b.ref)}</strong></td>
-            <td>${fmtDate(b.createdAt)}</td>
-            <td>${esc(b.fullName)}</td>
-            <td><a href="tel:${esc(b.phone)}" style="color:var(--primary); text-decoration:none;">${esc(b.phone)}</a></td>
-            <td>${esc(b.carName)}</td>
-            <td>${esc(b.duration)} days</td>
-            <td>AED ${(Number(b.totalAed) || 0).toLocaleString()}</td>
-            <td>${editable ? `<select class="status-select" onchange="updateBookingStatus(${b.id}, this.value)">
-                <option value="pending" ${b.status==='pending'?'selected':''}>Pending</option>
-                <option value="confirmed" ${b.status==='confirmed'?'selected':''}>Confirmed</option>
-                <option value="active" ${b.status==='active'?'selected':''}>Active</option>
-                <option value="completed" ${b.status==='completed'?'selected':''}>Completed</option>
-                <option value="cancelled" ${b.status==='cancelled'?'selected':''}>Cancelled</option>
-            </select>` : `<span class="badge badge-${b.status}">${cap(b.status)}</span>`}</td>
-            <td><div style="display:flex;gap:4px;">
-                <a href="https://wa.me/${esc(b.phone.replace(/[^0-9]/g,''))}" target="_blank" class="btn btn-ghost btn-sm" title="WhatsApp">&#128172;</a>
-                ${editable ? `<button class="btn btn-danger btn-sm" onclick="deleteBooking(${b.id})">&#128465;</button>` : ''}
-            </div></td>
-        </tr>`).join('');
-    }
-
-    async function updateBookingStatus(id, status) {
-        try {
-            await api('PATCH', '/bookings/' + id, { status });
-            await loadBookings(); loadStats();
-            toast('Booking status updated', 'success');
-        } catch(e) { toast(e.message, 'error'); }
-    }
-
-    async function deleteBooking(id) {
-        if (!confirm('Delete this booking? This cannot be undone.')) return;
-        try {
-            await api('DELETE', '/bookings/' + id);
-            await loadBookings(); loadStats();
-            toast('Booking deleted', 'success');
-        } catch(e) { toast(e.message, 'error'); }
-    }
-
-    function exportBookings() {
-        let csv = 'Ref,Date,Name,Phone,Car,Duration,Total,Status\n';
-        bookingsData.forEach(b => {
-            csv += `"${b.ref}","${fmtDate(b.createdAt)}","${b.fullName}","${b.phone}","${b.carName}","${b.duration}","${b.totalAed}","${b.status}"\n`;
-        });
-        downloadCSV(csv, 'bookings.csv');
-    }
-
-    // ╔══════════════════════════════════════╗
-    // ║         RENDER: CARS                 ║
-    // ╚══════════════════════════════════════╝
-    function renderCars() {
-        const grid = document.getElementById('carsGrid');
-        if (!carsData.length) {
-            grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-icon">&#128663;</div><div class="empty-state-title">No cars yet</div><p style="color:var(--text-muted);">Add your first car to get started</p></div>';
-            return;
-        }
-        const editable = canEdit();
-        grid.innerHTML = carsData.map(c => `<div class="car-card">
-            <div class="car-img">${c.img ? `<img src="${esc(c.img)}" alt="${esc(c.name)}" loading="lazy">` : '<span style="color:var(--text-muted)">No image</span>'}</div>
+// ═══════ CARS ═══════
+function setCarsViewMode(mode,btn){ carsViewMode=mode; btn.parentElement.querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderCars(); }
+function renderCars(){
+    const el=document.getElementById('carsContent'),ed=canEdit();
+    if(!carsData.length){el.innerHTML='<div class="empty-state" style="padding:60px"><div class="empty-state-icon">&#128663;</div><div class="empty-state-title">No cars yet</div></div>';return;}
+    if(carsViewMode==='grid'){
+        el.innerHTML=`<div class="cars-grid">${carsData.map(c=>`<div class="car-card ${c.active===false?'inactive':''}" draggable="${ed}" ondragstart="dragCar(event,${c.id})" ondragover="event.preventDefault()" ondrop="dropCar(event,${c.id})">
+            <div class="car-img">${c.img?`<img src="${esc(c.img)}" alt="${esc(c.name)}" loading="lazy">`:'<span style="color:var(--text-muted)">No image</span>'}
+            ${c.active===false?'<div class="car-status-badge"><span class="badge badge-cancelled">Hidden</span></div>':''}</div>
             <div class="car-body">
-                <div class="car-name">${esc(c.name)}</div>
-                <div class="car-cat">${esc(c.cat || '')}</div>
-                <div class="car-pricing">
-                    <span class="car-price">AED ${(c.price || 0).toLocaleString()}</span>
-                    ${c.was ? `<span class="car-was">AED ${c.was.toLocaleString()}</span>` : ''}
-                </div>
-                ${c.badge ? `<div class="car-badge-tag">${esc(c.badge)}</div>` : ''}
-                <div class="car-meta">
-                    <span>${esc(c.type || 'N/A')}</span>
-                    <span>${c.spots || 0} spots</span>
-                </div>
-                ${editable ? `<div class="car-actions">
-                    <button class="btn btn-secondary btn-sm" style="flex:1" onclick="openCarModal(${c.id})">Edit</button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteCar(${c.id})">&#128465;</button>
-                </div>` : ''}
+                <div class="car-name">${esc(c.name)}</div><div class="car-cat">${esc(c.cat||'')}</div>
+                <div class="car-pricing"><span class="car-price">AED ${(c.price||0).toLocaleString()}</span>${c.was?`<span class="car-was">AED ${c.was.toLocaleString()}</span>`:''}</div>
+                ${c.badge?`<div class="car-badge-tag">${esc(c.badge)}</div>`:''}
+                <div class="car-specs"><span class="car-spec">${esc(c.type||'')}</span><span class="car-spec">${c.seats||5} seats</span><span class="car-spec">${c.doors||4} doors</span><span class="car-spec">${esc(c.transmission||'Auto')}</span><span class="car-spec">${c.bags||0} bags</span></div>
+                ${ed?`<div class="car-actions">
+                    <button class="btn btn-secondary btn-xs" style="flex:1" onclick="openCarModal(${c.id})">Edit</button>
+                    <button class="btn btn-secondary btn-xs" onclick="toggleCarActive(${c.id})">${c.active===false?'Show':'Hide'}</button>
+                    <button class="btn btn-secondary btn-xs" onclick="duplicateCar(${c.id})">Dup</button>
+                    <button class="btn btn-danger btn-xs" onclick="deleteCar(${c.id})">&#128465;</button>
+                </div>`:''}
             </div>
-        </div>`).join('');
+        </div>`).join('')}</div>`;
+    } else {
+        el.innerHTML=`<div class="data-section"><div class="table-wrap"><table><thead><tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Type</th><th>Seats</th><th>Status</th><th>Actions</th></tr></thead><tbody>${carsData.map(c=>`<tr style="${c.active===false?'opacity:0.5':''}">
+            <td><div style="width:60px;height:40px;border-radius:6px;overflow:hidden;background:var(--bg-input)">${c.img?`<img src="${esc(c.img)}" style="width:100%;height:100%;object-fit:cover">`:''}</div></td>
+            <td><strong>${esc(c.name)}</strong></td><td>${esc(c.cat||'')}</td>
+            <td>AED ${(c.price||0).toLocaleString()}${c.was?` <span style="text-decoration:line-through;color:var(--text-muted);font-size:11px">${c.was.toLocaleString()}</span>`:''}</td>
+            <td>${esc(c.type||'')}</td><td>${c.seats||5}</td>
+            <td><span class="badge badge-${c.active===false?'cancelled':'active'}">${c.active===false?'Hidden':'Active'}</span></td>
+            <td>${ed?`<div style="display:flex;gap:3px"><button class="btn btn-secondary btn-xs" onclick="openCarModal(${c.id})">Edit</button><button class="btn btn-secondary btn-xs" onclick="toggleCarActive(${c.id})">${c.active===false?'Show':'Hide'}</button><button class="btn btn-secondary btn-xs" onclick="duplicateCar(${c.id})">Dup</button><button class="btn btn-danger btn-xs" onclick="deleteCar(${c.id})">&#128465;</button></div>`:''}</td>
+        </tr>`).join('')}</tbody></table></div></div>`;
     }
+}
 
-    function openCarModal(editId) {
-        const car = editId ? carsData.find(c => c.id === editId) : null;
-        const title = car ? 'Edit Car' : 'Add New Car';
-        document.getElementById('modalTitle').textContent = title;
-        document.getElementById('modalBody').innerHTML = `
-            <form onsubmit="submitCar(event, ${editId || 'null'})">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Name</label>
-                        <input class="form-input" id="carName" value="${esc(car?.name || '')}" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Category</label>
-                        <input class="form-input" id="carCat" value="${esc(car?.cat || '')}">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Image URL</label>
-                    <input class="form-input" id="carImg" value="${esc(car?.img || '')}" placeholder="https://...">
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Price (AED)</label>
-                        <input type="number" class="form-input" id="carPrice" value="${car?.price || ''}" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Was Price (AED)</label>
-                        <input type="number" class="form-input" id="carWas" value="${car?.was || ''}">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Type</label>
-                        <input class="form-input" id="carType" value="${esc(car?.type || '')}">
-                    </div>
-                    <div class="form-group">
-                        <label>Badge</label>
-                        <input class="form-input" id="carBadge" value="${esc(car?.badge || '')}">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Spots</label>
-                        <input type="number" class="form-input" id="carSpots" value="${car?.spots || 5}">
-                    </div>
-                    <div class="form-group">
-                        <label>Features (comma-separated)</label>
-                        <input class="form-input" id="carFeats" value="${esc(Array.isArray(car?.feats) ? car.feats.join(', ') : (car?.feats || ''))}">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Includes</label>
-                    <input class="form-input" id="carIncludes" value="${esc(car?.includes || '')}">
-                </div>
-                <div style="display:flex; gap:8px; margin-top:20px;">
-                    <button type="submit" class="btn btn-primary" style="flex:1">${car ? 'Save Changes' : 'Add Car'}</button>
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                </div>
-            </form>`;
-        openModal();
-    }
+function openCarModal(editId){
+    const c=editId?carsData.find(x=>x.id===editId):null;
+    document.getElementById('modal').classList.remove('wide');
+    document.getElementById('modalTitle').textContent=c?'Edit Car':'Add New Car';
+    document.getElementById('modalBody').innerHTML=`
+    <form onsubmit="submitCar(event,${editId||'null'})">
+        <div class="form-row"><div class="form-group"><label>Name *</label><input class="form-input" id="cfName" value="${esc(c?.name||'')}" required></div><div class="form-group"><label>Category</label><input class="form-input" id="cfCat" value="${esc(c?.cat||'')}"></div></div>
+        <div class="form-group"><label>Image URL</label><input class="form-input" id="cfImg" value="${esc(c?.img||'')}" oninput="previewCarImg(this.value)"><div class="img-preview" id="carImgPreview">${c?.img?`<img src="${esc(c.img)}">`:'Enter URL to preview'}</div></div>
+        <div class="form-row"><div class="form-group"><label>Price (AED) *</label><input type="number" class="form-input" id="cfPrice" value="${c?.price||''}" required></div><div class="form-group"><label>Was Price</label><input type="number" class="form-input" id="cfWas" value="${c?.was||''}"></div></div>
+        <div class="form-row"><div class="form-group"><label>Type</label><input class="form-input" id="cfType" value="${esc(c?.type||'')}"></div><div class="form-group"><label>Badge</label><input class="form-input" id="cfBadge" value="${esc(c?.badge||'')}"></div></div>
+        <div class="form-row"><div class="form-group"><label>Seats</label><input type="number" class="form-input" id="cfSeats" value="${c?.seats||5}"></div><div class="form-group"><label>Doors</label><input type="number" class="form-input" id="cfDoors" value="${c?.doors||4}"></div></div>
+        <div class="form-row"><div class="form-group"><label>Transmission</label><select class="form-input" id="cfTrans"><option value="Automatic" ${(c?.transmission||'Automatic')==='Automatic'?'selected':''}>Automatic</option><option value="Manual" ${c?.transmission==='Manual'?'selected':''}>Manual</option></select></div><div class="form-group"><label>Bags</label><input type="number" class="form-input" id="cfBags" value="${c?.bags||2}"></div></div>
+        <div class="form-group"><label>Features (comma-separated)</label><input class="form-input" id="cfFeats" value="${esc(Array.isArray(c?.feats)?c.feats.join(', '):(c?.feats||''))}"></div>
+        <div class="form-group"><label>Includes</label><input class="form-input" id="cfIncludes" value="${esc(c?.includes||'')}"></div>
+        <div class="form-group"><label>Spots Available</label><input type="number" class="form-input" id="cfSpots" value="${c?.spots||5}"></div>
+        <div style="display:flex;gap:8px;margin-top:16px"><button type="submit" class="btn btn-primary" style="flex:1">${c?'Save Changes':'Add Car'}</button><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button></div>
+    </form>`;
+    openModal();
+}
+function previewCarImg(url){ const p=document.getElementById('carImgPreview'); p.innerHTML=url?`<img src="${esc(url)}" onerror="this.parentElement.innerHTML='Invalid URL'">`:'Enter URL to preview'; }
+async function submitCar(e,editId){
+    e.preventDefault();
+    const featsStr=document.getElementById('cfFeats').value;
+    const feats=featsStr?featsStr.split(',').map(f=>f.trim()).filter(Boolean):[];
+    const body={name:document.getElementById('cfName').value,cat:document.getElementById('cfCat').value,img:document.getElementById('cfImg').value,price:Number(document.getElementById('cfPrice').value),was:Number(document.getElementById('cfWas').value)||null,type:document.getElementById('cfType').value,badge:document.getElementById('cfBadge').value,seats:Number(document.getElementById('cfSeats').value),doors:Number(document.getElementById('cfDoors').value),transmission:document.getElementById('cfTrans').value,bags:Number(document.getElementById('cfBags').value),feats,includes:document.getElementById('cfIncludes').value,spots:Number(document.getElementById('cfSpots').value)};
+    try{if(editId){await api('PUT','/cars/'+editId,body);toast('Car updated','success');}else{await api('POST','/cars',body);toast('Car added','success');}closeModal();await loadCars();loadStats();}catch(e){toast(e.message,'error');}
+}
+async function deleteCar(id){ if(!confirm('Delete this car?'))return; try{await api('DELETE','/cars/'+id);await loadCars();loadStats();toast('Car deleted','success');}catch(e){toast(e.message,'error');} }
+async function toggleCarActive(id){ try{await api('PATCH','/cars/'+id+'/toggle');await loadCars();toast('Visibility toggled','success');}catch(e){toast(e.message,'error');} }
+async function duplicateCar(id){ try{await api('POST','/cars/'+id+'/duplicate');await loadCars();toast('Car duplicated','success');}catch(e){toast(e.message,'error');} }
 
-    async function submitCar(e, editId) {
-        e.preventDefault();
-        const featsStr = document.getElementById('carFeats').value;
-        const feats = featsStr ? featsStr.split(',').map(f => f.trim()).filter(Boolean) : [];
-        const body = {
-            name: document.getElementById('carName').value,
-            cat: document.getElementById('carCat').value,
-            img: document.getElementById('carImg').value,
-            price: Number(document.getElementById('carPrice').value),
-            was: Number(document.getElementById('carWas').value) || null,
-            type: document.getElementById('carType').value,
-            badge: document.getElementById('carBadge').value,
-            spots: Number(document.getElementById('carSpots').value) || 5,
-            feats, includes: document.getElementById('carIncludes').value
-        };
-        try {
-            if (editId) {
-                await api('PUT', '/cars/' + editId, body);
-                toast('Car updated', 'success');
-            } else {
-                await api('POST', '/cars', body);
-                toast('Car added', 'success');
-            }
-            closeModal(); await loadCars(); loadStats();
-        } catch(e) { toast(e.message, 'error'); }
-    }
+// Drag reorder
+let dragCarId=null;
+function dragCar(e,id){ dragCarId=id; e.dataTransfer.effectAllowed='move'; e.target.closest('.car-card').classList.add('dragging'); }
+function dropCar(e,targetId){ e.preventDefault(); if(dragCarId===null||dragCarId===targetId)return; document.querySelectorAll('.car-card.dragging').forEach(c=>c.classList.remove('dragging')); const ids=carsData.map(c=>c.id); const fromIdx=ids.indexOf(dragCarId),toIdx=ids.indexOf(targetId); if(fromIdx===-1||toIdx===-1)return; ids.splice(fromIdx,1); ids.splice(toIdx,0,dragCarId); api('PUT','/cars/reorder',{order:ids}).then(()=>loadCars()).catch(e=>toast(e.message,'error')); dragCarId=null; }
 
-    async function deleteCar(id) {
-        if (!confirm('Delete this car?')) return;
-        try {
-            await api('DELETE', '/cars/' + id);
-            await loadCars(); loadStats();
-            toast('Car deleted', 'success');
-        } catch(e) { toast(e.message, 'error'); }
-    }
+// ═══════ TEAM ═══════
+function renderTeam(){ const el=document.getElementById('teamList'); if(!teamData.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">&#128100;</div><div class="empty-state-title">No team members</div></div>';return;} el.innerHTML=teamData.map(u=>{const i=u.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);return `<div class="team-card"><div class="team-avatar ${u.active?'':'inactive'}">${i}</div><div class="team-info"><div class="team-name">${esc(u.name)}${!u.active?'<span class="deactivated">(Deactivated)</span>':''}</div><div class="team-email">${esc(u.email)}</div></div><span class="badge badge-${u.role}">${cap(u.role)}</span><div class="team-actions">${u.id!==currentUser.id?`<button class="btn btn-ghost btn-sm" onclick="openEditTeamModal('${u.id}')">&#9998;</button><button class="btn btn-danger btn-xs" onclick="deleteTeamMember('${u.id}')">&#128465;</button>`:'<span style="font-size:11px;color:var(--text-muted)">You</span>'}</div></div>`;}).join(''); }
+function openTeamModal(){ document.getElementById('modal').classList.remove('wide'); document.getElementById('modalTitle').textContent='Add Team Member'; document.getElementById('modalBody').innerHTML=`<form onsubmit="submitTeam(event)"><div class="form-group"><label>Name</label><input class="form-input" id="tmName" required></div><div class="form-group"><label>Email</label><input type="email" class="form-input" id="tmEmail" required></div><div class="form-group"><label>Password</label><input type="password" class="form-input" id="tmPw" required minlength="4"></div><div class="form-group"><label>Role</label><select class="form-input" id="tmRole"><option value="viewer">Viewer</option><option value="manager">Manager</option><option value="superadmin">Super Admin</option></select></div><div style="display:flex;gap:8px;margin-top:16px"><button type="submit" class="btn btn-primary" style="flex:1">Add</button><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button></div></form>`; openModal(); }
+function openEditTeamModal(uid){ const u=teamData.find(t=>t.id===uid); if(!u)return; document.getElementById('modal').classList.remove('wide'); document.getElementById('modalTitle').textContent='Edit: '+u.name; document.getElementById('modalBody').innerHTML=`<form onsubmit="submitEditTeam(event,'${u.id}')"><div class="form-group"><label>Name</label><input class="form-input" id="tmName" value="${esc(u.name)}" required></div><div class="form-group"><label>Email</label><input type="email" class="form-input" id="tmEmail" value="${esc(u.email)}" required></div><div class="form-group"><label>New Password (optional)</label><input type="password" class="form-input" id="tmPw"></div><div class="form-group"><label>Role</label><select class="form-input" id="tmRole"><option value="viewer" ${u.role==='viewer'?'selected':''}>Viewer</option><option value="manager" ${u.role==='manager'?'selected':''}>Manager</option><option value="superadmin" ${u.role==='superadmin'?'selected':''}>Super Admin</option></select></div><div class="form-group"><label>Status</label><select class="form-input" id="tmActive"><option value="true" ${u.active?'selected':''}>Active</option><option value="false" ${!u.active?'selected':''}>Deactivated</option></select></div><div style="display:flex;gap:8px;margin-top:16px"><button type="submit" class="btn btn-primary" style="flex:1">Save</button><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button></div></form>`; openModal(); }
+async function submitTeam(e){ e.preventDefault(); try{await api('POST','/team',{name:document.getElementById('tmName').value,email:document.getElementById('tmEmail').value,password:document.getElementById('tmPw').value,role:document.getElementById('tmRole').value});closeModal();await loadTeam();toast('Member added','success');}catch(e){toast(e.message,'error');} }
+async function submitEditTeam(e,id){ e.preventDefault(); const b={name:document.getElementById('tmName').value,email:document.getElementById('tmEmail').value,role:document.getElementById('tmRole').value,active:document.getElementById('tmActive').value==='true'}; const pw=document.getElementById('tmPw').value; if(pw)b.password=pw; try{await api('PUT','/team/'+id,b);closeModal();await loadTeam();toast('Member updated','success');}catch(e){toast(e.message,'error');} }
+async function deleteTeamMember(id){ if(!confirm('Delete this member?'))return; try{await api('DELETE','/team/'+id);await loadTeam();toast('Member removed','success');}catch(e){toast(e.message,'error');} }
 
-    // ╔══════════════════════════════════════╗
-    // ║         RENDER: TEAM                 ║
-    // ╚══════════════════════════════════════╝
-    function renderTeam() {
-        const el = document.getElementById('teamList');
-        if (!teamData.length) {
-            el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#128100;</div><div class="empty-state-title">No team members</div></div>';
-            return;
-        }
-        el.innerHTML = teamData.map(u => {
-            const initials = u.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
-            return `<div class="team-card">
-                <div class="team-avatar ${u.active ? '' : 'inactive'}">${initials}</div>
-                <div class="team-info">
-                    <div class="team-name">${esc(u.name)}${!u.active ? '<span class="deactivated">(Deactivated)</span>' : ''}</div>
-                    <div class="team-email">${esc(u.email)}</div>
-                </div>
-                <span class="badge badge-${u.role}">${cap(u.role)}</span>
-                <div class="team-actions">
-                    ${u.id !== currentUser.id ? `
-                        <button class="btn btn-ghost btn-sm" onclick="openEditTeamModal('${u.id}')" title="Edit">&#9998;</button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteTeamMember('${u.id}')" title="Delete">&#128465;</button>
-                    ` : '<span style="font-size:12px;color:var(--text-muted);">You</span>'}
-                </div>
-            </div>`;
-        }).join('');
-    }
+// ═══════ ACTIVITY LOG ═══════
+function renderActivityLog(items){ const el=document.getElementById('activityList'); if(!items.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">&#128203;</div><div class="empty-state-title">No activity yet</div></div>';return;} el.innerHTML=items.map(a=>`<div class="activity-item"><div class="activity-dot"></div><div><div class="activity-text"><strong>${esc(a.userName)}</strong> &mdash; ${esc(a.details)}</div><div class="activity-time">${fmtDateTime(a.timestamp)} &middot; ${esc(a.action)}</div></div></div>`).join(''); }
 
-    function openTeamModal() {
-        document.getElementById('modalTitle').textContent = 'Add Team Member';
-        document.getElementById('modalBody').innerHTML = `
-            <form onsubmit="submitTeamMember(event)">
-                <div class="form-group">
-                    <label>Full Name</label>
-                    <input class="form-input" id="tmName" required>
-                </div>
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" class="form-input" id="tmEmail" required>
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" class="form-input" id="tmPassword" required minlength="4">
-                </div>
-                <div class="form-group">
-                    <label>Role</label>
-                    <select class="form-input" id="tmRole">
-                        <option value="viewer">Viewer (Read-only)</option>
-                        <option value="manager">Manager</option>
-                        <option value="superadmin">Super Admin</option>
-                    </select>
-                </div>
-                <div style="display:flex; gap:8px; margin-top:20px;">
-                    <button type="submit" class="btn btn-primary" style="flex:1">Add Member</button>
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                </div>
-            </form>`;
-        openModal();
-    }
+// ═══════ VIEW SWITCHING ═══════
+function switchView(name,navEl){
+    currentView=name;
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    if(navEl)navEl.classList.add('active'); else{const it=document.querySelector(`.nav-item[data-view="${name}"]`);if(it)it.classList.add('active');}
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    const v=document.getElementById(name+'View');if(v)v.classList.add('active');
+    document.getElementById('breadcrumbCurrent').textContent=cap(name);
+    if(name==='team'&&isSuperAdmin())loadTeam();
+    if(name==='activity')loadActivity();
+    closeMobileSidebar();
+}
 
-    function openEditTeamModal(userId) {
-        const u = teamData.find(t => t.id === userId);
-        if (!u) return;
-        document.getElementById('modalTitle').textContent = 'Edit Team Member';
-        document.getElementById('modalBody').innerHTML = `
-            <form onsubmit="submitEditTeam(event, '${u.id}')">
-                <div class="form-group">
-                    <label>Full Name</label>
-                    <input class="form-input" id="tmName" value="${esc(u.name)}" required>
-                </div>
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" class="form-input" id="tmEmail" value="${esc(u.email)}" required>
-                </div>
-                <div class="form-group">
-                    <label>New Password (leave blank to keep)</label>
-                    <input type="password" class="form-input" id="tmPassword">
-                </div>
-                <div class="form-group">
-                    <label>Role</label>
-                    <select class="form-input" id="tmRole">
-                        <option value="viewer" ${u.role==='viewer'?'selected':''}>Viewer</option>
-                        <option value="manager" ${u.role==='manager'?'selected':''}>Manager</option>
-                        <option value="superadmin" ${u.role==='superadmin'?'selected':''}>Super Admin</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Status</label>
-                    <select class="form-input" id="tmActive">
-                        <option value="true" ${u.active?'selected':''}>Active</option>
-                        <option value="false" ${!u.active?'selected':''}>Deactivated</option>
-                    </select>
-                </div>
-                <div style="display:flex; gap:8px; margin-top:20px;">
-                    <button type="submit" class="btn btn-primary" style="flex:1">Save Changes</button>
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                </div>
-            </form>`;
-        openModal();
-    }
+// ═══════ SIDEBAR ═══════
+function toggleSidebarCollapse(){ document.getElementById('sidebar').classList.toggle('collapsed'); }
+function toggleMobileSidebar(){ document.getElementById('sidebar').classList.toggle('mobile-open'); document.getElementById('sidebarOverlay').classList.toggle('active'); }
+function closeMobileSidebar(){ document.getElementById('sidebar').classList.remove('mobile-open'); document.getElementById('sidebarOverlay').classList.remove('active'); }
 
-    async function submitTeamMember(e) {
-        e.preventDefault();
-        try {
-            await api('POST', '/team', {
-                name: document.getElementById('tmName').value,
-                email: document.getElementById('tmEmail').value,
-                password: document.getElementById('tmPassword').value,
-                role: document.getElementById('tmRole').value
-            });
-            closeModal(); await loadTeam();
-            toast('Team member added', 'success');
-        } catch(e) { toast(e.message, 'error'); }
-    }
+// ═══════ MODAL ═══════
+function openModal(){ document.getElementById('modalOverlay').classList.add('active'); }
+function closeModal(){ document.getElementById('modalOverlay').classList.remove('active'); document.getElementById('modal').classList.remove('wide'); }
+function switchDetailTab(tab,panelId){ tab.parentElement.querySelectorAll('.detail-tab').forEach(t=>t.classList.remove('active')); tab.classList.add('active'); const parent=tab.parentElement.parentElement; parent.querySelectorAll('.detail-panel').forEach(p=>p.classList.remove('active')); document.getElementById(panelId).classList.add('active'); }
 
-    async function submitEditTeam(e, id) {
-        e.preventDefault();
-        const body = {
-            name: document.getElementById('tmName').value,
-            email: document.getElementById('tmEmail').value,
-            role: document.getElementById('tmRole').value,
-            active: document.getElementById('tmActive').value === 'true'
-        };
-        const pw = document.getElementById('tmPassword').value;
-        if (pw) body.password = pw;
-        try {
-            await api('PUT', '/team/' + id, body);
-            closeModal(); await loadTeam();
-            toast('Team member updated', 'success');
-        } catch(e) { toast(e.message, 'error'); }
-    }
+// ═══════ TOAST ═══════
+function toast(msg,type='info'){ const c=document.getElementById('toastContainer'),el=document.createElement('div'); el.className='toast '+type; el.textContent=msg; c.appendChild(el); setTimeout(()=>{el.style.animation='slideOut 0.3s ease forwards';setTimeout(()=>el.remove(),300);},3000); }
 
-    async function deleteTeamMember(id) {
-        if (!confirm('Delete this team member?')) return;
-        try {
-            await api('DELETE', '/team/' + id);
-            await loadTeam();
-            toast('Team member removed', 'success');
-        } catch(e) { toast(e.message, 'error'); }
-    }
+// ═══════ UTILITIES ═══════
+function esc(s){if(!s)return '';const d=document.createElement('div');d.textContent=String(s);return d.innerHTML;}
+function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):'';}
+function fmtDate(d){if(!d)return '—';return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+function fmtDateTime(d){if(!d)return '—';return new Date(d).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});}
+function downloadCSV(csv,fn){const b=new Blob([csv],{type:'text/csv'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=fn;a.click();URL.revokeObjectURL(u);}
+function updateSortArrows(prefix,sortState){document.querySelectorAll(`[id^="${prefix}"]`).forEach(el=>el.textContent='');const el=document.getElementById(prefix+sortState.field);if(el)el.textContent=sortState.dir==='asc'?'\u25B2':'\u25BC';}
+function handleGlobalSearch(e){if(e.key==='Enter'){const q=e.target.value.trim().toLowerCase();if(!q)return;if(leadsData.find(l=>`${l.fullName} ${l.phone}`.toLowerCase().includes(q))){switchView('leads');document.getElementById('leadsSearch').value=q;renderLeads();return;}if(bookingsData.find(b=>`${b.fullName} ${b.phone} ${b.ref} ${b.carName}`.toLowerCase().includes(q))){switchView('bookings');document.getElementById('bookingsSearch').value=q;renderBookings();return;}toast('No results for "'+q+'"','info');}}
+document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();const el=document.getElementById('globalSearch');if(el){el.focus();el.select();}}});
+function updateGreeting(){const h=new Date().getHours();const g=h<12?'Good morning':h<18?'Good afternoon':'Good evening';document.getElementById('dashboardGreeting').textContent=g+(currentUser?', '+currentUser.name.split(' ')[0]:'');document.getElementById('dashboardDate').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});}
 
-    // ╔══════════════════════════════════════╗
-    // ║         RENDER: ACTIVITY LOG         ║
-    // ╚══════════════════════════════════════╝
-    function renderActivity(items) {
-        const el = document.getElementById('activityList');
-        if (!items.length) {
-            el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#128203;</div><div class="empty-state-title">No activity recorded yet</div></div>';
-            return;
-        }
-        el.innerHTML = items.map(a => `<div class="activity-item">
-            <div class="activity-dot"></div>
-            <div class="activity-content">
-                <div class="activity-text"><strong>${esc(a.userName)}</strong> &mdash; ${esc(a.details)}</div>
-                <div class="activity-time">${fmtDateTime(a.timestamp)} &middot; ${esc(a.action)}</div>
-            </div>
-        </div>`).join('');
-    }
-
-    // ╔══════════════════════════════════════╗
-    // ║         VIEW SWITCHING               ║
-    // ╚══════════════════════════════════════╝
-    function switchView(name, navEl) {
-        currentView = name;
-        // Update nav
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        if (navEl) navEl.classList.add('active');
-        else {
-            const item = document.querySelector(`.nav-item[data-view="${name}"]`);
-            if (item) item.classList.add('active');
-        }
-        // Update views
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        const view = document.getElementById(name + 'View');
-        if (view) view.classList.add('active');
-        // Update breadcrumb
-        document.getElementById('breadcrumbCurrent').textContent = cap(name);
-        // Load data for specific views
-        if (name === 'team' && isSuperAdmin()) loadTeam();
-        if (name === 'activity') loadActivity();
-        // Close mobile sidebar
-        closeMobileSidebar();
-    }
-
-    // ╔══════════════════════════════════════╗
-    // ║         SIDEBAR                      ║
-    // ╚══════════════════════════════════════╝
-    function toggleSidebarCollapse() {
-        document.getElementById('sidebar').classList.toggle('collapsed');
-    }
-    function toggleMobileSidebar() {
-        document.getElementById('sidebar').classList.toggle('mobile-open');
-        document.getElementById('sidebarOverlay').classList.toggle('active');
-    }
-    function closeMobileSidebar() {
-        document.getElementById('sidebar').classList.remove('mobile-open');
-        document.getElementById('sidebarOverlay').classList.remove('active');
-    }
-
-    // ╔══════════════════════════════════════╗
-    // ║         MODAL                        ║
-    // ╚══════════════════════════════════════╝
-    function openModal() { document.getElementById('modalOverlay').classList.add('active'); }
-    function closeModal() { document.getElementById('modalOverlay').classList.remove('active'); }
-
-    // ╔══════════════════════════════════════╗
-    // ║         TOAST                        ║
-    // ╚══════════════════════════════════════╝
-    function toast(msg, type = 'info') {
-        const container = document.getElementById('toastContainer');
-        const el = document.createElement('div');
-        el.className = 'toast ' + type;
-        el.textContent = msg;
-        container.appendChild(el);
-        setTimeout(() => {
-            el.style.animation = 'slideOut 0.3s ease forwards';
-            setTimeout(() => el.remove(), 300);
-        }, 3000);
-    }
-
-    // ╔══════════════════════════════════════╗
-    // ║         UTILITIES                    ║
-    // ╚══════════════════════════════════════╝
-    function esc(s) {
-        if (!s) return '';
-        const div = document.createElement('div');
-        div.textContent = String(s);
-        return div.innerHTML;
-    }
-    function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
-    function fmtDate(d) {
-        if (!d) return '-';
-        return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    }
-    function fmtDateTime(d) {
-        if (!d) return '-';
-        return new Date(d).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-    }
-    function updateGreeting() {
-        const h = new Date().getHours();
-        const g = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
-        document.getElementById('dashboardGreeting').textContent = g + (currentUser ? ', ' + currentUser.name.split(' ')[0] : '');
-        document.getElementById('dashboardDate').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    }
-    function downloadCSV(csv, filename) {
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = filename; a.click();
-        URL.revokeObjectURL(url);
-    }
-    function handleGlobalSearch(e) {
-        if (e.key === 'Enter') {
-            const q = e.target.value.trim().toLowerCase();
-            if (!q) return;
-            // Search leads first
-            const lead = leadsData.find(l => `${l.fullName} ${l.phone}`.toLowerCase().includes(q));
-            if (lead) { switchView('leads'); document.getElementById('leadsSearch').value = q; renderLeads(); return; }
-            // Search bookings
-            const booking = bookingsData.find(b => `${b.fullName} ${b.phone} ${b.ref} ${b.carName}`.toLowerCase().includes(q));
-            if (booking) { switchView('bookings'); document.getElementById('bookingsSearch').value = q; renderBookings(); return; }
-            toast('No results found for "' + q + '"', 'info');
-        }
-    }
-    // Cmd+K shortcut
-    document.addEventListener('keydown', e => {
-        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-            e.preventDefault();
-            const el = document.getElementById('globalSearch');
-            if (el) { el.focus(); el.select(); }
-        }
-    });
-
-    // ╔══════════════════════════════════════╗
-    // ║         INIT                         ║
-    // ╚══════════════════════════════════════╝
-    document.addEventListener('DOMContentLoaded', () => {
-        initTheme();
-        if (loadSession() && currentUser) {
-            enterDashboard();
-        }
-    });
-    </script>
+// ═══════ INIT ═══════
+document.addEventListener('DOMContentLoaded',()=>{initTheme();if(loadSession()&&currentUser)enterDashboard();});
+</script>
 </body>
 </html>

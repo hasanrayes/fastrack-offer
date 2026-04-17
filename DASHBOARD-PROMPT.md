@@ -270,9 +270,9 @@ After each phase, update this section:
 | 1.1 | Auth System (JWT + Login) | ✅ DONE |
 | 1.2 | Dashboard Layout Shell | ✅ DONE |
 | 1.3 | Role-Based Access (RBAC) | ✅ DONE |
-| 2.1 | Leads Management | ⬜ PENDING |
-| 2.2 | Bookings Management | ⬜ PENDING |
-| 2.3 | Cars / Fleet Management | ⬜ PENDING |
+| 2.1 | Leads Management | ✅ DONE |
+| 2.2 | Bookings Management | ✅ DONE |
+| 2.3 | Cars / Fleet Management | ✅ DONE |
 | 3.1 | Content Editor (CMS) | ⬜ PENDING |
 | 3.2 | Drag & Drop Section Builder | ⬜ PENDING |
 | 3.3 | Landing Page Settings | ⬜ PENDING |
