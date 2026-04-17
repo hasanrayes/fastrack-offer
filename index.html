@@ -727,8 +727,60 @@ document.addEventListener('mouseout',function(e){if(!exitS&&!localStorage.getIte
     if(s&&s.seo){if(s.seo.title)document.title=s.seo.title;var md=document.querySelector('meta[name="description"]');if(md&&s.seo.description)md.setAttribute('content',s.seo.description);else if(s.seo.description){md=document.createElement('meta');md.name='description';md.content=s.seo.description;document.head.appendChild(md);}}
     // Settings: social whatsapp link
     if(s&&s.social&&s.social.whatsapp){var waLinks=document.querySelectorAll('a[href*="wa.me"]');waLinks.forEach(function(a){a.href='https://wa.me/'+s.social.whatsapp;});}
-    // Section visibility
-    if(sec&&sec.length){var sectionMap={nav:'.nav',countdown:'.cd-bar',hero:'.hero',ticker:'.ticker',trust:'.trust',cars:'.cars-section',why:'#why',reviews:'.reviews-section',guarantee:'.guarantee',finalcta:'.final-cta',footer:'.footer',sticky:'.sticky-bottom',leadpopup:'.lead-ov'};sec.forEach(function(section){if(sectionMap[section.id]&&section.visible===false){var el=document.querySelector(sectionMap[section.id]);if(el)el.style.display='none';}});}
+    // Section visibility + reorder
+    if(sec&&sec.length){
+      var sectionMap={nav:'.nav',countdown:'.cd-bar',hero:'.hero',ticker:'.ticker',trust:'.trust',cars:'.cars-section',why:'#why',reviews:'.reviews-section',guarantee:'.guarantee',finalcta:'.final-cta',footer:'.footer',sticky:'.sticky-bottom',leadpopup:'.lead-ov'};
+      // Sort sections by order
+      sec.sort(function(a,b){return(a.order||0)-(b.order||0);});
+      // Apply visibility: show or hide each section
+      sec.forEach(function(section){
+        var sel=sectionMap[section.id];
+        if(!sel)return;
+        var el=document.querySelector(sel);
+        if(!el)return;
+        if(section.visible===false){
+          el.style.display='none';
+        }else{
+          el.style.display='';
+        }
+      });
+      // Reorder DOM: move sections in the order specified by config
+      // Find a common parent (body or main wrapper)
+      var mainParent=document.querySelector('.hero')?.parentElement||document.body;
+      var orderedEls=[];
+      sec.forEach(function(section){
+        var sel=sectionMap[section.id];
+        if(!sel)return;
+        var el=document.querySelector(sel);
+        if(el&&el.parentElement===mainParent)orderedEls.push(el);
+      });
+      // Collect non-section children to preserve them (scripts, overlays, etc.)
+      var allChildren=Array.from(mainParent.children);
+      var sectionEls=new Set(orderedEls);
+      var nonSectionEls=allChildren.filter(function(el){return !sectionEls.has(el);});
+      // Re-append in order: sections first in config order, then non-sections
+      orderedEls.forEach(function(el){mainParent.appendChild(el);});
+      nonSectionEls.forEach(function(el){mainParent.appendChild(el);});
+      // Render custom sections
+      sec.forEach(function(section){
+        if(section.type==='builtin'||!section.content||section.visible===false)return;
+        var existing=document.getElementById('custom-'+section.id);
+        if(existing)existing.remove();
+        var div=document.createElement('section');
+        div.id='custom-'+section.id;
+        div.style.cssText='padding:60px 20px;text-align:center;';
+        var inner='';
+        if(section.content.heading)inner+='<h2 style="font-size:28px;font-weight:800;margin-bottom:12px">'+section.content.heading+'</h2>';
+        if(section.content.imageUrl)inner+='<img src="'+section.content.imageUrl+'" style="max-width:600px;width:100%;border-radius:12px;margin:16px auto;display:block" alt="">';
+        if(section.content.body)inner+='<p style="max-width:600px;margin:0 auto 16px;color:#999;font-size:16px">'+section.content.body+'</p>';
+        if(section.content.buttonText)inner+='<a href="'+(section.content.buttonUrl||'#offers')+'" style="display:inline-block;background:var(--o,#FF5F00);color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:16px">'+section.content.buttonText+'</a>';
+        div.innerHTML='<div style="max-width:900px;margin:0 auto">'+inner+'</div>';
+        // Insert before footer
+        var footer=document.querySelector('.footer');
+        if(footer)footer.parentElement.insertBefore(div,footer);
+        else mainParent.appendChild(div);
+      });
+    }
   }).catch(function(){/* config load failed, page works with hardcoded defaults */});
 })();
 </script>

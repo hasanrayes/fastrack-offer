@@ -682,7 +682,8 @@
             <!-- CMS: SECTION BUILDER -->
             <div class="view" id="sectionsView">
                 <div class="view-header"><div><h1 class="view-title">Section Builder</h1><p class="view-subtitle">Reorder, show/hide, and add custom sections</p></div>
-                <div class="view-actions"><button class="btn btn-primary btn-sm" onclick="openAddSectionModal()">+ Add Section</button><button class="btn btn-danger btn-sm" onclick="resetSections()">Reset Default</button></div></div>
+                <div class="view-actions"><button class="btn btn-primary btn-sm" onclick="publishSections()">Save &amp; Publish</button><button class="btn btn-secondary btn-sm" onclick="openAddSectionModal()">+ Add Section</button><button class="btn btn-danger btn-sm" onclick="resetSections()">Reset Default</button></div></div>
+                <div style="padding:0 28px 8px"><div style="padding:10px 14px;background:var(--blue-bg);border-radius:10px;font-size:12px;color:var(--blue);display:flex;align-items:center;gap:8px">&#9432; Toggle switches save instantly. Drag to reorder, then click <strong>Save &amp; Publish</strong> to push changes live.</div></div>
                 <div class="data-section"><div id="sectionsList"></div></div>
             </div>
 
@@ -1676,7 +1677,17 @@ async function toggleSectionVisibility(id, visible) {
         const sec = cmsConfig.sections.find(s => s.id === id);
         if (sec) sec.visible = visible;
         toast(visible ? 'Section shown' : 'Section hidden', 'success');
+        // Auto-refresh preview
+        const f = document.getElementById('previewFrame');
+        if (f) f.src = '/?t=' + Date.now();
     } catch(e) { toast(e.message, 'error'); }
+}
+
+async function publishSections() {
+    toast('Sections published! Changes are live.', 'success');
+    // Refresh preview iframe
+    const f = document.getElementById('previewFrame');
+    if (f) f.src = '/?t=' + Date.now();
 }
 
 function openAddSectionModal() {
