@@ -29,7 +29,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .nav-cta:hover{background:var(--orangeH)}
 
 /* ── HERO (compact) ── */
-.hero{margin-top:58px;background:var(--dark);padding:32px 0 28px;text-align:center}
+.hero{background:var(--dark);padding:32px 0 28px;text-align:center}
 .hero-inner{max-width:1200px;margin:0 auto;padding:0 24px}
 .hero-urgency{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;background:var(--red);color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;border-radius:4px;margin-bottom:14px;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
@@ -56,7 +56,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .trust-item svg{color:var(--orange);flex-shrink:0}
 
 /* ── COUNTDOWN (compact) ── */
-.cd-bar{background:var(--dark);padding:12px 0;text-align:center;border-bottom:1px solid var(--borderD)}
+.cd-bar{margin-top:58px;background:var(--dark);padding:12px 0;text-align:center;border-bottom:1px solid var(--borderD)}
 .cd-inner{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
 .cd-text{font-size:13px;font-weight:700;color:var(--red)}
 .cd-timer{display:flex;gap:5px}
@@ -286,6 +286,19 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
   </div>
 </nav>
 
+<!-- COUNTDOWN -->
+<div class="cd-bar">
+  <div class="cd-inner">
+    <span class="cd-text">&#128293; DEAL EXPIRES IN:</span>
+    <div class="cd-timer">
+      <div class="cd-b"><div class="cd-n" id="cdD">00</div><div class="cd-u">Days</div></div>
+      <div class="cd-b"><div class="cd-n" id="cdH">00</div><div class="cd-u">Hrs</div></div>
+      <div class="cd-b"><div class="cd-n" id="cdM">00</div><div class="cd-u">Min</div></div>
+      <div class="cd-b"><div class="cd-n" id="cdS">00</div><div class="cd-u">Sec</div></div>
+    </div>
+  </div>
+</div>
+
 <!-- HERO (compact - no image) -->
 <section class="hero">
   <div class="hero-inner">
@@ -304,30 +317,6 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
   </div>
 </section>
 
-<!-- TRUST BAR -->
-<div class="trust">
-  <div class="trust-inner">
-    <div class="trust-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Full Insurance</div>
-    <div class="trust-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Free Delivery</div>
-    <div class="trust-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>24/7 Assist</div>
-    <div class="trust-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>No Hidden Fees</div>
-    <div class="trust-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Cancel Anytime</div>
-  </div>
-</div>
-
-<!-- COUNTDOWN -->
-<div class="cd-bar">
-  <div class="cd-inner">
-    <span class="cd-text">&#128293; DEAL EXPIRES IN:</span>
-    <div class="cd-timer">
-      <div class="cd-b"><div class="cd-n" id="cdD">00</div><div class="cd-u">Days</div></div>
-      <div class="cd-b"><div class="cd-n" id="cdH">00</div><div class="cd-u">Hrs</div></div>
-      <div class="cd-b"><div class="cd-n" id="cdM">00</div><div class="cd-u">Min</div></div>
-      <div class="cd-b"><div class="cd-n" id="cdS">00</div><div class="cd-u">Sec</div></div>
-    </div>
-  </div>
-</div>
-
 <!-- TICKER -->
 <div class="ticker">
   <div class="ticker-track" id="ticker">
@@ -341,6 +330,17 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
     <span class="ticker-item"><span class="g">&#9989;</span> Mohammed from Business Bay booked 2 min ago</span>
     <span class="ticker-item"><span class="g">&#9989;</span> 143 rentals booked this week</span>
     <span class="ticker-item"><span class="g">&#9989;</span> 4.9&#9733; average from 2,500+ customers</span>
+  </div>
+</div>
+
+<!-- TRUST BAR -->
+<div class="trust">
+  <div class="trust-inner">
+    <div class="trust-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Full Insurance</div>
+    <div class="trust-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Free Delivery</div>
+    <div class="trust-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>24/7 Assist</div>
+    <div class="trust-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>No Hidden Fees</div>
+    <div class="trust-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Cancel Anytime</div>
   </div>
 </div>
 
