@@ -601,6 +601,208 @@ app.get('/api/stats', auth, (req, res) => {
   res.json({ totalBookings, totalLeads, totalRevenue, newBookings, newLeads, convertedLeads, conversionRate, popularCar, totalCars: cars.length });
 });
 
+// ══════════════════════════════
+// CMS CONFIG API
+// ══════════════════════════════
+
+const DEFAULT_SECTIONS = [
+  { id: 'nav', name: 'Navigation', type: 'builtin', visible: true, order: 0 },
+  { id: 'countdown', name: 'Countdown Timer', type: 'builtin', visible: true, order: 1 },
+  { id: 'hero', name: 'Hero Section', type: 'builtin', visible: true, order: 2 },
+  { id: 'ticker', name: 'Social Proof Ticker', type: 'builtin', visible: true, order: 3 },
+  { id: 'trust', name: 'Trust Bar', type: 'builtin', visible: true, order: 4 },
+  { id: 'cars', name: 'Cars / Offers', type: 'builtin', visible: true, order: 5 },
+  { id: 'why', name: 'Why Us', type: 'builtin', visible: true, order: 6 },
+  { id: 'reviews', name: 'Customer Reviews', type: 'builtin', visible: true, order: 7 },
+  { id: 'guarantee', name: 'Guarantee', type: 'builtin', visible: true, order: 8 },
+  { id: 'finalcta', name: 'Final CTA', type: 'builtin', visible: true, order: 9 },
+  { id: 'footer', name: 'Footer', type: 'builtin', visible: true, order: 10 },
+  { id: 'sticky', name: 'Sticky Bottom Bar', type: 'builtin', visible: true, order: 11 },
+  { id: 'leadpopup', name: 'Lead Popup', type: 'builtin', visible: true, order: 12 }
+];
+
+let siteConfig = {
+  content: {
+    logo: 'FASTRACK',
+    nav: { ctaText: 'View Offers' },
+    countdown: { enabled: true, urgencyText: 'DEAL EXPIRES IN:', endDate: '' },
+    hero: {
+      urgencyBadge: 'Offer Ends Soon — Limited Spots',
+      headline: 'SAVE UP TO <strong>40%</strong> ON MONTHLY CAR RENTAL',
+      subtext: 'Premium cars from AED 999/month. Full insurance, free UAE delivery, zero hidden fees.',
+      proof1: '4.9/5 from 2,500+ customers',
+      proof2: '143 booked this week',
+      ctaPrimary: 'Claim Your Deal',
+      ctaSecondary: 'WhatsApp Us',
+      liveText: 'people viewing offers right now'
+    },
+    ticker: {
+      messages: [
+        'Ahmed from Dubai Marina just booked a Mitsubishi ASX',
+        'Sara saved AED 2,400 on a 3-month plan',
+        'Mohammed from Business Bay booked 2 min ago',
+        '143 rentals booked this week',
+        '4.9★ average from 2,500+ customers'
+      ]
+    },
+    trust: {
+      items: ['Full Insurance', 'Free Delivery', '24/7 Assist', 'No Hidden Fees', 'Cancel Anytime']
+    },
+    carsSection: {
+      tag: 'Limited Spots Available',
+      headline: 'CHOOSE YOUR <strong>DEAL</strong>',
+      subtext: 'Lock in your discounted monthly rate before it\'s gone.'
+    },
+    whyUs: {
+      label: 'Why 2,500+ Customers Trust Us',
+      title: 'THE FASTRACK DIFFERENCE',
+      cards: [
+        { icon: '🛡️', title: 'Full Insurance', text: 'Comprehensive coverage. Zero deductibles, zero worries.' },
+        { icon: '🚚', title: 'Free Delivery', text: 'To your doorstep anywhere in UAE. No pickup hassle.' },
+        { icon: '💰', title: 'No Hidden Fees', text: 'Price you see is the price you pay. Period.' },
+        { icon: '⚡', title: '2-Min Booking', text: 'Pick, confirm, done. Car at your door tomorrow.' },
+        { icon: '🔄', title: 'Flexible Plans', text: 'Switch cars, extend, or cancel anytime. No penalties.' },
+        { icon: '📞', title: '24/7 Support', text: 'Phone & WhatsApp support around the clock.' }
+      ]
+    },
+    reviews: {
+      label: 'Real Reviews',
+      title: 'WHAT OUR CUSTOMERS SAY',
+      items: [
+        { stars: 5, text: 'Saved AED 2,400 on a 3-month rental. Fastrack beat every quote I got.', name: 'Ahmed K.', role: 'Business Consultant, Dubai Marina' },
+        { stars: 5, text: 'Compared 5 companies. Fastrack was 40% cheaper with better insurance.', name: 'Sara M.', role: 'Marketing Manager, Business Bay' },
+        { stars: 5, text: 'Booked in 2 minutes. Car delivered next day to my apartment.', name: 'Omar H.', role: 'Entrepreneur, JBR' },
+        { stars: 5, text: 'I was paying AED 2,200/month before. Now paying AED 1,299. Same class of car.', name: 'Khalid R.', role: 'Sales Director, Downtown' },
+        { stars: 5, text: 'Needed a car urgently. Called at 9pm, had a car by 8am next morning.', name: 'Fatima A.', role: 'Consultant, Abu Dhabi' },
+        { stars: 5, text: 'Third time renting from them. Consistent quality and fair pricing.', name: 'Rami T.', role: 'Freelancer, Deira' },
+        { stars: 5, text: 'Rented a JS4 for 6 months. Panoramic roof, 360 camera — luxury for less.', name: 'Layla S.', role: 'Interior Designer, JBR' },
+        { stars: 5, text: 'My company rents 3 cars from Fastrack. Best fleet deal in the UAE.', name: 'Nasser Q.', role: 'CEO, Small Business, Sharjah' }
+      ]
+    },
+    guarantee: {
+      headline: 'PRICE MATCH <strong>GUARANTEE</strong>',
+      subtext: 'Found a cheaper monthly rate? We\'ll match it + give you extra 5% off.'
+    },
+    finalCta: {
+      headline: 'DON\'T MISS OUT — <strong>LOCK YOUR RATE</strong>',
+      subtext: 'Prices go up when spots are filled. Secure your deal today.',
+      buttonText: 'View Deals'
+    },
+    footer: {
+      copyright: '© 2024 Fastrack Rent a Car • Dubai, UAE',
+      phone: '+971 58 596 9960',
+      whatsappText: 'WhatsApp',
+      email: 'info@fasttrackrac.com'
+    },
+    stickyBar: {
+      prefix: 'From',
+      wasPrice: 'AED 1,399',
+      currentPrice: 'AED 999/mo',
+      buttonText: 'Claim Deal'
+    },
+    leadPopup: {
+      headline: 'Wait — Get 5% Extra Off',
+      subtext: 'Drop your WhatsApp and we\'ll send you an exclusive discount code.',
+      buttonText: 'Send Me The Deal',
+      skipText: 'No thanks, I\'ll pay full price'
+    },
+    notifications: {
+      messages: [
+        'Ahmed from Dubai Marina just booked Mitsubishi ASX',
+        'Sara from JBR saved AED 2,400',
+        'Mohammed from Business Bay booked 2 min ago',
+        'Fatima from Downtown claimed the JAC J7 deal',
+        'Ali from Sharjah booked Mitsubishi Attrage',
+        'Khalid from Abu Dhabi just booked JAC JS4'
+      ]
+    }
+  },
+  sections: JSON.parse(JSON.stringify(DEFAULT_SECTIONS)),
+  settings: {
+    colors: { primary: '#FF5F00', dark: '#1A1A1A', accent: '#00C853' },
+    fonts: { family: 'Inter', sizePreset: 'default' },
+    seo: { title: 'Fastrack Rent a Car Dubai — Save Up to 40%', description: 'Premium monthly car rental in Dubai from AED 999. Full insurance, free delivery.', ogImage: '' },
+    scripts: { headerScripts: '', footerScripts: '' },
+    social: { whatsapp: '971585969960', phone: '+971 58 596 9960', email: 'info@fasttrackrac.com' }
+  }
+};
+
+// Public: landing page fetches config
+app.get('/api/config', (req, res) => {
+  res.json(siteConfig);
+});
+
+// Admin: update full config
+app.put('/api/config', auth, requireRole('superadmin', 'manager'), (req, res) => {
+  const { content, settings } = req.body;
+  if (content) siteConfig.content = { ...siteConfig.content, ...content };
+  if (settings) siteConfig.settings = { ...siteConfig.settings, ...settings };
+  logActivity(req.user.id, 'config_updated', 'Updated landing page configuration');
+  res.json({ success: true, config: siteConfig });
+});
+
+// Sections list
+app.get('/api/config/sections', auth, (req, res) => {
+  res.json(siteConfig.sections.sort((a, b) => a.order - b.order));
+});
+
+// Reorder sections
+app.put('/api/config/sections/reorder', auth, requireRole('superadmin', 'manager'), (req, res) => {
+  const { order } = req.body; // array of section IDs
+  if (!order || !Array.isArray(order)) return res.status(400).json({ error: 'order array required' });
+  order.forEach((id, idx) => {
+    const sec = siteConfig.sections.find(s => s.id === id);
+    if (sec) sec.order = idx;
+  });
+  logActivity(req.user.id, 'sections_reordered', 'Reordered landing page sections');
+  res.json({ success: true, sections: siteConfig.sections.sort((a, b) => a.order - b.order) });
+});
+
+// Toggle section visibility
+app.patch('/api/config/sections/:id', auth, requireRole('superadmin', 'manager'), (req, res) => {
+  const sec = siteConfig.sections.find(s => s.id === req.params.id);
+  if (!sec) return res.status(404).json({ error: 'Section not found' });
+  if (req.body.visible !== undefined) sec.visible = req.body.visible;
+  if (req.body.name) sec.name = req.body.name;
+  logActivity(req.user.id, 'section_updated', `Updated section: ${sec.name}`);
+  res.json(sec);
+});
+
+// Add custom section
+app.post('/api/config/sections', auth, requireRole('superadmin', 'manager'), (req, res) => {
+  const { name, type, content } = req.body;
+  if (!name) return res.status(400).json({ error: 'Section name required' });
+  const validTypes = ['text', 'image_text', 'cta_banner'];
+  const sec = {
+    id: 'custom_' + Date.now().toString(36),
+    name,
+    type: validTypes.includes(type) ? type : 'text',
+    visible: true,
+    order: siteConfig.sections.length,
+    content: content || { heading: '', body: '', imageUrl: '', buttonText: '', buttonUrl: '' }
+  };
+  siteConfig.sections.push(sec);
+  logActivity(req.user.id, 'section_added', `Added custom section: ${name}`);
+  res.json(sec);
+});
+
+// Delete custom section
+app.delete('/api/config/sections/:id', auth, requireRole('superadmin', 'manager'), (req, res) => {
+  const idx = siteConfig.sections.findIndex(s => s.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: 'Section not found' });
+  if (siteConfig.sections[idx].type === 'builtin') return res.status(400).json({ error: 'Cannot delete built-in sections' });
+  const deleted = siteConfig.sections.splice(idx, 1)[0];
+  logActivity(req.user.id, 'section_deleted', `Deleted section: ${deleted.name}`);
+  res.json({ success: true });
+});
+
+// Reset config to defaults
+app.post('/api/config/reset', auth, requireRole('superadmin'), (req, res) => {
+  siteConfig.sections = JSON.parse(JSON.stringify(DEFAULT_SECTIONS));
+  logActivity(req.user.id, 'config_reset', 'Reset landing page sections to defaults');
+  res.json({ success: true });
+});
+
 app.get('/dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, 'dashboard.html'));
 });

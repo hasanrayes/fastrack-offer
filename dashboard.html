@@ -334,6 +334,28 @@
             .kpi-grid { grid-template-columns:1fr; }
             .kpi-value { font-size:22px; }
         }
+        /* ─── CMS ─── */
+        .cms-panel { display:none; padding-top:20px; }
+        .cms-panel.active { display:block; }
+        .cms-card { background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:20px; margin-bottom:16px; }
+        .cms-card-title { font-size:14px; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+        .cms-card-title .icon { font-size:18px; }
+        .cms-list-item { display:flex; align-items:center; gap:10px; padding:10px 12px; background:var(--bg-input); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; cursor:grab; }
+        .cms-list-item:active { cursor:grabbing; opacity:0.7; }
+        .cms-list-item.dragging { opacity:0.4; }
+        .cms-list-item .drag-handle { color:var(--text-muted); font-size:16px; cursor:grab; flex-shrink:0; }
+        .cms-list-item .item-content { flex:1; min-width:0; }
+        .cms-list-item .item-name { font-size:13px; font-weight:600; }
+        .cms-list-item .item-type { font-size:11px; color:var(--text-muted); }
+        .cms-list-item .item-actions { display:flex; gap:4px; align-items:center; }
+        .toggle-switch { position:relative; width:36px; height:20px; }
+        .toggle-switch input { opacity:0; width:0; height:0; }
+        .toggle-slider { position:absolute; cursor:pointer; inset:0; background:var(--border); border-radius:20px; transition:0.2s; }
+        .toggle-slider:before { content:''; position:absolute; height:16px; width:16px; left:2px; bottom:2px; background:#fff; border-radius:50%; transition:0.2s; }
+        .toggle-switch input:checked + .toggle-slider { background:var(--green); }
+        .toggle-switch input:checked + .toggle-slider:before { transform:translateX(16px); }
+        .color-input-wrap { display:flex; align-items:center; gap:8px; }
+        .color-input-wrap input[type="color"] { width:36px; height:36px; border:1px solid var(--border); border-radius:8px; padding:2px; cursor:pointer; background:var(--bg-input); }
     </style>
 </head>
 <body>
@@ -393,6 +415,10 @@
             <div class="nav-item" data-view="leads" onclick="switchView('leads',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><span class="nav-label">Leads</span><span class="nav-badge" id="leadsNavBadge" style="display:none"></span></div>
             <div class="nav-item" data-view="bookings" onclick="switchView('bookings',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><span class="nav-label">Bookings</span><span class="nav-badge" id="bookingsNavBadge" style="display:none"></span></div>
             <div class="nav-item" data-view="cars" onclick="switchView('cars',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div><span class="nav-label">Cars</span></div>
+            <div class="nav-section">CMS</div>
+            <div class="nav-item" data-view="cms" data-roles="superadmin,manager" onclick="switchView('cms',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div><span class="nav-label">Content Editor</span></div>
+            <div class="nav-item" data-view="sections" data-roles="superadmin,manager" onclick="switchView('sections',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div><span class="nav-label">Section Builder</span></div>
+            <div class="nav-item" data-view="pagesettings" data-roles="superadmin,manager" onclick="switchView('pagesettings',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div><span class="nav-label">Page Settings</span></div>
             <div class="nav-section">Management</div>
             <div class="nav-item" data-view="team" data-roles="superadmin" onclick="switchView('team',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10z"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/></svg></div><span class="nav-label">Team</span></div>
             <div class="nav-item" data-view="activity" onclick="switchView('activity',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><span class="nav-label">Activity Log</span></div>
@@ -516,6 +542,41 @@
             <div class="view" id="activityView">
                 <div class="view-header"><div><h1 class="view-title">Activity Log</h1><p class="view-subtitle">Track all dashboard actions</p></div></div>
                 <div class="data-section"><div class="table-wrap" style="padding:16px" id="activityList"></div></div>
+            </div>
+
+            <!-- CMS: CONTENT EDITOR -->
+            <div class="view" id="cmsView">
+                <div class="view-header"><div><h1 class="view-title">Content Editor</h1><p class="view-subtitle">Edit all landing page text and content</p></div>
+                <div class="view-actions"><button class="btn btn-primary btn-sm" onclick="saveCmsContent()">Save &amp; Publish</button><button class="btn btn-secondary btn-sm" onclick="window.open('/','_blank')">Preview Site</button></div></div>
+                <div style="padding:0 28px 28px">
+                    <div class="detail-tabs" id="cmsTabs" style="margin-bottom:0;position:sticky;top:0;background:var(--bg-primary);z-index:2;padding-top:4px">
+                        <div class="detail-tab active" onclick="switchCmsTab(this,'cms-hero')">Hero</div>
+                        <div class="detail-tab" onclick="switchCmsTab(this,'cms-ticker')">Ticker</div>
+                        <div class="detail-tab" onclick="switchCmsTab(this,'cms-trust')">Trust Bar</div>
+                        <div class="detail-tab" onclick="switchCmsTab(this,'cms-whyus')">Why Us</div>
+                        <div class="detail-tab" onclick="switchCmsTab(this,'cms-reviews')">Reviews</div>
+                        <div class="detail-tab" onclick="switchCmsTab(this,'cms-guarantee')">Guarantee</div>
+                        <div class="detail-tab" onclick="switchCmsTab(this,'cms-cta')">Final CTA</div>
+                        <div class="detail-tab" onclick="switchCmsTab(this,'cms-footer')">Footer</div>
+                        <div class="detail-tab" onclick="switchCmsTab(this,'cms-sticky')">Sticky Bar</div>
+                        <div class="detail-tab" onclick="switchCmsTab(this,'cms-popup')">Lead Popup</div>
+                    </div>
+                    <div id="cmsContentPanels"></div>
+                </div>
+            </div>
+
+            <!-- CMS: SECTION BUILDER -->
+            <div class="view" id="sectionsView">
+                <div class="view-header"><div><h1 class="view-title">Section Builder</h1><p class="view-subtitle">Reorder, show/hide, and add custom sections</p></div>
+                <div class="view-actions"><button class="btn btn-primary btn-sm" onclick="openAddSectionModal()">+ Add Section</button><button class="btn btn-danger btn-sm" onclick="resetSections()">Reset Default</button></div></div>
+                <div class="data-section"><div id="sectionsList"></div></div>
+            </div>
+
+            <!-- CMS: PAGE SETTINGS -->
+            <div class="view" id="pagesettingsView">
+                <div class="view-header"><div><h1 class="view-title">Page Settings</h1><p class="view-subtitle">Colors, fonts, SEO, scripts, and social links</p></div>
+                <div class="view-actions"><button class="btn btn-primary btn-sm" onclick="savePageSettings()">Save Settings</button></div></div>
+                <div id="pageSettingsContent" style="padding:0 28px 28px"></div>
             </div>
 
             <!-- SETTINGS -->
@@ -912,6 +973,7 @@ function switchView(name,navEl){
     document.getElementById('breadcrumbCurrent').textContent=cap(name);
     if(name==='team'&&isSuperAdmin())loadTeam();
     if(name==='activity')loadActivity();
+    if((name==='cms'||name==='sections'||name==='pagesettings')&&!cmsConfig)loadCmsConfig();
     closeMobileSidebar();
 }
 
@@ -938,6 +1000,455 @@ function updateSortArrows(prefix,sortState){document.querySelectorAll(`[id^="${p
 function handleGlobalSearch(e){if(e.key==='Enter'){const q=e.target.value.trim().toLowerCase();if(!q)return;if(leadsData.find(l=>`${l.fullName} ${l.phone}`.toLowerCase().includes(q))){switchView('leads');document.getElementById('leadsSearch').value=q;renderLeads();return;}if(bookingsData.find(b=>`${b.fullName} ${b.phone} ${b.ref} ${b.carName}`.toLowerCase().includes(q))){switchView('bookings');document.getElementById('bookingsSearch').value=q;renderBookings();return;}toast('No results for "'+q+'"','info');}}
 document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();const el=document.getElementById('globalSearch');if(el){el.focus();el.select();}}});
 function updateGreeting(){const h=new Date().getHours();const g=h<12?'Good morning':h<18?'Good afternoon':'Good evening';document.getElementById('dashboardGreeting').textContent=g+(currentUser?', '+currentUser.name.split(' ')[0]:'');document.getElementById('dashboardDate').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});}
+
+// ═══════ CMS ═══════
+let cmsConfig = null;
+
+async function loadCmsConfig() {
+    try {
+        cmsConfig = await api('GET', '/config');
+        renderCmsContentEditor();
+        renderSectionBuilder();
+        renderPageSettings();
+    } catch(e) { console.error('CMS config load:', e); }
+}
+
+function switchCmsTab(tab, panelId) {
+    tab.parentElement.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    document.querySelectorAll('.cms-panel').forEach(p => p.classList.remove('active'));
+    const el = document.getElementById(panelId);
+    if (el) el.classList.add('active');
+}
+
+function cmsField(label, id, value, type='text', extra='') {
+    if (type === 'textarea') return `<div class="form-group"><label>${label}</label><textarea class="form-input" id="${id}" rows="3" ${extra}>${esc(value||'')}</textarea></div>`;
+    if (type === 'checkbox') return `<div class="checkbox-group"><input type="checkbox" id="${id}" ${value?'checked':''}><label for="${id}">${label}</label></div>`;
+    return `<div class="form-group"><label>${label}</label><input type="${type}" class="form-input" id="${id}" value="${esc(value||'')}" ${extra}></div>`;
+}
+
+function renderCmsContentEditor() {
+    if (!cmsConfig) return;
+    const c = cmsConfig.content;
+    const el = document.getElementById('cmsContentPanels');
+
+    el.innerHTML = `
+    <div class="cms-panel active" id="cms-hero">
+        <div class="cms-card"><div class="cms-card-title"><span class="icon">&#127968;</span> Hero Section</div>
+            ${cmsField('Logo Text','cms_logo',c.logo)}
+            ${cmsField('Nav CTA Button','cms_navCta',c.nav?.ctaText)}
+            <hr style="border-color:var(--border);margin:16px 0">
+            ${cmsField('Urgency Badge','cms_heroBadge',c.hero?.urgencyBadge)}
+            ${cmsField('Main Headline (HTML allowed)','cms_heroHeadline',c.hero?.headline,'textarea')}
+            ${cmsField('Subtext','cms_heroSubtext',c.hero?.subtext,'textarea')}
+            <div class="form-row">
+                ${cmsField('Proof Item 1','cms_heroProof1',c.hero?.proof1)}
+                ${cmsField('Proof Item 2','cms_heroProof2',c.hero?.proof2)}
+            </div>
+            <div class="form-row">
+                ${cmsField('Primary CTA Button','cms_heroCta1',c.hero?.ctaPrimary)}
+                ${cmsField('Secondary CTA Button','cms_heroCta2',c.hero?.ctaSecondary)}
+            </div>
+            ${cmsField('Live Viewer Text','cms_heroLive',c.hero?.liveText)}
+        </div>
+        <div class="cms-card"><div class="cms-card-title"><span class="icon">&#9203;</span> Countdown Timer</div>
+            ${cmsField('Countdown Enabled','cms_cdEnabled',c.countdown?.enabled!==false,'checkbox')}
+            ${cmsField('Urgency Text','cms_cdText',c.countdown?.urgencyText)}
+            ${cmsField('End Date (leave empty for auto)','cms_cdEnd',c.countdown?.endDate,'datetime-local')}
+        </div>
+        <div class="cms-card"><div class="cms-card-title"><span class="icon">&#128663;</span> Cars Section Header</div>
+            ${cmsField('Tag Line','cms_carsTag',c.carsSection?.tag)}
+            ${cmsField('Headline (HTML)','cms_carsHeadline',c.carsSection?.headline)}
+            ${cmsField('Subtext','cms_carsSubtext',c.carsSection?.subtext)}
+        </div>
+    </div>
+
+    <div class="cms-panel" id="cms-ticker">
+        <div class="cms-card"><div class="cms-card-title"><span class="icon">&#128240;</span> Scrolling Ticker Messages</div>
+            <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">These messages scroll across the page as social proof.</p>
+            <div id="tickerItemsList"></div>
+            <button class="btn btn-secondary btn-sm" onclick="addTickerItem()" style="margin-top:8px">+ Add Message</button>
+        </div>
+    </div>
+
+    <div class="cms-panel" id="cms-trust">
+        <div class="cms-card"><div class="cms-card-title"><span class="icon">&#9989;</span> Trust Bar Items</div>
+            <div id="trustItemsList"></div>
+            <button class="btn btn-secondary btn-sm" onclick="addTrustItem()" style="margin-top:8px">+ Add Item</button>
+        </div>
+    </div>
+
+    <div class="cms-panel" id="cms-whyus">
+        <div class="cms-card"><div class="cms-card-title"><span class="icon">&#11088;</span> Why Us Section</div>
+            ${cmsField('Section Label','cms_whyLabel',c.whyUs?.label)}
+            ${cmsField('Section Title','cms_whyTitle',c.whyUs?.title)}
+            <div id="whyUsCardsList"></div>
+            <button class="btn btn-secondary btn-sm" onclick="addWhyUsCard()" style="margin-top:8px">+ Add Card</button>
+        </div>
+    </div>
+
+    <div class="cms-panel" id="cms-reviews">
+        <div class="cms-card"><div class="cms-card-title"><span class="icon">&#128172;</span> Customer Reviews</div>
+            ${cmsField('Section Label','cms_revLabel',c.reviews?.label)}
+            ${cmsField('Section Title','cms_revTitle',c.reviews?.title)}
+            <div id="reviewItemsList"></div>
+            <button class="btn btn-secondary btn-sm" onclick="addReviewItem()" style="margin-top:8px">+ Add Review</button>
+        </div>
+    </div>
+
+    <div class="cms-panel" id="cms-guarantee">
+        <div class="cms-card"><div class="cms-card-title"><span class="icon">&#127942;</span> Guarantee Section</div>
+            ${cmsField('Headline (HTML)','cms_guarHeadline',c.guarantee?.headline)}
+            ${cmsField('Subtext','cms_guarSubtext',c.guarantee?.subtext)}
+        </div>
+    </div>
+
+    <div class="cms-panel" id="cms-cta">
+        <div class="cms-card"><div class="cms-card-title"><span class="icon">&#128293;</span> Final CTA Section</div>
+            ${cmsField('Headline (HTML)','cms_ctaHeadline',c.finalCta?.headline)}
+            ${cmsField('Subtext','cms_ctaSubtext',c.finalCta?.subtext)}
+            ${cmsField('Button Text','cms_ctaButton',c.finalCta?.buttonText)}
+        </div>
+    </div>
+
+    <div class="cms-panel" id="cms-footer">
+        <div class="cms-card"><div class="cms-card-title"><span class="icon">&#128386;</span> Footer</div>
+            ${cmsField('Copyright Text','cms_footCopy',c.footer?.copyright)}
+            ${cmsField('Phone','cms_footPhone',c.footer?.phone)}
+            ${cmsField('WhatsApp Link Text','cms_footWa',c.footer?.whatsappText)}
+            ${cmsField('Email','cms_footEmail',c.footer?.email)}
+        </div>
+    </div>
+
+    <div class="cms-panel" id="cms-sticky">
+        <div class="cms-card"><div class="cms-card-title"><span class="icon">&#128204;</span> Sticky Bottom Bar</div>
+            ${cmsField('Prefix Text','cms_stickyPrefix',c.stickyBar?.prefix)}
+            ${cmsField('Was Price','cms_stickyWas',c.stickyBar?.wasPrice)}
+            ${cmsField('Current Price','cms_stickyCurrent',c.stickyBar?.currentPrice)}
+            ${cmsField('Button Text','cms_stickyBtn',c.stickyBar?.buttonText)}
+        </div>
+    </div>
+
+    <div class="cms-panel" id="cms-popup">
+        <div class="cms-card"><div class="cms-card-title"><span class="icon">&#128232;</span> Lead Capture Popup</div>
+            ${cmsField('Headline','cms_popHeadline',c.leadPopup?.headline)}
+            ${cmsField('Description','cms_popSubtext',c.leadPopup?.subtext)}
+            ${cmsField('Button Text','cms_popButton',c.leadPopup?.buttonText)}
+            ${cmsField('Skip Text','cms_popSkip',c.leadPopup?.skipText)}
+        </div>
+        <div class="cms-card"><div class="cms-card-title"><span class="icon">&#128276;</span> Social Proof Notifications</div>
+            <div id="notifItemsList"></div>
+            <button class="btn btn-secondary btn-sm" onclick="addNotifItem()" style="margin-top:8px">+ Add Message</button>
+        </div>
+    </div>`;
+
+    // Render dynamic lists
+    renderTickerItems();
+    renderTrustItems();
+    renderWhyUsCards();
+    renderReviewItems();
+    renderNotifItems();
+}
+
+// Dynamic list renderers
+function renderTickerItems() {
+    const el = document.getElementById('tickerItemsList'); if (!el) return;
+    const msgs = cmsConfig.content.ticker?.messages || [];
+    el.innerHTML = msgs.map((m, i) => `<div class="cms-list-item" draggable="true" ondragstart="cmsListDrag(event,'ticker',${i})" ondragover="event.preventDefault()" ondrop="cmsListDrop(event,'ticker',${i})"><span class="drag-handle">&#9776;</span><input class="form-input" value="${esc(m)}" onchange="cmsConfig.content.ticker.messages[${i}]=this.value" style="flex:1"><button class="btn btn-danger btn-xs" onclick="cmsConfig.content.ticker.messages.splice(${i},1);renderTickerItems()">&#128465;</button></div>`).join('');
+}
+function addTickerItem() { if (!cmsConfig.content.ticker) cmsConfig.content.ticker = { messages: [] }; cmsConfig.content.ticker.messages.push('New message'); renderTickerItems(); }
+
+function renderTrustItems() {
+    const el = document.getElementById('trustItemsList'); if (!el) return;
+    const items = cmsConfig.content.trust?.items || [];
+    el.innerHTML = items.map((m, i) => `<div class="cms-list-item"><span class="drag-handle">&#9776;</span><input class="form-input" value="${esc(m)}" onchange="cmsConfig.content.trust.items[${i}]=this.value" style="flex:1"><button class="btn btn-danger btn-xs" onclick="cmsConfig.content.trust.items.splice(${i},1);renderTrustItems()">&#128465;</button></div>`).join('');
+}
+function addTrustItem() { if (!cmsConfig.content.trust) cmsConfig.content.trust = { items: [] }; cmsConfig.content.trust.items.push('New item'); renderTrustItems(); }
+
+function renderWhyUsCards() {
+    const el = document.getElementById('whyUsCardsList'); if (!el) return;
+    const cards = cmsConfig.content.whyUs?.cards || [];
+    el.innerHTML = cards.map((c, i) => `<div class="cms-card" style="padding:14px;margin-bottom:10px;background:var(--bg-input)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><strong style="font-size:13px">Card ${i+1}</strong><button class="btn btn-danger btn-xs" onclick="cmsConfig.content.whyUs.cards.splice(${i},1);renderWhyUsCards()">&#128465;</button></div>
+        <div class="form-row"><div class="form-group"><label>Icon (emoji)</label><input class="form-input" value="${esc(c.icon)}" onchange="cmsConfig.content.whyUs.cards[${i}].icon=this.value"></div><div class="form-group"><label>Title</label><input class="form-input" value="${esc(c.title)}" onchange="cmsConfig.content.whyUs.cards[${i}].title=this.value"></div></div>
+        <div class="form-group"><label>Description</label><input class="form-input" value="${esc(c.text)}" onchange="cmsConfig.content.whyUs.cards[${i}].text=this.value"></div>
+    </div>`).join('');
+}
+function addWhyUsCard() { if (!cmsConfig.content.whyUs) cmsConfig.content.whyUs = { cards: [] }; cmsConfig.content.whyUs.cards.push({ icon: '✨', title: 'New Feature', text: 'Description here' }); renderWhyUsCards(); }
+
+function renderReviewItems() {
+    const el = document.getElementById('reviewItemsList'); if (!el) return;
+    const items = cmsConfig.content.reviews?.items || [];
+    el.innerHTML = items.map((r, i) => `<div class="cms-card" style="padding:14px;margin-bottom:10px;background:var(--bg-input)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><strong style="font-size:13px">Review ${i+1}</strong><button class="btn btn-danger btn-xs" onclick="cmsConfig.content.reviews.items.splice(${i},1);renderReviewItems()">&#128465;</button></div>
+        <div class="form-group"><label>Review Text</label><textarea class="form-input" rows="2" onchange="cmsConfig.content.reviews.items[${i}].text=this.value">${esc(r.text)}</textarea></div>
+        <div class="form-row"><div class="form-group"><label>Name</label><input class="form-input" value="${esc(r.name)}" onchange="cmsConfig.content.reviews.items[${i}].name=this.value"></div><div class="form-group"><label>Role / Location</label><input class="form-input" value="${esc(r.role)}" onchange="cmsConfig.content.reviews.items[${i}].role=this.value"></div></div>
+        <div class="form-group"><label>Stars (1-5)</label><input type="number" class="form-input" min="1" max="5" value="${r.stars||5}" onchange="cmsConfig.content.reviews.items[${i}].stars=Number(this.value)"></div>
+    </div>`).join('');
+}
+function addReviewItem() { if (!cmsConfig.content.reviews) cmsConfig.content.reviews = { items: [] }; cmsConfig.content.reviews.items.push({ stars: 5, text: 'Great service!', name: 'Customer', role: 'Dubai' }); renderReviewItems(); }
+
+function renderNotifItems() {
+    const el = document.getElementById('notifItemsList'); if (!el) return;
+    const msgs = cmsConfig.content.notifications?.messages || [];
+    el.innerHTML = msgs.map((m, i) => `<div class="cms-list-item"><span class="drag-handle">&#9776;</span><input class="form-input" value="${esc(m)}" onchange="cmsConfig.content.notifications.messages[${i}]=this.value" style="flex:1"><button class="btn btn-danger btn-xs" onclick="cmsConfig.content.notifications.messages.splice(${i},1);renderNotifItems()">&#128465;</button></div>`).join('');
+}
+function addNotifItem() { if (!cmsConfig.content.notifications) cmsConfig.content.notifications = { messages: [] }; cmsConfig.content.notifications.messages.push('New notification message'); renderNotifItems(); }
+
+// CMS list drag reorder
+let cmsListDragIdx = null, cmsListDragType = null;
+function cmsListDrag(e, type, idx) { cmsListDragIdx = idx; cmsListDragType = type; e.dataTransfer.effectAllowed = 'move'; }
+function cmsListDrop(e, type, targetIdx) {
+    e.preventDefault();
+    if (cmsListDragType !== type || cmsListDragIdx === null) return;
+    let arr;
+    if (type === 'ticker') arr = cmsConfig.content.ticker.messages;
+    else return;
+    const item = arr.splice(cmsListDragIdx, 1)[0];
+    arr.splice(targetIdx, 0, item);
+    cmsListDragIdx = null;
+    renderTickerItems();
+}
+
+async function saveCmsContent() {
+    if (!cmsConfig) return;
+    const c = cmsConfig.content;
+    // Read all form fields back into config
+    c.logo = document.getElementById('cms_logo')?.value || c.logo;
+    if (!c.nav) c.nav = {};
+    c.nav.ctaText = document.getElementById('cms_navCta')?.value || c.nav.ctaText;
+    if (!c.countdown) c.countdown = {};
+    c.countdown.enabled = document.getElementById('cms_cdEnabled')?.checked ?? true;
+    c.countdown.urgencyText = document.getElementById('cms_cdText')?.value || c.countdown.urgencyText;
+    c.countdown.endDate = document.getElementById('cms_cdEnd')?.value || '';
+    if (!c.hero) c.hero = {};
+    c.hero.urgencyBadge = document.getElementById('cms_heroBadge')?.value || c.hero.urgencyBadge;
+    c.hero.headline = document.getElementById('cms_heroHeadline')?.value || c.hero.headline;
+    c.hero.subtext = document.getElementById('cms_heroSubtext')?.value || c.hero.subtext;
+    c.hero.proof1 = document.getElementById('cms_heroProof1')?.value || c.hero.proof1;
+    c.hero.proof2 = document.getElementById('cms_heroProof2')?.value || c.hero.proof2;
+    c.hero.ctaPrimary = document.getElementById('cms_heroCta1')?.value || c.hero.ctaPrimary;
+    c.hero.ctaSecondary = document.getElementById('cms_heroCta2')?.value || c.hero.ctaSecondary;
+    c.hero.liveText = document.getElementById('cms_heroLive')?.value || c.hero.liveText;
+    if (!c.carsSection) c.carsSection = {};
+    c.carsSection.tag = document.getElementById('cms_carsTag')?.value || c.carsSection.tag;
+    c.carsSection.headline = document.getElementById('cms_carsHeadline')?.value || c.carsSection.headline;
+    c.carsSection.subtext = document.getElementById('cms_carsSubtext')?.value || c.carsSection.subtext;
+    if (!c.whyUs) c.whyUs = {};
+    c.whyUs.label = document.getElementById('cms_whyLabel')?.value || c.whyUs.label;
+    c.whyUs.title = document.getElementById('cms_whyTitle')?.value || c.whyUs.title;
+    if (!c.reviews) c.reviews = {};
+    c.reviews.label = document.getElementById('cms_revLabel')?.value || c.reviews.label;
+    c.reviews.title = document.getElementById('cms_revTitle')?.value || c.reviews.title;
+    if (!c.guarantee) c.guarantee = {};
+    c.guarantee.headline = document.getElementById('cms_guarHeadline')?.value || c.guarantee.headline;
+    c.guarantee.subtext = document.getElementById('cms_guarSubtext')?.value || c.guarantee.subtext;
+    if (!c.finalCta) c.finalCta = {};
+    c.finalCta.headline = document.getElementById('cms_ctaHeadline')?.value || c.finalCta.headline;
+    c.finalCta.subtext = document.getElementById('cms_ctaSubtext')?.value || c.finalCta.subtext;
+    c.finalCta.buttonText = document.getElementById('cms_ctaButton')?.value || c.finalCta.buttonText;
+    if (!c.footer) c.footer = {};
+    c.footer.copyright = document.getElementById('cms_footCopy')?.value || c.footer.copyright;
+    c.footer.phone = document.getElementById('cms_footPhone')?.value || c.footer.phone;
+    c.footer.whatsappText = document.getElementById('cms_footWa')?.value || c.footer.whatsappText;
+    c.footer.email = document.getElementById('cms_footEmail')?.value || c.footer.email;
+    if (!c.stickyBar) c.stickyBar = {};
+    c.stickyBar.prefix = document.getElementById('cms_stickyPrefix')?.value || c.stickyBar.prefix;
+    c.stickyBar.wasPrice = document.getElementById('cms_stickyWas')?.value || c.stickyBar.wasPrice;
+    c.stickyBar.currentPrice = document.getElementById('cms_stickyCurrent')?.value || c.stickyBar.currentPrice;
+    c.stickyBar.buttonText = document.getElementById('cms_stickyBtn')?.value || c.stickyBar.buttonText;
+    if (!c.leadPopup) c.leadPopup = {};
+    c.leadPopup.headline = document.getElementById('cms_popHeadline')?.value || c.leadPopup.headline;
+    c.leadPopup.subtext = document.getElementById('cms_popSubtext')?.value || c.leadPopup.subtext;
+    c.leadPopup.buttonText = document.getElementById('cms_popButton')?.value || c.leadPopup.buttonText;
+    c.leadPopup.skipText = document.getElementById('cms_popSkip')?.value || c.leadPopup.skipText;
+
+    try {
+        await api('PUT', '/config', { content: c });
+        toast('Content saved & published!', 'success');
+    } catch(e) { toast(e.message, 'error'); }
+}
+
+// ═══════ SECTION BUILDER ═══════
+function renderSectionBuilder() {
+    if (!cmsConfig) return;
+    const el = document.getElementById('sectionsList');
+    const sections = (cmsConfig.sections || []).sort((a, b) => a.order - b.order);
+    el.innerHTML = sections.map(s => `<div class="cms-list-item" draggable="true" ondragstart="secDrag(event,'${s.id}')" ondragover="event.preventDefault()" ondrop="secDrop(event,'${s.id}')">
+        <span class="drag-handle">&#9776;</span>
+        <div class="item-content"><div class="item-name">${esc(s.name)}</div><div class="item-type">${s.type === 'builtin' ? 'Built-in section' : 'Custom: ' + s.type}</div></div>
+        <div class="item-actions">
+            <label class="toggle-switch"><input type="checkbox" ${s.visible ? 'checked' : ''} onchange="toggleSectionVisibility('${s.id}',this.checked)"><span class="toggle-slider"></span></label>
+            ${s.type !== 'builtin' ? `<button class="btn btn-danger btn-xs" onclick="deleteSection('${s.id}')">&#128465;</button>` : ''}
+        </div>
+    </div>`).join('');
+}
+
+let secDragId = null;
+function secDrag(e, id) { secDragId = id; e.dataTransfer.effectAllowed = 'move'; }
+async function secDrop(e, targetId) {
+    e.preventDefault();
+    if (!secDragId || secDragId === targetId) return;
+    const ids = cmsConfig.sections.sort((a, b) => a.order - b.order).map(s => s.id);
+    const fromIdx = ids.indexOf(secDragId), toIdx = ids.indexOf(targetId);
+    if (fromIdx === -1 || toIdx === -1) return;
+    ids.splice(fromIdx, 1);
+    ids.splice(toIdx, 0, secDragId);
+    secDragId = null;
+    try {
+        const data = await api('PUT', '/config/sections/reorder', { order: ids });
+        cmsConfig.sections = data.sections || cmsConfig.sections;
+        renderSectionBuilder();
+        toast('Sections reordered', 'success');
+    } catch(e) { toast(e.message, 'error'); }
+}
+
+async function toggleSectionVisibility(id, visible) {
+    try {
+        await api('PATCH', '/config/sections/' + id, { visible });
+        const sec = cmsConfig.sections.find(s => s.id === id);
+        if (sec) sec.visible = visible;
+        toast(visible ? 'Section shown' : 'Section hidden', 'success');
+    } catch(e) { toast(e.message, 'error'); }
+}
+
+function openAddSectionModal() {
+    document.getElementById('modal').classList.remove('wide');
+    document.getElementById('modalTitle').textContent = 'Add Custom Section';
+    document.getElementById('modalBody').innerHTML = `
+        <form onsubmit="submitAddSection(event)">
+            <div class="form-group"><label>Section Name</label><input class="form-input" id="newSecName" required></div>
+            <div class="form-group"><label>Type</label><select class="form-input" id="newSecType">
+                <option value="text">Text Block</option><option value="image_text">Image + Text</option><option value="cta_banner">CTA Banner</option>
+            </select></div>
+            <div class="form-group"><label>Heading</label><input class="form-input" id="newSecHeading"></div>
+            <div class="form-group"><label>Body Content</label><textarea class="form-input" id="newSecBody" rows="3"></textarea></div>
+            <div class="form-group"><label>Image URL (optional)</label><input class="form-input" id="newSecImg"></div>
+            <div class="form-group"><label>Button Text (optional)</label><input class="form-input" id="newSecBtn"></div>
+            <div style="display:flex;gap:8px;margin-top:16px"><button type="submit" class="btn btn-primary" style="flex:1">Add Section</button><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button></div>
+        </form>`;
+    openModal();
+}
+
+async function submitAddSection(e) {
+    e.preventDefault();
+    try {
+        const sec = await api('POST', '/config/sections', {
+            name: document.getElementById('newSecName').value,
+            type: document.getElementById('newSecType').value,
+            content: {
+                heading: document.getElementById('newSecHeading').value,
+                body: document.getElementById('newSecBody').value,
+                imageUrl: document.getElementById('newSecImg').value,
+                buttonText: document.getElementById('newSecBtn').value,
+                buttonUrl: ''
+            }
+        });
+        cmsConfig.sections.push(sec);
+        closeModal();
+        renderSectionBuilder();
+        toast('Section added', 'success');
+    } catch(e) { toast(e.message, 'error'); }
+}
+
+async function deleteSection(id) {
+    if (!confirm('Delete this custom section?')) return;
+    try {
+        await api('DELETE', '/config/sections/' + id);
+        cmsConfig.sections = cmsConfig.sections.filter(s => s.id !== id);
+        renderSectionBuilder();
+        toast('Section deleted', 'success');
+    } catch(e) { toast(e.message, 'error'); }
+}
+
+async function resetSections() {
+    if (!confirm('Reset all sections to default order and visibility?')) return;
+    try {
+        await api('POST', '/config/reset');
+        await loadCmsConfig();
+        toast('Sections reset to defaults', 'success');
+    } catch(e) { toast(e.message, 'error'); }
+}
+
+// ═══════ PAGE SETTINGS ═══════
+function renderPageSettings() {
+    if (!cmsConfig) return;
+    const s = cmsConfig.settings;
+    document.getElementById('pageSettingsContent').innerHTML = `
+    <div class="settings-grid">
+        <div class="settings-card"><div class="settings-card-title">Colors</div><div class="settings-card-desc">Customize the landing page color scheme</div>
+            <div class="form-group"><label>Primary Color</label><div class="color-input-wrap"><input type="color" id="ps_colorPrimary" value="${s.colors?.primary||'#FF5F00'}"><input class="form-input" value="${s.colors?.primary||'#FF5F00'}" id="ps_colorPrimaryText" style="flex:1" onchange="document.getElementById('ps_colorPrimary').value=this.value"></div></div>
+            <div class="form-group"><label>Dark Color</label><div class="color-input-wrap"><input type="color" id="ps_colorDark" value="${s.colors?.dark||'#1A1A1A'}"><input class="form-input" value="${s.colors?.dark||'#1A1A1A'}" id="ps_colorDarkText" style="flex:1" onchange="document.getElementById('ps_colorDark').value=this.value"></div></div>
+            <div class="form-group"><label>Accent Color</label><div class="color-input-wrap"><input type="color" id="ps_colorAccent" value="${s.colors?.accent||'#00C853'}"><input class="form-input" value="${s.colors?.accent||'#00C853'}" id="ps_colorAccentText" style="flex:1" onchange="document.getElementById('ps_colorAccent').value=this.value"></div></div>
+        </div>
+        <div class="settings-card"><div class="settings-card-title">Fonts</div><div class="settings-card-desc">Font family and sizing</div>
+            <div class="form-group"><label>Font Family</label><select class="form-input" id="ps_fontFamily">
+                <option value="Inter" ${s.fonts?.family==='Inter'?'selected':''}>Inter</option>
+                <option value="Roboto" ${s.fonts?.family==='Roboto'?'selected':''}>Roboto</option>
+                <option value="Open Sans" ${s.fonts?.family==='Open Sans'?'selected':''}>Open Sans</option>
+                <option value="Poppins" ${s.fonts?.family==='Poppins'?'selected':''}>Poppins</option>
+                <option value="Montserrat" ${s.fonts?.family==='Montserrat'?'selected':''}>Montserrat</option>
+            </select></div>
+            <div class="form-group"><label>Size Preset</label><select class="form-input" id="ps_fontSize">
+                <option value="small" ${s.fonts?.sizePreset==='small'?'selected':''}>Small</option>
+                <option value="default" ${s.fonts?.sizePreset==='default'?'selected':''}>Default</option>
+                <option value="large" ${s.fonts?.sizePreset==='large'?'selected':''}>Large</option>
+            </select></div>
+        </div>
+        <div class="settings-card"><div class="settings-card-title">SEO</div><div class="settings-card-desc">Search engine optimization</div>
+            ${cmsField('Page Title','ps_seoTitle',s.seo?.title)}
+            <div class="form-group"><label>Meta Description</label><textarea class="form-input" id="ps_seoDesc" rows="2">${esc(s.seo?.description||'')}</textarea></div>
+            ${cmsField('OG Image URL','ps_seoOg',s.seo?.ogImage)}
+        </div>
+        <div class="settings-card"><div class="settings-card-title">Custom Scripts</div><div class="settings-card-desc">Analytics, pixels, and tracking codes</div>
+            <div class="form-group"><label>Header Scripts</label><textarea class="form-input" id="ps_headerScripts" rows="3" placeholder="Paste scripts here...">${esc(s.scripts?.headerScripts||'')}</textarea></div>
+            <div class="form-group"><label>Footer Scripts</label><textarea class="form-input" id="ps_footerScripts" rows="3" placeholder="Paste scripts here...">${esc(s.scripts?.footerScripts||'')}</textarea></div>
+        </div>
+        <div class="settings-card"><div class="settings-card-title">Social Links</div><div class="settings-card-desc">Contact information used across the site</div>
+            ${cmsField('WhatsApp Number (no +)','ps_socialWa',s.social?.whatsapp)}
+            ${cmsField('Phone Display','ps_socialPhone',s.social?.phone)}
+            ${cmsField('Email','ps_socialEmail',s.social?.email)}
+        </div>
+    </div>`;
+
+    // Sync color pickers with text inputs
+    document.getElementById('ps_colorPrimary')?.addEventListener('input', e => { document.getElementById('ps_colorPrimaryText').value = e.target.value; });
+    document.getElementById('ps_colorDark')?.addEventListener('input', e => { document.getElementById('ps_colorDarkText').value = e.target.value; });
+    document.getElementById('ps_colorAccent')?.addEventListener('input', e => { document.getElementById('ps_colorAccentText').value = e.target.value; });
+}
+
+async function savePageSettings() {
+    const settings = {
+        colors: {
+            primary: document.getElementById('ps_colorPrimaryText')?.value || '#FF5F00',
+            dark: document.getElementById('ps_colorDarkText')?.value || '#1A1A1A',
+            accent: document.getElementById('ps_colorAccentText')?.value || '#00C853'
+        },
+        fonts: {
+            family: document.getElementById('ps_fontFamily')?.value || 'Inter',
+            sizePreset: document.getElementById('ps_fontSize')?.value || 'default'
+        },
+        seo: {
+            title: document.getElementById('ps_seoTitle')?.value || '',
+            description: document.getElementById('ps_seoDesc')?.value || '',
+            ogImage: document.getElementById('ps_seoOg')?.value || ''
+        },
+        scripts: {
+            headerScripts: document.getElementById('ps_headerScripts')?.value || '',
+            footerScripts: document.getElementById('ps_footerScripts')?.value || ''
+        },
+        social: {
+            whatsapp: document.getElementById('ps_socialWa')?.value || '',
+            phone: document.getElementById('ps_socialPhone')?.value || '',
+            email: document.getElementById('ps_socialEmail')?.value || ''
+        }
+    };
+    try {
+        await api('PUT', '/config', { settings });
+        cmsConfig.settings = settings;
+        toast('Page settings saved!', 'success');
+    } catch(e) { toast(e.message, 'error'); }
+}
 
 // ═══════ INIT ═══════
 document.addEventListener('DOMContentLoaded',()=>{initTheme();if(loadSession()&&currentUser)enterDashboard();});

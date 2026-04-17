@@ -673,5 +673,62 @@ document.getElementById('leadOv').addEventListener('click',function(e){if(e.targ
 var exitS=false;
 document.addEventListener('mouseout',function(e){if(!exitS&&!localStorage.getItem('ft_lead')&&e.clientY<5){exitS=true;document.getElementById('leadOv').classList.add('active');}});
 </script>
+<script>
+// CMS Config Loader — fetches overrides from dashboard, applies to page
+(function(){
+  fetch('/api/config').then(r=>r.json()).then(function(cfg){
+    if(!cfg||!cfg.content)return;
+    var c=cfg.content,s=cfg.settings,sec=cfg.sections;
+    // Helper: set text of first match
+    function t(sel,val){if(!val)return;var el=document.querySelector(sel);if(el)el.innerHTML=val;}
+    // Logo
+    if(c.logo){var logos=document.querySelectorAll('.nav-logo');logos.forEach(function(l){l.innerHTML=c.logo.replace(/RACK/,'<span style="color:var(--o,#FF5F00)">RACK</span>');});}
+    // Nav CTA
+    if(c.nav&&c.nav.ctaText)t('.nav-cta',c.nav.ctaText+' &#8594;');
+    // Countdown
+    if(c.countdown){if(c.countdown.enabled===false){var cb=document.querySelector('.cd-bar');if(cb)cb.style.display='none';}}
+    // Hero
+    if(c.hero){
+      t('.hero-urgency','&#9202; '+c.hero.urgencyBadge);
+      var h1=document.querySelector('.hero h1');if(h1&&c.hero.headline)h1.innerHTML=c.hero.headline;
+      t('.hero-sub',c.hero.subtext);
+      var proofs=document.querySelectorAll('.hero-proof span');
+      if(proofs[0]&&c.hero.proof1)proofs[0].innerHTML='&#11088; <strong>'+c.hero.proof1+'</strong>';
+      if(proofs[1]&&c.hero.proof2)proofs[1].innerHTML='&#9989; <strong>'+c.hero.proof2+'</strong>';
+      var ctas=document.querySelectorAll('.hero-ctas a');
+      if(ctas[0]&&c.hero.ctaPrimary)ctas[0].innerHTML=c.hero.ctaPrimary+' &#8594;';
+      if(ctas[1]&&c.hero.ctaSecondary)ctas[1].innerHTML='&#128172; '+c.hero.ctaSecondary;
+    }
+    // Ticker
+    if(c.ticker&&c.ticker.messages&&c.ticker.messages.length){var tk=document.getElementById('ticker');if(tk){var html='';c.ticker.messages.concat(c.ticker.messages).forEach(function(m){html+='<div class="ticker-item">'+m+'</div>';});tk.innerHTML=html;}}
+    // Trust
+    if(c.trust&&c.trust.items){var ti=document.querySelectorAll('.trust-item');c.trust.items.forEach(function(txt,i){if(ti[i])ti[i].textContent=txt;});}
+    // Cars section head
+    if(c.carsSection){t('.cars-section .tag','&#128293; '+c.carsSection.tag);var ch=document.querySelector('.cars-section .cars-head h2');if(ch&&c.carsSection.headline)ch.innerHTML=c.carsSection.headline;t('.cars-section .cars-head p',c.carsSection.subtext);}
+    // Why Us
+    if(c.whyUs){t('.sec-compact .sec-label',c.whyUs.label);t('.sec-compact .sec-title',c.whyUs.title);var wc=document.querySelectorAll('.why-card');c.whyUs.cards.forEach(function(card,i){if(wc[i]){var ic=wc[i].querySelector('.ic');if(ic&&card.icon)ic.textContent=card.icon;var h3=wc[i].querySelector('h3');if(h3&&card.title)h3.textContent=card.title;var p=wc[i].querySelector('p');if(p&&card.text)p.textContent=card.text;}});}
+    // Reviews
+    if(c.reviews&&c.reviews.items){t('.reviews-section .sec-label',c.reviews.label);t('.reviews-section .sec-title',c.reviews.title);var rc=document.querySelectorAll('.rev-card');c.reviews.items.forEach(function(r,i){if(rc[i]){var q=rc[i].querySelector('p');if(q&&r.text)q.textContent='"'+r.text+'"';var nm=rc[i].querySelector('strong');if(nm&&r.name)nm.textContent=r.name;var sp=rc[i].querySelectorAll('span');if(sp.length>1&&r.role)sp[sp.length-1].textContent=r.role;}});}
+    // Guarantee
+    if(c.guarantee){var gi=document.querySelector('.guarantee');if(gi){var gh=gi.querySelector('h2');if(gh&&c.guarantee.headline)gh.innerHTML=c.guarantee.headline;var gp=gi.querySelector('p');if(gp&&c.guarantee.subtext)gp.textContent=c.guarantee.subtext;}}
+    // Final CTA
+    if(c.finalCta){var fc=document.querySelector('.final-cta');if(fc){var fh=fc.querySelector('h2');if(fh&&c.finalCta.headline)fh.innerHTML=c.finalCta.headline;var fp=fc.querySelector('p');if(fp&&c.finalCta.subtext)fp.textContent=c.finalCta.subtext;var fb=fc.querySelector('a');if(fb&&c.finalCta.buttonText)fb.innerHTML=c.finalCta.buttonText+' &#8594;';}}
+    // Footer
+    if(c.footer){t('.footer-left',c.footer.copyright);var fl=document.querySelectorAll('.footer-links a');if(fl[0]&&c.footer.phone){fl[0].textContent=c.footer.phone;fl[0].href='tel:'+c.footer.phone.replace(/\s/g,'');}if(fl[1]&&c.footer.whatsappText)fl[1].textContent=c.footer.whatsappText;if(fl[2]&&c.footer.email){fl[2].textContent=c.footer.email;fl[2].href='mailto:'+c.footer.email;}}
+    // Sticky bar
+    if(c.stickyBar){var sb=document.querySelector('.sticky-text');if(sb)sb.innerHTML=c.stickyBar.prefix+' <s style="opacity:.5">'+c.stickyBar.wasPrice+'</s> <strong style="color:var(--o,#FF5F00);font-size:1.2em">'+c.stickyBar.currentPrice+'</strong>';var sbt=document.querySelector('.sticky-btn');if(sbt&&c.stickyBar.buttonText)sbt.innerHTML=c.stickyBar.buttonText+' &#8594;';}
+    // Lead popup
+    if(c.leadPopup){t('.lead-box h2',c.leadPopup.headline);t('.lead-sub',c.leadPopup.subtext);var lbtn=document.querySelector('.lead-box .fi[type="submit"]');if(lbtn&&c.leadPopup.buttonText)lbtn.value=c.leadPopup.buttonText;t('.lead-skip',c.leadPopup.skipText);}
+    // Settings: colors
+    if(s&&s.colors){var root=document.documentElement;if(s.colors.primary)root.style.setProperty('--o',s.colors.primary);if(s.colors.dark)root.style.setProperty('--d',s.colors.dark);}
+    // Settings: SEO
+    if(s&&s.seo){if(s.seo.title)document.title=s.seo.title;var md=document.querySelector('meta[name="description"]');if(md&&s.seo.description)md.setAttribute('content',s.seo.description);else if(s.seo.description){md=document.createElement('meta');md.name='description';md.content=s.seo.description;document.head.appendChild(md);}}
+    // Settings: social whatsapp link
+    if(s&&s.social&&s.social.whatsapp){var waLinks=document.querySelectorAll('a[href*="wa.me"]');waLinks.forEach(function(a){a.href='https://wa.me/'+s.social.whatsapp;});}
+    // Section visibility
+    if(sec&&sec.length){var sectionMap={nav:'.nav',countdown:'.cd-bar',hero:'.hero',ticker:'.ticker',trust:'.trust',cars:'.cars-section',why:'#why',reviews:'.reviews-section',guarantee:'.guarantee',finalcta:'.final-cta',footer:'.footer',sticky:'.sticky-bottom',leadpopup:'.lead-ov'};sec.forEach(function(section){if(sectionMap[section.id]&&section.visible===false){var el=document.querySelector(sectionMap[section.id]);if(el)el.style.display='none';}});}
+  }).catch(function(){/* config load failed, page works with hardcoded defaults */});
+})();
+</script>
 </body>
 </html>

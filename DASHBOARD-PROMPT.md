@@ -273,9 +273,9 @@ After each phase, update this section:
 | 2.1 | Leads Management | ✅ DONE |
 | 2.2 | Bookings Management | ✅ DONE |
 | 2.3 | Cars / Fleet Management | ✅ DONE |
-| 3.1 | Content Editor (CMS) | ⬜ PENDING |
-| 3.2 | Drag & Drop Section Builder | ⬜ PENDING |
-| 3.3 | Landing Page Settings | ⬜ PENDING |
+| 3.1 | Content Editor (CMS) | ✅ DONE |
+| 3.2 | Drag & Drop Section Builder | ✅ DONE |
+| 3.3 | Landing Page Settings | ✅ DONE |
 | 4.1 | Analytics Overview Cards | ⬜ PENDING |
 | 4.2 | Charts & Graphs | ⬜ PENDING |
 | 4.3 | Real-time Panel | ⬜ PENDING |
