@@ -214,7 +214,7 @@ app.get('/api/cars', (req, res) => {
 });
 
 app.post('/api/leads', (req, res) => {
-  const { fullName, phone, interest, source, whatsapp, email } = req.body;
+  const { fullName, phone, interest, source, whatsapp, email, address } = req.body;
   if (!fullName || !phone) {
     return res.status(400).json({ error: 'Name and phone required' });
   }
@@ -225,6 +225,7 @@ app.post('/api/leads', (req, res) => {
     whatsapp: whatsapp || phone,
     email: email || '',
     interest: interest || '',
+    address: address || '',
     source: source || 'popup',
     status: 'new',
     notes: [],
@@ -479,7 +480,7 @@ app.patch('/api/leads/:id', auth, (req, res) => {
   const l = leads.find(x => x.id === parseInt(req.params.id));
   if (!l) return res.status(404).json({ error: 'Not found' });
   if (req.body.status && !VALID_LEAD_STATUSES.includes(req.body.status)) return res.status(400).json({ error: 'Invalid status' });
-  const fields = ['status', 'fullName', 'phone', 'whatsapp', 'email', 'interest', 'source', 'convertedToBooking'];
+  const fields = ['status', 'fullName', 'phone', 'whatsapp', 'email', 'interest', 'address', 'source', 'convertedToBooking'];
   fields.forEach(f => { if (req.body[f] !== undefined) l[f] = req.body[f]; });
   logActivity(req.user.id, 'lead_updated', `Updated lead ${l.fullName}`);
   res.json(l);
