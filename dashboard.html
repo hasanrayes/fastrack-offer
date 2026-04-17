@@ -354,6 +354,22 @@
         .hot-lead-info { flex:1; }
         .hot-lead-name { font-size:13px; font-weight:600; }
         .hot-lead-time { font-size:11px; color:var(--text-muted); }
+        /* ─── NOTIFICATIONS ─── */
+        .notif-item { display:flex; gap:10px; padding:10px 16px; cursor:pointer; transition:background var(--transition); border-bottom:1px solid var(--border); }
+        .notif-item:hover { background:var(--bg-card-hover); }
+        .notif-item:last-child { border-bottom:none; }
+        .notif-item.unread { background:var(--primary-bg); }
+        .notif-item .notif-icon { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
+        .notif-item .notif-body { flex:1; min-width:0; }
+        .notif-item .notif-title { font-size:13px; font-weight:600; }
+        .notif-item .notif-desc { font-size:12px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .notif-item .notif-time { font-size:11px; color:var(--text-muted); }
+        /* ─── COMMAND PALETTE ─── */
+        .cmd-result { display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:8px; cursor:pointer; transition:background var(--transition); }
+        .cmd-result:hover,.cmd-result.selected { background:var(--primary-bg); }
+        .cmd-result .cmd-icon { font-size:16px; width:24px; text-align:center; }
+        .cmd-result .cmd-title { font-size:13px; font-weight:600; }
+        .cmd-result .cmd-sub { font-size:11px; color:var(--text-muted); }
         /* ─── CMS ─── */
         .cms-panel { display:none; padding-top:20px; }
         .cms-panel.active { display:block; }
@@ -439,9 +455,11 @@
             <div class="nav-item" data-view="cms" data-roles="superadmin,manager" onclick="switchView('cms',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div><span class="nav-label">Content Editor</span></div>
             <div class="nav-item" data-view="sections" data-roles="superadmin,manager" onclick="switchView('sections',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div><span class="nav-label">Section Builder</span></div>
             <div class="nav-item" data-view="pagesettings" data-roles="superadmin,manager" onclick="switchView('pagesettings',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div><span class="nav-label">Page Settings</span></div>
+            <div class="nav-item" data-view="preview" data-roles="superadmin,manager" onclick="switchView('preview',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div><span class="nav-label">Live Preview</span></div>
             <div class="nav-section">Management</div>
             <div class="nav-item" data-view="team" data-roles="superadmin" onclick="switchView('team',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10z"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/></svg></div><span class="nav-label">Team</span></div>
             <div class="nav-item" data-view="activity" onclick="switchView('activity',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><span class="nav-label">Activity Log</span></div>
+            <div class="nav-item" data-view="databackup" data-roles="superadmin" onclick="switchView('databackup',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div><span class="nav-label">Data &amp; Backup</span></div>
             <div class="nav-item" data-view="settings" onclick="switchView('settings',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div><span class="nav-label">Settings</span></div>
         </nav>
         <div class="sidebar-footer"><div class="sidebar-user-avatar" id="userAvatar"></div><div class="sidebar-user-info sidebar-footer-text"><div class="sidebar-user-name" id="userName"></div><div class="sidebar-user-role" id="userRole"></div></div></div>
@@ -456,7 +474,7 @@
             </div>
             <div class="header-right">
                 <div class="header-search"><span class="header-search-icon">&#128269;</span><input type="text" placeholder="Search..." id="globalSearch" onkeydown="handleGlobalSearch(event)"><span class="kbd">&#8984;K</span></div>
-                <button class="notif-btn">&#128276;<span class="notif-dot" id="notifDot" style="display:none"></span></button>
+                <div style="position:relative"><button class="notif-btn" onclick="toggleNotifPanel()">&#128276;<span class="notif-dot" id="notifDot" style="display:none"></span></button><div id="notifPanel" style="display:none;position:absolute;right:0;top:44px;width:360px;max-height:420px;overflow-y:auto;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-lg);z-index:500"><div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border)"><span style="font-size:14px;font-weight:700">Notifications</span><button class="btn btn-ghost btn-xs" onclick="markAllNotifsRead()">Mark all read</button></div><div id="notifList" style="padding:4px 0"></div></div></div>
                 <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">&#9790;</button>
             </div>
         </header>
@@ -639,6 +657,27 @@
                 <div id="pageSettingsContent" style="padding:0 28px 28px"></div>
             </div>
 
+            <!-- LIVE PREVIEW -->
+            <div class="view" id="previewView">
+                <div class="view-header"><div><h1 class="view-title">Live Preview</h1><p class="view-subtitle">Preview the landing page in different device sizes</p></div>
+                <div class="view-actions">
+                    <div class="toggle-group"><button class="toggle-btn active" onclick="setPreviewDevice('100%',this)">Desktop</button><button class="toggle-btn" onclick="setPreviewDevice('768px',this)">Tablet</button><button class="toggle-btn" onclick="setPreviewDevice('375px',this)">Mobile</button></div>
+                    <button class="btn btn-secondary btn-sm" onclick="document.getElementById('previewFrame').src='/?t='+Date.now()">Refresh</button>
+                    <button class="btn btn-primary btn-sm" onclick="window.open('/','_blank')">Open in Tab</button>
+                </div></div>
+                <div style="padding:0 28px 28px;display:flex;justify-content:center"><div id="previewContainer" style="width:100%;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--bg-card);transition:width 0.3s ease"><iframe id="previewFrame" src="/" style="width:100%;height:calc(100vh - 180px);border:none"></iframe></div></div>
+            </div>
+
+            <!-- DATA & BACKUP -->
+            <div class="view" id="databackupView">
+                <div class="view-header"><div><h1 class="view-title">Data &amp; Backup</h1><p class="view-subtitle">Export, import, or clear your data</p></div></div>
+                <div class="settings-grid">
+                    <div class="settings-card"><div class="settings-card-title">Export Data</div><div class="settings-card-desc">Download all leads, bookings, cars, and config as JSON</div><p style="font-size:11px;color:var(--text-muted);margin-bottom:12px" id="lastExportTime">No exports yet</p><button class="btn btn-primary btn-sm" onclick="exportAllData()">Export JSON</button></div>
+                    <div class="settings-card"><div class="settings-card-title">Import Data</div><div class="settings-card-desc">Upload a JSON backup file</div><div class="form-group"><select class="form-input" id="importMode"><option value="merge">Merge (add new, keep existing)</option><option value="replace">Replace (overwrite all)</option></select></div><div class="form-group"><input type="file" accept=".json" id="importFile" class="form-input" style="padding:8px"></div><button class="btn btn-primary btn-sm" onclick="importData()">Import</button></div>
+                    <div class="settings-card" style="border-color:var(--red)"><div class="settings-card-title" style="color:var(--red)">Danger Zone</div><div class="settings-card-desc">Permanently delete all leads and bookings</div><div class="form-group"><label>Type <strong>DELETE</strong> to confirm</label><input class="form-input" id="clearConfirm" placeholder="Type DELETE here"></div><button class="btn btn-danger btn-sm" onclick="clearAllData()">Clear All Data</button></div>
+                </div>
+            </div>
+
             <!-- SETTINGS -->
             <div class="view" id="settingsView">
                 <div class="view-header"><div><h1 class="view-title">Settings</h1><p class="view-subtitle">Dashboard preferences</p></div></div>
@@ -659,6 +698,25 @@
         <div class="modal-head"><span class="modal-title" id="modalTitle"></span><button class="modal-close" onclick="closeModal()">&times;</button></div>
         <div class="modal-body" id="modalBody"></div>
     </div>
+</div>
+
+<!-- COMMAND PALETTE -->
+<div id="cmdPalette" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9500;display:none;align-items:flex-start;justify-content:center;padding-top:20vh;backdrop-filter:blur(2px)" onclick="if(event.target===this)closeCmdPalette()">
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;width:100%;max-width:540px;box-shadow:var(--shadow-lg);overflow:hidden">
+        <div style="padding:12px 16px;border-bottom:1px solid var(--border)"><input type="text" id="cmdInput" class="form-input" placeholder="Search leads, bookings, cars..." oninput="handleCmdSearch(this.value)" style="border:none;box-shadow:none;font-size:15px;padding:4px 0"></div>
+        <div id="cmdResults" style="max-height:360px;overflow-y:auto;padding:8px"></div>
+        <div style="padding:8px 16px;border-top:1px solid var(--border);font-size:11px;color:var(--text-muted);display:flex;gap:16px"><span>&#8593;&#8595; Navigate</span><span>&#9166; Open</span><span>Esc Close</span></div>
+    </div>
+</div>
+
+<!-- QUICK-ADD FAB -->
+<div id="quickAddFab" style="display:none;position:fixed;bottom:24px;right:24px;z-index:800">
+    <div id="quickAddMenu" style="display:none;position:absolute;bottom:52px;right:0;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-lg);padding:8px;min-width:160px">
+        <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:flex-start" onclick="quickAddLead()">&#128101; New Lead</button>
+        <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:flex-start" onclick="switchView('bookings');closeQuickAdd()">&#128203; New Booking</button>
+        <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:flex-start" onclick="openCarModal();closeQuickAdd()">&#128663; New Car</button>
+    </div>
+    <button class="btn btn-primary" style="width:48px;height:48px;border-radius:50%;font-size:22px;padding:0;box-shadow:var(--shadow-md)" onclick="toggleQuickAdd()">+</button>
 </div>
 
 <script>
@@ -716,6 +774,12 @@ async function enterDashboard(){
     // Live visitor counter refresh every 5s
     if(window._liveInterval) clearInterval(window._liveInterval);
     window._liveInterval=setInterval(async()=>{ try{ const d=await api('GET','/analytics/overview'); document.getElementById('kpiLiveVisitors').textContent=d.liveVisitors||0; }catch(e){} },5000);
+    // Show FAB, load notifications, poll for new
+    document.getElementById('quickAddFab').style.display = canEdit() ? 'block' : 'none';
+    loadNotifications();
+    if(window._notifInterval) clearInterval(window._notifInterval);
+    window._notifInterval=setInterval(loadNotifications, 15000);
+    updateExportTimestamp();
 }
 function updateUserUI(){ if(!currentUser)return; const i=currentUser.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); document.getElementById('userAvatar').textContent=i; document.getElementById('userName').textContent=currentUser.name; document.getElementById('userRole').textContent=currentUser.role; document.getElementById('settingsEmail').textContent=currentUser.email; const r=document.getElementById('settingsRole'); r.textContent=currentUser.role; r.className='badge badge-'+currentUser.role; }
 function applyRBAC(){ if(!currentUser)return; document.querySelectorAll('.nav-item[data-roles]').forEach(n=>{n.style.display=n.dataset.roles.split(',').includes(currentUser.role)?'':'none';}); if(currentUser.role==='viewer') document.getElementById('carsActions').style.display='none'; }
@@ -1038,6 +1102,8 @@ function switchView(name,navEl){
     if(name==='team'&&isSuperAdmin())loadTeam();
     if(name==='activity')loadActivity();
     if((name==='cms'||name==='sections'||name==='pagesettings')&&!cmsConfig)loadCmsConfig();
+    if(name==='preview'){const f=document.getElementById('previewFrame');if(f)f.src='/?t='+Date.now();}
+    if(name==='databackup')updateExportTimestamp();
     closeMobileSidebar();
 }
 
@@ -1062,7 +1128,7 @@ function fmtDateTime(d){if(!d)return '—';return new Date(d).toLocaleString('en
 function downloadCSV(csv,fn){const b=new Blob([csv],{type:'text/csv'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=fn;a.click();URL.revokeObjectURL(u);}
 function updateSortArrows(prefix,sortState){document.querySelectorAll(`[id^="${prefix}"]`).forEach(el=>el.textContent='');const el=document.getElementById(prefix+sortState.field);if(el)el.textContent=sortState.dir==='asc'?'\u25B2':'\u25BC';}
 function handleGlobalSearch(e){if(e.key==='Enter'){const q=e.target.value.trim().toLowerCase();if(!q)return;if(leadsData.find(l=>`${l.fullName} ${l.phone}`.toLowerCase().includes(q))){switchView('leads');document.getElementById('leadsSearch').value=q;renderLeads();return;}if(bookingsData.find(b=>`${b.fullName} ${b.phone} ${b.ref} ${b.carName}`.toLowerCase().includes(q))){switchView('bookings');document.getElementById('bookingsSearch').value=q;renderBookings();return;}toast('No results for "'+q+'"','info');}}
-document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();const el=document.getElementById('globalSearch');if(el){el.focus();el.select();}}});
+// Cmd+K now handled in KEYBOARD SHORTCUTS section
 function updateGreeting(){const h=new Date().getHours();const g=h<12?'Good morning':h<18?'Good afternoon':'Good evening';document.getElementById('dashboardGreeting').textContent=g+(currentUser?', '+currentUser.name.split(' ')[0]:'');document.getElementById('dashboardDate').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});}
 
 // ═══════ ANALYTICS ═══════
@@ -1506,6 +1572,9 @@ async function saveCmsContent() {
     try {
         await api('PUT', '/config', { content: c });
         toast('Content saved & published!', 'success');
+        // Auto-refresh preview if open
+        const f = document.getElementById('previewFrame');
+        if (f) f.src = '/?t=' + Date.now();
     } catch(e) { toast(e.message, 'error'); }
 }
 
@@ -1688,6 +1757,219 @@ async function savePageSettings() {
         cmsConfig.settings = settings;
         toast('Page settings saved!', 'success');
     } catch(e) { toast(e.message, 'error'); }
+}
+
+// ═══════ LIVE PREVIEW ═══════
+function setPreviewDevice(width, btn) {
+    btn.parentElement.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('previewContainer').style.width = width;
+}
+
+// ═══════ NOTIFICATIONS ═══════
+let notifPanelOpen = false;
+
+function toggleNotifPanel() {
+    notifPanelOpen = !notifPanelOpen;
+    document.getElementById('notifPanel').style.display = notifPanelOpen ? 'block' : 'none';
+    if (notifPanelOpen) loadNotifications();
+}
+
+async function loadNotifications() {
+    try {
+        const d = await api('GET', '/notifications?limit=20');
+        renderNotifList(d.items || []);
+        const dot = document.getElementById('notifDot');
+        if (d.unreadCount > 0) { dot.style.display = ''; } else { dot.style.display = 'none'; }
+    } catch(e) {}
+}
+
+function renderNotifList(items) {
+    const el = document.getElementById('notifList');
+    if (!items.length) { el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:13px">No notifications</div>'; return; }
+    const iconMap = { lead: '&#128101;', booking: '&#128203;', system: '&#9881;', team: '&#128100;' };
+    const bgMap = { lead: 'var(--blue-bg)', booking: 'var(--green-bg)', system: 'var(--primary-bg)', team: 'var(--purple-bg)' };
+    el.innerHTML = items.map(n => {
+        const ago = timeAgo(n.createdAt);
+        return `<div class="notif-item ${n.read ? '' : 'unread'}" onclick="markNotifRead(${n.id})"><div class="notif-icon" style="background:${bgMap[n.type] || 'var(--bg-input)'}">${iconMap[n.type] || '&#128276;'}</div><div class="notif-body"><div class="notif-title">${esc(n.title)}</div><div class="notif-desc">${esc(n.body)}</div></div><div class="notif-time">${ago}</div></div>`;
+    }).join('');
+}
+
+function timeAgo(dateStr) {
+    const s = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+    if (s < 60) return 'now';
+    if (s < 3600) return Math.floor(s / 60) + 'm';
+    if (s < 86400) return Math.floor(s / 3600) + 'h';
+    return Math.floor(s / 86400) + 'd';
+}
+
+async function markNotifRead(id) {
+    try { await api('PATCH', '/notifications/' + id + '/read'); loadNotifications(); } catch(e) {}
+}
+
+async function markAllNotifsRead() {
+    try { await api('POST', '/notifications/read-all'); loadNotifications(); toast('All marked as read', 'info'); } catch(e) {}
+}
+
+// Close notif panel when clicking outside
+document.addEventListener('click', e => {
+    if (notifPanelOpen && !e.target.closest('.notif-btn') && !e.target.closest('#notifPanel')) {
+        notifPanelOpen = false;
+        document.getElementById('notifPanel').style.display = 'none';
+    }
+});
+
+// ═══════ COMMAND PALETTE ═══════
+let cmdOpen = false;
+let cmdResults = [];
+let cmdSelectedIdx = 0;
+
+function openCmdPalette() {
+    cmdOpen = true;
+    const el = document.getElementById('cmdPalette');
+    el.style.display = 'flex';
+    const input = document.getElementById('cmdInput');
+    input.value = '';
+    input.focus();
+    document.getElementById('cmdResults').innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:13px">Type to search across leads, bookings, and cars</div>';
+}
+
+function closeCmdPalette() {
+    cmdOpen = false;
+    document.getElementById('cmdPalette').style.display = 'none';
+}
+
+let cmdDebounce = null;
+function handleCmdSearch(q) {
+    clearTimeout(cmdDebounce);
+    if (!q || q.length < 2) {
+        document.getElementById('cmdResults').innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:13px">Type at least 2 characters</div>';
+        return;
+    }
+    cmdDebounce = setTimeout(async () => {
+        try {
+            const d = await api('GET', '/search?q=' + encodeURIComponent(q));
+            cmdResults = [...(d.leads || []), ...(d.bookings || []), ...(d.cars || [])];
+            cmdSelectedIdx = 0;
+            renderCmdResults();
+        } catch(e) {}
+    }, 200);
+}
+
+function renderCmdResults() {
+    const el = document.getElementById('cmdResults');
+    if (!cmdResults.length) { el.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:13px">No results found</div>'; return; }
+    el.innerHTML = cmdResults.map((r, i) => `<div class="cmd-result ${i === cmdSelectedIdx ? 'selected' : ''}" onclick="cmdNavigate(${i})" onmouseenter="cmdSelectedIdx=${i};renderCmdResults()"><span class="cmd-icon">${r.icon}</span><div><div class="cmd-title">${r.title}</div><div class="cmd-sub">${esc(r.subtitle)}</div></div></div>`).join('');
+}
+
+function cmdNavigate(idx) {
+    const r = cmdResults[idx]; if (!r) return;
+    closeCmdPalette();
+    if (r.type === 'lead') { switchView('leads'); document.getElementById('leadsSearch').value = r.title; renderLeads(); }
+    else if (r.type === 'booking') { switchView('bookings'); openBookingDetail(r.id); }
+    else if (r.type === 'car') { switchView('cars'); }
+}
+
+// ═══════ QUICK-ADD FAB ═══════
+let quickAddOpen = false;
+function toggleQuickAdd() {
+    quickAddOpen = !quickAddOpen;
+    document.getElementById('quickAddMenu').style.display = quickAddOpen ? 'block' : 'none';
+}
+function closeQuickAdd() { quickAddOpen = false; document.getElementById('quickAddMenu').style.display = 'none'; }
+
+function quickAddLead() {
+    closeQuickAdd();
+    document.getElementById('modal').classList.remove('wide');
+    document.getElementById('modalTitle').textContent = 'Add Lead';
+    document.getElementById('modalBody').innerHTML = `<form onsubmit="submitQuickLead(event)">
+        <div class="form-row"><div class="form-group"><label>Full Name</label><input class="form-input" id="qlName" required></div><div class="form-group"><label>Phone</label><input class="form-input" id="qlPhone" required></div></div>
+        <div class="form-row"><div class="form-group"><label>WhatsApp</label><input class="form-input" id="qlWa" placeholder="Same as phone"></div><div class="form-group"><label>Email</label><input class="form-input" id="qlEmail"></div></div>
+        <div class="form-row"><div class="form-group"><label>Interest</label><input class="form-input" id="qlInterest" placeholder="e.g. Economy Sedan"></div><div class="form-group"><label>Source</label><select class="form-input" id="qlSource"><option value="direct">Direct</option><option value="popup">Popup</option><option value="whatsapp">WhatsApp</option><option value="referral">Referral</option></select></div></div>
+        <div style="display:flex;gap:8px;margin-top:16px"><button type="submit" class="btn btn-primary" style="flex:1">Add Lead</button><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button></div></form>`;
+    openModal();
+}
+
+async function submitQuickLead(e) {
+    e.preventDefault();
+    try {
+        await api('POST', '/leads', {
+            fullName: document.getElementById('qlName').value,
+            phone: document.getElementById('qlPhone').value,
+            whatsapp: document.getElementById('qlWa').value || document.getElementById('qlPhone').value,
+            email: document.getElementById('qlEmail').value,
+            interest: document.getElementById('qlInterest').value,
+            source: document.getElementById('qlSource').value
+        });
+        closeModal(); await loadLeads(); loadStats(); toast('Lead added', 'success');
+    } catch(e) { toast(e.message, 'error'); }
+}
+
+// ═══════ KEYBOARD SHORTCUTS ═══════
+document.addEventListener('keydown', e => {
+    // Cmd+K / Ctrl+K -> command palette
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); if (cmdOpen) closeCmdPalette(); else openCmdPalette(); return; }
+    // Escape
+    if (e.key === 'Escape') { if (cmdOpen) { closeCmdPalette(); return; } if (notifPanelOpen) { notifPanelOpen = false; document.getElementById('notifPanel').style.display = 'none'; return; } closeQuickAdd(); return; }
+    // Command palette keyboard nav
+    if (cmdOpen) {
+        if (e.key === 'ArrowDown') { e.preventDefault(); cmdSelectedIdx = Math.min(cmdSelectedIdx + 1, cmdResults.length - 1); renderCmdResults(); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); cmdSelectedIdx = Math.max(cmdSelectedIdx - 1, 0); renderCmdResults(); }
+        else if (e.key === 'Enter') { e.preventDefault(); cmdNavigate(cmdSelectedIdx); }
+        return;
+    }
+    // Skip if typing in an input
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+    // Shortcut keys (no modifier)
+    if (e.key === 'd' || e.key === 'D') switchView('dashboard');
+    else if (e.key === 'l' || e.key === 'L') switchView('leads');
+    else if (e.key === 'b' || e.key === 'B') switchView('bookings');
+    else if (e.key === 'c' || e.key === 'C') switchView('cars');
+});
+
+// ═══════ DATA EXPORT / IMPORT / CLEAR ═══════
+async function exportAllData() {
+    try {
+        const data = await api('GET', '/export');
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'fastrack-backup-' + new Date().toISOString().split('T')[0] + '.json'; a.click();
+        URL.revokeObjectURL(url);
+        localStorage.setItem('ft_lastExport', new Date().toISOString());
+        updateExportTimestamp();
+        toast('Data exported successfully', 'success');
+    } catch(e) { toast(e.message, 'error'); }
+}
+
+async function importData() {
+    const file = document.getElementById('importFile').files[0];
+    if (!file) { toast('Select a file first', 'error'); return; }
+    const mode = document.getElementById('importMode').value;
+    try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        await api('POST', '/import', { data, mode });
+        toast('Data imported! Reloading...', 'success');
+        loadAllData();
+    } catch(e) { toast('Import failed: ' + e.message, 'error'); }
+}
+
+async function clearAllData() {
+    const token = document.getElementById('clearConfirm').value;
+    if (token !== 'DELETE') { toast('Type DELETE to confirm', 'error'); return; }
+    try {
+        await api('DELETE', '/data', { confirmToken: 'DELETE' });
+        document.getElementById('clearConfirm').value = '';
+        toast('All data cleared', 'success');
+        loadAllData();
+    } catch(e) { toast(e.message, 'error'); }
+}
+
+function updateExportTimestamp() {
+    const el = document.getElementById('lastExportTime');
+    if (!el) return;
+    const last = localStorage.getItem('ft_lastExport');
+    el.textContent = last ? 'Last export: ' + fmtDateTime(last) : 'No exports yet';
 }
 
 // ═══════ INIT ═══════

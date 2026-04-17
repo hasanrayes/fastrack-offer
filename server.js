@@ -39,6 +39,13 @@ let users = [
 let refreshTokens = new Map();
 let resetTokens = new Map();
 let activityLog = [];
+let notifications = [];
+let nextNotifId = 1;
+
+function addNotification(type, title, body, userId) {
+  notifications.unshift({ id: nextNotifId++, type, title, body, read: false, userId: userId || null, createdAt: new Date().toISOString() });
+  if (notifications.length > 200) notifications.length = 200;
+}
 
 let cars = [
   {id:1,name:'Mitsubishi Attrage',cat:'Economy Sedan',img:'https://fasttrackrac.com/cdn/shop/products/fastrack-Mitsubishi-attrage-car.jpg?v=1726815463&width=900',price:999,was:1399,type:'Sedan',seats:5,doors:4,transmission:'Automatic',bags:2,viewers:12,spots:3,badge:'Best Value',feats:['A/C','Reverse Camera','Bluetooth','Fog Lights'],includes:'Insurance + UAE delivery included',active:true,order:0},
@@ -137,6 +144,7 @@ app.post('/api/leads', (req, res) => {
   };
   leads.unshift(lead);
   logActivity('system', 'lead_created', `New lead: ${fullName} (${phone})`);
+  addNotification('lead', 'New Lead', `${fullName} (${phone}) — ${interest || 'General'}`);
   res.json({ success: true, lead });
 });
 
@@ -170,6 +178,7 @@ app.post('/api/bookings', (req, res) => {
   const matchLead = leads.find(l => l.phone === phone && !l.convertedToBooking);
   if (matchLead) matchLead.convertedToBooking = true;
   logActivity('system', 'booking_created', `New booking: ${ref} - ${fullName} for ${carName}`);
+  addNotification('booking', 'New Booking', `${ref} — ${fullName} booked ${carName}`);
   res.json({ success: true, ref, booking });
 });
 
@@ -949,6 +958,91 @@ app.delete('/api/config/sections/:id', auth, requireRole('superadmin', 'manager'
 app.post('/api/config/reset', auth, requireRole('superadmin'), (req, res) => {
   siteConfig.sections = JSON.parse(JSON.stringify(DEFAULT_SECTIONS));
   logActivity(req.user.id, 'config_reset', 'Reset landing page sections to defaults');
+  res.json({ success: true });
+});
+
+// ══════════════════════════════
+// NOTIFICATIONS API
+// ══════════════════════════════
+
+app.get('/api/notifications', auth, (req, res) => {
+  const limit = parseInt(req.query.limit) || 30;
+  const unreadOnly = req.query.unread === 'true';
+  let result = notifications;
+  if (unreadOnly) result = result.filter(n => !n.read);
+  res.json({ items: result.slice(0, limit), unreadCount: notifications.filter(n => !n.read).length });
+});
+
+app.patch('/api/notifications/:id/read', auth, (req, res) => {
+  const n = notifications.find(x => x.id === parseInt(req.params.id));
+  if (n) n.read = true;
+  res.json({ success: true });
+});
+
+app.post('/api/notifications/read-all', auth, (req, res) => {
+  notifications.forEach(n => n.read = true);
+  res.json({ success: true });
+});
+
+// ══════════════════════════════
+// GLOBAL SEARCH API
+// ══════════════════════════════
+
+app.get('/api/search', auth, (req, res) => {
+  const q = (req.query.q || '').toLowerCase();
+  if (!q || q.length < 2) return res.json({ leads: [], bookings: [], cars: [] });
+
+  const matchedLeads = leads.filter(l => `${l.fullName} ${l.phone} ${l.email} ${l.interest}`.toLowerCase().includes(q)).slice(0, 8).map(l => ({ id: l.id, type: 'lead', title: l.fullName, subtitle: l.phone + ' — ' + (l.status || 'new'), icon: '&#128101;' }));
+  const matchedBookings = bookings.filter(b => `${b.fullName} ${b.phone} ${b.ref} ${b.carName}`.toLowerCase().includes(q)).slice(0, 8).map(b => ({ id: b.id, type: 'booking', title: b.ref + ' — ' + b.fullName, subtitle: b.carName + ' — ' + (b.status || 'pending'), icon: '&#128203;' }));
+  const matchedCars = cars.filter(c => `${c.name} ${c.cat} ${c.type}`.toLowerCase().includes(q)).slice(0, 8).map(c => ({ id: c.id, type: 'car', title: c.name, subtitle: c.cat + ' — AED ' + c.price, icon: '&#128663;' }));
+
+  res.json({ leads: matchedLeads, bookings: matchedBookings, cars: matchedCars });
+});
+
+// ══════════════════════════════
+// DATA EXPORT / IMPORT / CLEAR
+// ══════════════════════════════
+
+app.get('/api/export', auth, (req, res) => {
+  res.json({
+    exportDate: new Date().toISOString(),
+    version: '2.0',
+    leads, bookings, cars,
+    config: siteConfig,
+    activityLog: activityLog.slice(0, 100)
+  });
+});
+
+app.post('/api/import', auth, requireRole('superadmin'), (req, res) => {
+  const { data, mode } = req.body; // mode: 'merge' or 'replace'
+  if (!data) return res.status(400).json({ error: 'No data provided' });
+
+  try {
+    if (mode === 'replace') {
+      if (data.leads) { leads = data.leads; nextLeadId = Math.max(...leads.map(l => l.id || 0), 0) + 1; }
+      if (data.bookings) { bookings = data.bookings; nextBookingId = Math.max(...bookings.map(b => b.id || 0), 0) + 1; }
+      if (data.cars) { cars = data.cars; nextCarId = Math.max(...cars.map(c => c.id || 0), 0) + 1; }
+      if (data.config) { siteConfig = { ...siteConfig, ...data.config }; }
+    } else {
+      if (data.leads) { const existIds = new Set(leads.map(l => l.id)); data.leads.forEach(l => { if (!existIds.has(l.id)) leads.push(l); }); nextLeadId = Math.max(...leads.map(l => l.id || 0), 0) + 1; }
+      if (data.bookings) { const existIds = new Set(bookings.map(b => b.id)); data.bookings.forEach(b => { if (!existIds.has(b.id)) bookings.push(b); }); nextBookingId = Math.max(...bookings.map(b => b.id || 0), 0) + 1; }
+      if (data.cars) { const existIds = new Set(cars.map(c => c.id)); data.cars.forEach(c => { if (!existIds.has(c.id)) cars.push(c); }); nextCarId = Math.max(...cars.map(c => c.id || 0), 0) + 1; }
+    }
+    logActivity(req.user.id, 'data_imported', `Imported data (${mode} mode)`);
+    addNotification('system', 'Data Imported', `Data was imported in ${mode} mode`);
+    res.json({ success: true, counts: { leads: leads.length, bookings: bookings.length, cars: cars.length } });
+  } catch(e) {
+    res.status(400).json({ error: 'Invalid data format: ' + e.message });
+  }
+});
+
+app.delete('/api/data', auth, requireRole('superadmin'), (req, res) => {
+  const { confirmToken } = req.body;
+  if (confirmToken !== 'DELETE') return res.status(400).json({ error: 'Type DELETE to confirm' });
+  const prevCounts = { leads: leads.length, bookings: bookings.length };
+  leads = []; bookings = []; nextLeadId = 1; nextBookingId = 1;
+  logActivity(req.user.id, 'data_cleared', `Cleared all data (${prevCounts.leads} leads, ${prevCounts.bookings} bookings)`);
+  addNotification('system', 'Data Cleared', 'All leads and bookings have been cleared');
   res.json({ success: true });
 });
 
