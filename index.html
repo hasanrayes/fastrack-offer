@@ -251,6 +251,13 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .ok .ref{font-size:13px;color:var(--orange);font-weight:700;margin-bottom:4px}
 .ok p{font-size:12px;color:var(--txt2);line-height:1.5}
 
+/* ── CAROUSEL INDICATORS ── */
+.carousel-dots{display:none;justify-content:center;gap:6px;margin-top:8px}
+.carousel-dot{width:8px;height:8px;border-radius:50%;background:var(--border);border:none;padding:0;cursor:pointer;transition:.25s}
+.carousel-dot.active{background:var(--orange);width:24px;border-radius:4px}
+.swipe-hint{display:none;align-items:center;justify-content:center;gap:6px;margin-top:6px;font-size:11px;font-weight:600;color:var(--txt3);animation:swipeAnim 2s ease-in-out infinite}
+@keyframes swipeAnim{0%,100%{transform:translateX(0);opacity:.7}50%{transform:translateX(6px);opacity:1}}
+
 /* ── RESPONSIVE ── */
 @media(max-width:768px){
   .hero h1{font-size:22px}
@@ -267,6 +274,9 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
   .sticky-inner{flex-direction:column;text-align:center;gap:6px}
   .sticky-text{font-size:12px}
   .carousel-nav{display:none}
+  .carousel{padding-right:40px}
+  .carousel-dots{display:flex}
+  .swipe-hint{display:flex}
 }
 @media(max-width:480px){
   .car-bottom{flex-direction:column;gap:10px;align-items:flex-start}
@@ -356,6 +366,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
     <div class="carousel" id="carCarousel"></div>
     <button class="carousel-nav carousel-next" onclick="scrollCar(1)">&#8250;</button>
   </div>
+  <div class="carousel-dots" id="carDots"></div>
+  <div class="swipe-hint" id="swipeHint">Swipe for more offers &#8594;</div>
 </section>
 
 <!-- WHY US (compact) -->
@@ -539,11 +551,25 @@ function renderCars(){
         '<button class="car-cta" onclick="event.stopPropagation();openB('+JSON.stringify(c).replace(/'/g,"&#39;")+')">Book Now</button>'+
       '</div></div>';
   }).join('');
+  initDots();
 }
 
 function scrollCar(dir){
   var el=document.getElementById('carCarousel');
   el.scrollBy({left:dir*360,behavior:'smooth'});
+}
+
+// CAROUSEL DOTS
+function initDots(){
+  var wrap=document.getElementById('carCarousel'),dots=document.getElementById('carDots'),hint=document.getElementById('swipeHint');
+  var cards=wrap.querySelectorAll('.car');if(!cards.length)return;
+  dots.innerHTML='';
+  for(var i=0;i<cards.length;i++){var d=document.createElement('button');d.className='carousel-dot'+(i===0?' active':'');d.setAttribute('data-i',i);d.onclick=function(){var idx=parseInt(this.getAttribute('data-i'));cards[idx].scrollIntoView({behavior:'smooth',inline:'start',block:'nearest'});};dots.appendChild(d);}
+  wrap.addEventListener('scroll',function(){
+    var sl=wrap.scrollLeft,cw=cards[0].offsetWidth+16,idx=Math.round(sl/cw);
+    dots.querySelectorAll('.carousel-dot').forEach(function(d,i){d.className='carousel-dot'+(i===idx?' active':'');});
+    if(hint&&sl>30)hint.style.display='none';
+  });
 }
 
 // COUNTDOWN
