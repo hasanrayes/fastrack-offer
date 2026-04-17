@@ -1,2093 +1,651 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fastrack Rent a Car | Premium Monthly Rentals in Dubai</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    :root {
-      --bg-primary: #161412;
-      --bg-secondary: #1E1B18;
-      --bg-elevated: #252220;
-      --bg-card: #1E1B18;
-      --border: rgba(196, 168, 130, 0.12);
-      --border-strong: rgba(196, 168, 130, 0.25);
-      --text-primary: #F5F0EB;
-      --text-secondary: #9B9088;
-      --text-tertiary: #6B6360;
-      --accent: #C4A882;
-      --accent-hover: #D4B892;
-      --urgent: #C85A4A;
-      --save: #7BA87B;
-      --save-bg: rgba(123, 168, 123, 0.1);
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      font-family: 'Inter', system-ui, sans-serif;
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      line-height: 1.6;
-      font-weight: 500;
-      overflow-x: hidden;
-    }
-
-    /* ===== TOPBAR ===== */
-    .topbar {
-      background: var(--urgent);
-      color: white;
-      padding: 12px 0;
-      text-align: center;
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 1px;
-    }
-
-    .topbar-content {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 20px;
-      flex-wrap: wrap;
-    }
-
-    .countdown-badges {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-    }
-
-    .countdown-unit {
-      background: rgba(0, 0, 0, 0.2);
-      padding: 4px 8px;
-      border-radius: 4px;
-      min-width: 32px;
-      text-align: center;
-      font-size: 11px;
-      font-weight: 700;
-    }
-
-    .countdown-label {
-      font-size: 10px;
-      opacity: 0.9;
-      margin-top: 2px;
-      display: block;
-    }
-
-    /* ===== NAVIGATION ===== */
-    nav {
-      position: sticky;
-      top: 0;
-      backdrop-filter: blur(12px);
-      background: rgba(22, 20, 18, 0.92);
-      border-bottom: 1px solid var(--border);
-      padding: 16px 20px;
-      z-index: 100;
-    }
-
-    .nav-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .nav-logo {
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: 6px;
-      color: var(--text-primary);
-      text-transform: uppercase;
-    }
-
-    .nav-center {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      color: var(--text-tertiary);
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-
-    .nav-center::before {
-      content: '●';
-      color: var(--save);
-      font-size: 8px;
-    }
-
-    .nav-cta {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid var(--border-strong);
-      color: var(--accent);
-      background: transparent;
-      padding: 10px 20px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .nav-cta:hover {
-      background: var(--accent);
-      color: var(--bg-primary);
-      border-color: var(--accent);
-    }
-
-    @media (max-width: 768px) {
-      .nav-center {
-        display: none;
-      }
-    }
-
-    /* ===== HERO SECTION ===== */
-    .hero {
-      background: var(--bg-primary);
-      padding: 80px 20px;
-      text-align: center;
-      max-width: 100%;
-    }
-
-    .hero-container {
-      max-width: 700px;
-      margin: 0 auto;
-    }
-
-    .hero-tag {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 3px;
-      color: var(--accent);
-      text-transform: uppercase;
-      margin-bottom: 24px;
-      display: inline-block;
-    }
-
-    .hero-heading {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: clamp(32px, 8vw, 56px);
-      font-weight: 700;
-      line-height: 1.2;
-      margin-bottom: 8px;
-      color: var(--text-primary);
-    }
-
-    .hero-heading-secondary {
-      font-weight: 300;
-      color: var(--text-secondary);
-      display: block;
-      margin-top: 4px;
-    }
-
-    .hero-subtitle {
-      font-size: 15px;
-      color: var(--text-secondary);
-      margin-bottom: 32px;
-      line-height: 1.7;
-      max-width: 500px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .hero-buttons {
-      display: flex;
-      gap: 16px;
-      justify-content: center;
-      margin-bottom: 40px;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      padding: 14px 28px;
-      border-radius: 24px;
-      border: none;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    .btn-primary {
-      background: var(--accent);
-      color: var(--bg-primary);
-    }
-
-    .btn-primary:hover {
-      background: var(--accent-hover);
-      transform: translateY(-2px);
-    }
-
-    .btn-primary:active {
-      transform: scale(0.97);
-    }
-
-    .btn-secondary {
-      background: transparent;
-      color: var(--text-secondary);
-      border: 1px solid var(--border-strong);
-    }
-
-    .btn-secondary:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    .hero-social-proof {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      font-size: 12px;
-      color: var(--text-tertiary);
-    }
-
-    .avatar-group {
-      display: flex;
-      margin-right: 8px;
-    }
-
-    .avatar {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--accent), #D4B892);
-      border: 2px solid var(--bg-primary);
-      margin-right: -8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--bg-primary);
-    }
-
-    /* ===== STATS BAR ===== */
-    .stats-bar {
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      padding: 32px 20px;
-      background: var(--bg-primary);
-    }
-
-    .stats-container {
-      max-width: 900px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 40px;
-      text-align: center;
-    }
-
-    .stat-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .stat-number {
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 4px;
-      font-family: 'Space Grotesk', sans-serif;
-    }
-
-    .stat-label {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 2px;
-      color: var(--text-tertiary);
-      text-transform: uppercase;
-    }
-
-    /* ===== CARS SECTION ===== */
-    .cars-section {
-      background: var(--bg-primary);
-      padding: 60px 20px;
-    }
-
-    .cars-container {
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-
-    .cars-header {
-      margin-bottom: 40px;
-    }
-
-    .cars-tag {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 3px;
-      color: var(--accent);
-      text-transform: uppercase;
-      margin-bottom: 12px;
-      display: inline-block;
-    }
-
-    .cars-heading {
-      font-size: 32px;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 8px;
-      display: flex;
-      gap: 4px;
-      align-items: baseline;
-      flex-wrap: wrap;
-    }
-
-    .cars-heading-accent {
-      color: var(--accent);
-    }
-
-    .cars-subtitle {
-      font-size: 14px;
-      color: var(--text-secondary);
-      margin-bottom: 12px;
-    }
-
-    .cars-subtitle-urgent {
-      color: var(--urgent);
-    }
-
-    .cars-viewers {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 11px;
-      color: var(--text-tertiary);
-      margin-top: 8px;
-    }
-
-    .cars-viewers::before {
-      content: '●';
-      color: var(--save);
-      font-size: 8px;
-    }
-
-    .cars-carousel {
-      display: flex;
-      gap: 24px;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      padding-bottom: 16px;
-      margin-bottom: 32px;
-      scroll-behavior: smooth;
-    }
-
-    .cars-carousel::-webkit-scrollbar {
-      height: 6px;
-    }
-
-    .cars-carousel::-webkit-scrollbar-track {
-      background: var(--bg-secondary);
-      border-radius: 3px;
-    }
-
-    .cars-carousel::-webkit-scrollbar-thumb {
-      background: var(--accent);
-      border-radius: 3px;
-    }
-
-    .car-card {
-      flex: 0 0 calc(100vw - 40px);
-      max-width: 280px;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      overflow: hidden;
-      scroll-snap-align: start;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
-      display: flex;
-      flex-direction: column;
-    }
-
-    .car-card:hover {
-      border-color: var(--border-strong);
-      transform: translateY(-2px);
-    }
-
-    .car-card-image-wrapper {
-      position: relative;
-      height: 200px;
-      overflow: hidden;
-      background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
-    }
-
-    .car-card-image {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.4s ease;
-    }
-
-    .car-card:hover .car-card-image {
-      transform: scale(1.05);
-    }
-
-    .car-card-badge {
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      background: var(--accent);
-      color: var(--bg-primary);
-      padding: 6px 12px;
-      border-radius: 12px;
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .car-card-spots {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      background: var(--urgent);
-      color: white;
-      padding: 6px 12px;
-      border-radius: 12px;
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-
-    .car-card-viewers {
-      position: absolute;
-      bottom: 12px;
-      left: 12px;
-      background: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(8px);
-      color: var(--text-primary);
-      padding: 6px 10px;
-      border-radius: 10px;
-      font-size: 10px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .car-card-viewers::before {
-      content: '●';
-      color: var(--save);
-      font-size: 6px;
-    }
-
-    .car-card-content {
-      padding: 16px;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .car-category {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 2px;
-      color: var(--text-tertiary);
-      text-transform: uppercase;
-      margin-bottom: 6px;
-    }
-
-    .car-name {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 10px;
-      line-height: 1.2;
-    }
-
-    .car-specs {
-      display: flex;
-      gap: 12px;
-      font-size: 12px;
-      color: var(--text-secondary);
-      margin-bottom: 12px;
-      flex-wrap: wrap;
-    }
-
-    .car-spec-item {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .car-features {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
-    }
-
-    .feature-pill {
-      background: rgba(196, 168, 130, 0.08);
-      border: 1px solid var(--border);
-      color: var(--text-secondary);
-      padding: 4px 8px;
-      border-radius: 8px;
-      font-size: 9px;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .car-price-box {
-      background: rgba(196, 168, 130, 0.04);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px;
-      margin-bottom: 12px;
-    }
-
-    .car-price-was {
-      font-size: 11px;
-      color: var(--text-tertiary);
-      text-decoration: line-through;
-      margin-bottom: 4px;
-    }
-
-    .car-price-save {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      background: var(--save-bg);
-      color: var(--save);
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 9px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 6px;
-    }
-
-    .car-price-current {
-      display: flex;
-      align-items: baseline;
-      gap: 2px;
-      margin-bottom: 6px;
-    }
-
-    .car-price-currency {
-      font-size: 13px;
-      color: var(--text-tertiary);
-      font-weight: 500;
-    }
-
-    .car-price-amount {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 32px;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-
-    .car-price-period {
-      font-size: 12px;
-      color: var(--text-tertiary);
-      font-weight: 500;
-    }
-
-    .car-includes {
-      font-size: 10px;
-      color: var(--text-tertiary);
-      margin-top: 6px;
-      display: flex;
-      align-items: flex-start;
-      gap: 4px;
-    }
-
-    .car-includes::before {
-      content: '✓';
-      color: var(--save);
-      font-weight: 700;
-      flex-shrink: 0;
-    }
-
-    .car-urgency {
-      font-size: 11px;
-      color: var(--urgent);
-      margin-bottom: 12px;
-    }
-
-    .car-urgency::before {
-      content: '● ';
-    }
-
-    .car-book-btn {
-      background: var(--accent);
-      color: var(--bg-primary);
-      border: none;
-      padding: 12px 16px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-top: auto;
-    }
-
-    .car-book-btn:hover {
-      background: var(--accent-hover);
-      transform: translateY(-2px);
-    }
-
-    .car-book-btn:active {
-      transform: scale(0.97);
-    }
-
-    .carousel-dots {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 24px;
-    }
-
-    .carousel-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--border-strong);
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .carousel-dot.active {
-      width: 24px;
-      border-radius: 4px;
-      background: var(--accent);
-    }
-
-    /* ===== URGENCY BANNER ===== */
-    .urgency-banner {
-      background: var(--bg-elevated);
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      padding: 20px;
-      margin: 40px 0;
-    }
-
-    .urgency-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-
-    .urgency-text {
-      font-size: 13px;
-      color: var(--text-primary);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .urgency-countdown {
-      background: var(--urgent);
-      color: white;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 1px;
-    }
-
-    /* ===== WHY SECTION ===== */
-    .why-section {
-      background: var(--bg-secondary);
-      padding: 60px 20px;
-    }
-
-    .why-container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .why-header {
-      margin-bottom: 40px;
-      text-align: center;
-    }
-
-    .why-tag {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 3px;
-      color: var(--accent);
-      text-transform: uppercase;
-      margin-bottom: 12px;
-      display: inline-block;
-    }
-
-    .why-heading {
-      font-size: 32px;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 20px;
-    }
-
-    .why-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 20px;
-    }
-
-    .why-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 24px;
-      text-align: center;
-      transition: all 0.3s ease;
-    }
-
-    .why-card:hover {
-      border-color: var(--border-strong);
-      transform: translateY(-2px);
-    }
-
-    .why-card-emoji {
-      font-size: 32px;
-      margin-bottom: 12px;
-    }
-
-    .why-card-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .why-card-description {
-      font-size: 12px;
-      color: var(--text-tertiary);
-      line-height: 1.5;
-    }
-
-    /* ===== GUARANTEE SECTION ===== */
-    .guarantee-section {
-      background: var(--bg-primary);
-      padding: 60px 20px;
-    }
-
-    .guarantee-container {
-      max-width: 500px;
-      margin: 0 auto;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 32px;
-      text-align: center;
-    }
-
-    .guarantee-emoji {
-      font-size: 48px;
-      margin-bottom: 16px;
-    }
-
-    .guarantee-title {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 12px;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-    }
-
-    .guarantee-description {
-      font-size: 13px;
-      color: var(--text-secondary);
-      line-height: 1.6;
-    }
-
-    /* ===== FLOATING CTA ===== */
-    .floating-cta {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: var(--accent);
-      color: var(--bg-primary);
-      padding: 12px 20px;
-      border-radius: 24px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      box-shadow: 0 8px 24px rgba(196, 168, 130, 0.3);
-      z-index: 90;
-      opacity: 0;
-      pointer-events: none;
-      transition: all 0.3s ease;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .floating-cta.visible {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .floating-cta::before {
-      content: '●';
-      font-size: 8px;
-    }
-
-    .floating-cta:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 32px rgba(196, 168, 130, 0.4);
-    }
-
-    /* ===== FOOTER ===== */
-    footer {
-      background: var(--bg-primary);
-      border-top: 1px solid var(--border);
-      padding: 40px 20px;
-    }
-
-    .footer-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 40px;
-      margin-bottom: 32px;
-    }
-
-    .footer-col h3 {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 16px;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-    }
-
-    .footer-col p {
-      font-size: 12px;
-      color: var(--text-tertiary);
-      line-height: 1.7;
-      margin-bottom: 12px;
-    }
-
-    .footer-links {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .footer-link {
-      font-size: 12px;
-      color: var(--text-secondary);
-      text-decoration: none;
-      transition: color 0.3s ease;
-    }
-
-    .footer-link:hover {
-      color: var(--accent);
-    }
-
-    .footer-bottom {
-      border-top: 1px solid var(--border);
-      padding-top: 24px;
-      text-align: center;
-      font-size: 11px;
-      color: var(--text-tertiary);
-    }
-
-    /* ===== BOOKING MODAL ===== */
-    .booking-modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(4px);
-      z-index: 300;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-    }
-
-    .booking-modal-overlay.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .booking-modal {
-      background: var(--bg-secondary);
-      width: 100%;
-      max-width: 600px;
-      border: 1px solid var(--border-strong);
-      border-radius: 20px 20px 0 0;
-      max-height: 90vh;
-      overflow-y: auto;
-      animation: slideUp 0.4s ease;
-    }
-
-    @media (min-width: 768px) {
-      .booking-modal {
-        border-radius: 20px;
-        align-self: center;
-      }
-
-      .booking-modal-overlay {
-        align-items: center;
-      }
-    }
-
-    @keyframes slideUp {
-      from {
-        transform: translateY(20px);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
-    }
-
-    .booking-modal-close {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      background: transparent;
-      border: none;
-      color: var(--text-primary);
-      font-size: 24px;
-      cursor: pointer;
-      z-index: 10;
-    }
-
-    .booking-modal-image {
-      width: 100%;
-      height: 260px;
-      object-fit: cover;
-      background: linear-gradient(180deg, var(--bg-elevated), var(--bg-secondary));
-    }
-
-    .booking-modal-content {
-      padding: 32px 24px;
-    }
-
-    .booking-step-progress {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 24px;
-    }
-
-    .progress-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--border);
-      transition: all 0.3s ease;
-    }
-
-    .progress-dot.active {
-      background: var(--accent);
-      width: 24px;
-      border-radius: 4px;
-    }
-
-    .progress-dot.done {
-      background: var(--save);
-    }
-
-    .booking-modal-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 16px;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-    }
-
-    .booking-form-group {
-      margin-bottom: 16px;
-    }
-
-    .booking-form-group label {
-      display: block;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-tertiary);
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .booking-review {
-      background: var(--bg-primary);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 20px;
-    }
-
-    .booking-review-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 0;
-      font-size: 12px;
-      color: var(--text-secondary);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .booking-review-item:last-child {
-      border-bottom: none;
-    }
-
-    .booking-review-total {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      padding: 8px 0;
-      margin-top: 8px;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-
-    .booking-review-total-amount {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 24px;
-    }
-
-    .booking-button {
-      width: 100%;
-      background: var(--accent);
-      color: var(--bg-primary);
-      border: none;
-      padding: 12px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 12px;
-    }
-
-    .booking-button:hover {
-      background: var(--accent-hover);
-      transform: translateY(-2px);
-    }
-
-    .booking-button:active {
-      transform: scale(0.97);
-    }
-
-    .booking-button-confirm {
-      background: var(--save);
-    }
-
-    .booking-button-confirm:hover {
-      background: #8BB88B;
-    }
-
-    .booking-success {
-      text-align: center;
-      padding: 32px 24px;
-    }
-
-    .booking-success-check {
-      font-size: 64px;
-      margin-bottom: 16px;
-    }
-
-    .booking-success-title {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-    }
-
-    .booking-success-message {
-      font-size: 13px;
-      color: var(--text-secondary);
-      line-height: 1.6;
-      margin-bottom: 24px;
-    }
-
-    .form-group {
-      margin-bottom: 16px;
-    }
-
-    .form-label {
-      display: block;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-tertiary);
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .form-input,
-    .form-select {
-      width: 100%;
-      background: var(--bg-primary);
-      border: 1px solid var(--border);
-      color: var(--text-primary);
-      padding: 12px;
-      border-radius: 8px;
-      font-size: 16px;
-      font-family: 'Inter', system-ui, sans-serif;
-      transition: all 0.3s ease;
-    }
-
-    .form-input:focus,
-    .form-select:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(196, 168, 130, 0.1);
-    }
-
-    .form-select {
-      cursor: pointer;
-      padding: 12px;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23C4A882' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 12px center;
-      padding-right: 32px;
-    }
-
-    .form-submit {
-      width: 100%;
-      background: var(--accent);
-      color: var(--bg-primary);
-      border: none;
-      padding: 12px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .form-submit:hover {
-      background: var(--accent-hover);
-      transform: translateY(-2px);
-    }
-
-    .form-submit:active {
-      transform: scale(0.97);
-    }
-
-    /* ===== LEAD POPUP ===== */
-    .lead-popup-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(4px);
-      z-index: 200;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-
-    .lead-popup-overlay.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .lead-popup {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-strong);
-      border-radius: 20px;
-      width: 100%;
-      max-width: 400px;
-      overflow: hidden;
-      animation: slideUp 0.4s ease;
-    }
-
-    .lead-popup-header {
-      background: linear-gradient(135deg, var(--accent), #D4B892);
-      padding: 24px;
-      text-align: center;
-      position: relative;
-    }
-
-    .lead-popup-close {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      background: rgba(0, 0, 0, 0.3);
-      border: none;
-      color: white;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s ease;
-    }
-
-    .lead-popup-close:hover {
-      background: rgba(0, 0, 0, 0.5);
-    }
-
-    .lead-popup-emoji {
-      font-size: 32px;
-      margin-bottom: 8px;
-    }
-
-    .lead-popup-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: white;
-      margin-bottom: 4px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .lead-popup-subtitle {
-      font-size: 12px;
-      color: rgba(255, 255, 255, 0.9);
-      margin-top: 8px;
-    }
-
-    .lead-popup-form {
-      padding: 24px;
-    }
-
-    /* ===== TOAST NOTIFICATIONS ===== */
-    .toast-container {
-      position: fixed;
-      bottom: 24px;
-      left: 24px;
-      z-index: 250;
-      max-width: 320px;
-    }
-
-    .toast {
-      background: var(--bg-elevated);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px;
-      margin-bottom: 12px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-      animation: slideInLeft 0.3s ease;
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-    }
-
-    @keyframes slideInLeft {
-      from {
-        transform: translateX(-100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
-    }
-
-    .toast-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--accent), #D4B892);
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--bg-primary);
-    }
-
-    .toast-content {
-      flex: 1;
-    }
-
-    .toast-name {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-
-    .toast-message {
-      font-size: 10px;
-      color: var(--text-secondary);
-      margin-top: 2px;
-    }
-
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 768px) {
-      .nav-center {
-        display: none;
-      }
-
-      .urgency-container {
-        flex-direction: column;
-        text-align: center;
-      }
-
-      .cars-carousel {
-        gap: 16px;
-      }
-
-      .car-card {
-        flex: 0 0 calc(100vw - 40px);
-      }
-
-      .why-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .footer-container {
-        grid-template-columns: 1fr;
-      }
-
-      .floating-cta {
-        bottom: 80px;
-        right: 12px;
-        left: 12px;
-        max-width: none;
-      }
-
-      .booking-modal {
-        border-radius: 20px 20px 0 0;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .hero {
-        padding: 60px 16px;
-      }
-
-      .hero-heading {
-        font-size: 28px;
-      }
-
-      .cars-heading {
-        font-size: 24px;
-      }
-
-      .hero-buttons {
-        flex-direction: column;
-      }
-
-      .btn {
-        width: 100%;
-      }
-
-      .topbar-content {
-        font-size: 10px;
-      }
-
-      .countdown-unit {
-        min-width: 24px;
-        font-size: 9px;
-        padding: 2px 4px;
-      }
-
-      .countdown-label {
-        font-size: 8px;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fastrack Rent a Car — Monthly Deals Dubai | Save Up to 40%</title>
+<meta name="description" content="Limited monthly car rental deals in Dubai. From AED 999/mo. Full insurance included. Free delivery. Offer ends soon.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --white:#fff;--bg:#F7F7F7;--dark:#1A1A1A;--card:#232323;--card-h:#2C2C2C;
+  --txt:#1A1A1A;--txt2:#666;--txt3:#999;--onDark:#fff;--onDarkM:rgba(255,255,255,.55);
+  --orange:#FF5F00;--orangeH:#E55500;--green:#22C55E;--red:#EF4444;
+  --border:#E5E5E5;--borderD:rgba(255,255,255,.1);
+  --sh:0 2px 12px rgba(0,0,0,.08);--shL:0 8px 30px rgba(0,0,0,.12);
+  --r:8px;--rl:12px;--rx:16px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--txt);-webkit-font-smoothing:antialiased;overflow-x:hidden;padding-bottom:72px}
+
+/* ── NAV ── */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);border-bottom:1px solid var(--border);height:58px;display:flex;align-items:center}
+.nav-inner{max-width:1200px;margin:0 auto;padding:0 24px;width:100%;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-size:22px;font-weight:900;letter-spacing:-.03em;color:var(--txt);text-decoration:none}
+.nav-logo b{color:var(--orange)}
+.nav-cta{padding:10px 22px;background:var(--orange);color:#fff;font-size:13px;font-weight:700;border:none;border-radius:var(--r);cursor:pointer;transition:.2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.nav-cta:hover{background:var(--orangeH)}
+
+/* ── HERO (compact) ── */
+.hero{margin-top:58px;background:var(--dark);padding:32px 0 28px;text-align:center}
+.hero-inner{max-width:1200px;margin:0 auto;padding:0 24px}
+.hero-urgency{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;background:var(--red);color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;border-radius:4px;margin-bottom:14px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+.hero h1{font-size:clamp(22px,3.5vw,38px);font-weight:900;color:var(--onDark);line-height:1.12;letter-spacing:-.03em;text-transform:uppercase;margin-bottom:10px}
+.hero h1 .o{color:var(--orange)}
+.hero-sub{font-size:14px;color:var(--onDarkM);line-height:1.6;margin-bottom:12px;max-width:520px;margin-left:auto;margin-right:auto}
+.hero-proof{display:flex;align-items:center;justify-content:center;gap:18px;margin-bottom:18px;flex-wrap:wrap}
+.hero-proof-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--onDarkM);font-weight:500}
+.hero-proof-item strong{color:var(--onDark)}
+.hero-ctas{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.btn-big{padding:13px 28px;border-radius:var(--r);font-size:14px;font-weight:700;border:none;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:8px;text-decoration:none}
+.btn-orange{background:var(--orange);color:#fff}
+.btn-orange:hover{background:var(--orangeH);transform:translateY(-1px)}
+.btn-outline{background:transparent;color:var(--onDark);border:2px solid rgba(255,255,255,.2)}
+.btn-outline:hover{border-color:rgba(255,255,255,.4)}
+.hero-live{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:14px;font-size:11px;color:var(--onDarkM)}
+.hero-live .dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── TRUST BAR ── */
+.trust{background:var(--white);border-bottom:1px solid var(--border);padding:12px 0}
+.trust-inner{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap}
+.trust-item{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.03em}
+.trust-item svg{color:var(--orange);flex-shrink:0}
+
+/* ── COUNTDOWN (compact) ── */
+.cd-bar{background:var(--dark);padding:12px 0;text-align:center;border-bottom:1px solid var(--borderD)}
+.cd-inner{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+.cd-text{font-size:13px;font-weight:700;color:var(--red)}
+.cd-timer{display:flex;gap:5px}
+.cd-b{background:rgba(255,255,255,.08);padding:6px 10px;border-radius:5px;text-align:center;min-width:44px}
+.cd-n{font-size:16px;font-weight:800;color:var(--orange)}
+.cd-u{font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:var(--onDarkM);font-weight:600}
+
+/* ── SOCIAL PROOF TICKER ── */
+.ticker{background:var(--white);padding:8px 0;overflow:hidden;border-bottom:1px solid var(--border)}
+.ticker-track{display:flex;gap:48px;animation:scroll 22s linear infinite;white-space:nowrap}
+.ticker-item{font-size:11px;font-weight:600;color:var(--txt2);display:flex;align-items:center;gap:5px;flex-shrink:0}
+.ticker-item .g{color:var(--green)}
+@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ── CARS CAROUSEL SECTION ── */
+.cars-section{max-width:1200px;margin:0 auto;padding:28px 24px 36px}
+.cars-head{text-align:center;margin-bottom:20px}
+.cars-head .tag{display:inline-block;padding:4px 12px;background:var(--orange);color:#fff;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;border-radius:4px;margin-bottom:8px}
+.cars-head h2{font-size:clamp(18px,2.5vw,28px);font-weight:900;text-transform:uppercase;letter-spacing:-.02em}
+.cars-head h2 .o{color:var(--orange)}
+.cars-head p{font-size:13px;color:var(--txt2);margin-top:6px}
+
+/* Carousel wrapper */
+.carousel-wrap{position:relative}
+.carousel{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:4px 0 12px}
+.carousel::-webkit-scrollbar{display:none}
+.carousel>.car{min-width:340px;max-width:380px;flex-shrink:0;scroll-snap-align:start}
+.carousel-nav{position:absolute;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:50%;background:var(--white);border:1px solid var(--border);box-shadow:var(--sh);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--txt);transition:.2s;z-index:5}
+.carousel-nav:hover{background:var(--orange);color:#fff;border-color:var(--orange)}
+.carousel-prev{left:-8px}
+.carousel-next{right:-8px}
+
+/* ── CAR CARD ── */
+.car{background:var(--card);border-radius:var(--rx);overflow:hidden;cursor:pointer;transition:.25s;position:relative}
+.car:hover{transform:translateY(-3px);box-shadow:var(--shL)}
+.car:hover .car-photo img{transform:scale(1.03)}
+.car-badge{position:absolute;top:12px;left:12px;z-index:2;padding:4px 10px;border-radius:4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.b-or{background:var(--orange);color:#fff}
+.b-gr{background:var(--green);color:#fff}
+.b-wh{background:var(--white);color:var(--txt)}
+.car-fomo{position:absolute;top:12px;right:12px;z-index:2;display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);color:#fff;font-size:10px;font-weight:500}
+.car-fomo .dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 1.5s infinite}
+.car-head{padding:14px 16px 0}
+.car-name{font-size:14px;font-weight:800;color:var(--onDark);text-transform:uppercase;letter-spacing:.01em}
+.car-type{font-size:10px;color:var(--onDarkM);margin-top:1px}
+.car-photo{padding:6px 16px 0;height:160px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.car-photo img{width:100%;height:100%;object-fit:cover;border-radius:var(--r);transition:transform .4s}
+.car-specs{display:flex;align-items:center;justify-content:center;gap:10px;padding:10px 16px;flex-wrap:wrap}
+.car-spec{font-size:10px;color:var(--onDarkM);font-weight:500;display:flex;align-items:center;gap:3px}
+.car-included{margin:0 16px;padding:8px 12px;background:rgba(34,197,94,.08);border-radius:5px;display:flex;align-items:center;gap:5px;font-size:10px;color:var(--green);font-weight:600}
+.car-bottom{padding:14px 16px 16px;display:flex;align-items:flex-end;justify-content:space-between;border-top:1px solid var(--borderD);margin-top:10px}
+.car-price-was{font-size:11px;color:var(--onDarkM);text-decoration:line-through}
+.car-price-now{display:flex;align-items:baseline;gap:2px}
+.car-price-now .sm{font-size:10px;color:var(--onDarkM)}
+.car-price-now .big{font-size:26px;font-weight:900;color:var(--onDark);letter-spacing:-.03em;line-height:1}
+.car-price-now .mo{font-size:11px;color:var(--onDarkM);font-weight:500}
+.car-save{font-size:10px;color:var(--orange);font-weight:700;margin-top:2px}
+.car-spots{font-size:9px;color:var(--red);font-weight:600;margin-top:2px}
+.car-cta{padding:10px 20px;background:var(--orange);color:#fff;border:none;border-radius:var(--r);font-size:12px;font-weight:700;cursor:pointer;transition:.2s;white-space:nowrap}
+.car-cta:hover{background:var(--orangeH)}
+
+/* ── COMPACT SECTION ── */
+.sec-compact{padding:36px 0}
+.sec-compact .inner{max-width:1200px;margin:0 auto;padding:0 24px}
+.sec-head{text-align:center;margin-bottom:24px}
+.sec-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--orange);margin-bottom:4px}
+.sec-title{font-size:clamp(16px,2vw,24px);font-weight:900;text-transform:uppercase;letter-spacing:-.01em}
+
+/* ── WHY GRID ── */
+.why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.why-card{background:var(--white);border-radius:var(--rl);padding:22px 18px;border:1px solid transparent;transition:.2s}
+.why-card:hover{border-color:var(--orange)}
+.why-card .ic{width:36px;height:36px;background:var(--dark);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;font-size:16px}
+.why-card h3{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.01em;margin-bottom:4px}
+.why-card p{font-size:11px;color:var(--txt2);line-height:1.55}
+
+/* ── REVIEWS CAROUSEL ── */
+.reviews-section{background:var(--dark);padding:36px 0}
+.reviews-section .inner{max-width:1200px;margin:0 auto;padding:0 24px}
+.reviews-section .sec-title{color:var(--onDark)}
+.rev-carousel{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:4px 0 8px}
+.rev-carousel::-webkit-scrollbar{display:none}
+.rev-card{min-width:280px;max-width:320px;flex-shrink:0;scroll-snap-align:start;background:var(--card);border-radius:var(--rl);padding:20px;border:1px solid var(--borderD)}
+.rev-stars{color:#F5A623;font-size:13px;margin-bottom:8px}
+.rev-text{font-size:12px;color:var(--onDarkM);line-height:1.55;margin-bottom:12px;font-style:italic}
+.rev-author{font-size:12px;font-weight:700;color:var(--onDark)}
+.rev-role{font-size:10px;color:var(--onDarkM)}
+
+/* ── GUARANTEE (compact) ── */
+.guarantee{background:var(--white);padding:32px 0;border-top:1px solid var(--border)}
+.guarantee-inner{max-width:600px;margin:0 auto;padding:0 24px;text-align:center}
+.guarantee-inner .ic{font-size:28px;margin-bottom:8px}
+.guarantee-inner h3{font-size:18px;font-weight:900;text-transform:uppercase;margin-bottom:6px}
+.guarantee-inner h3 span{color:var(--orange)}
+.guarantee-inner p{font-size:13px;color:var(--txt2);line-height:1.6}
+
+/* ── FINAL CTA (compact) ── */
+.final-cta{background:var(--dark);padding:36px 0;text-align:center}
+.final-cta h2{font-size:clamp(18px,2.5vw,28px);font-weight:900;color:var(--onDark);text-transform:uppercase;margin-bottom:6px;letter-spacing:-.02em}
+.final-cta h2 span{color:var(--orange)}
+.final-cta p{font-size:13px;color:var(--onDarkM);margin-bottom:18px}
+
+/* ── FOOTER (compact) ── */
+.footer{background:var(--dark);border-top:1px solid var(--borderD);padding:24px 0 16px}
+.footer-inner{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.footer-left{font-size:11px;color:rgba(255,255,255,.3)}
+.footer-links{display:flex;gap:16px}
+.footer-links a{font-size:11px;color:rgba(255,255,255,.5);text-decoration:none;transition:.2s}
+.footer-links a:hover{color:var(--orange)}
+
+/* ── STICKY BOTTOM CTA ── */
+.sticky-bottom{position:fixed;bottom:0;left:0;right:0;z-index:150;background:var(--white);border-top:1px solid var(--border);padding:10px 0;box-shadow:0 -4px 20px rgba(0,0,0,.08)}
+.sticky-inner{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sticky-text{font-size:13px;font-weight:700;color:var(--txt)}
+.sticky-text .price{color:var(--orange);font-size:17px;font-weight:900}
+.sticky-text .was{text-decoration:line-through;color:var(--txt3);font-weight:400;font-size:12px}
+.sticky-btn{padding:11px 24px;background:var(--orange);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;transition:.2s;white-space:nowrap}
+.sticky-btn:hover{background:var(--orangeH)}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.6);backdrop-filter:blur(4px)}
+.modal-overlay.active{display:flex;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto}
+.modal{background:var(--white);border-radius:var(--rx);width:100%;max-width:880px;overflow:hidden;animation:mIn .3s ease}
+@keyframes mIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.m-top{background:var(--card);padding:24px 28px;display:flex;gap:20px;align-items:center;position:relative}
+.m-close{position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:50%;border:1px solid var(--borderD);background:transparent;color:var(--onDark);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;transition:.2s}
+.m-close:hover{background:rgba(255,255,255,.1)}
+.m-img{width:180px;height:120px;object-fit:cover;border-radius:var(--r)}
+.m-info .m-name{font-size:18px;font-weight:800;color:var(--onDark);text-transform:uppercase}
+.m-info .m-cat{font-size:12px;color:var(--onDarkM)}
+.m-info .m-pr{font-size:13px;color:var(--orange);font-weight:700;margin-top:4px}
+.m-info .m-sp{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap}
+.m-info .m-s{font-size:10px;color:var(--onDarkM);display:flex;align-items:center;gap:3px}
+.m-steps{display:flex;gap:3px;padding:0 28px;margin-top:-1px}
+.m-step{flex:1;height:3px;background:var(--border);border-radius:3px}
+.m-step.active{background:var(--orange)}
+.m-step.done{background:var(--green)}
+.m-body{padding:24px 28px 28px}
+.fg{margin-bottom:16px}
+.fl{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--txt);margin-bottom:5px}
+.fi,.fs{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--r);font-size:14px;font-family:inherit;color:var(--txt);background:var(--white);outline:none;transition:.2s}
+.fi:focus,.fs:focus{border-color:var(--orange)}
+.fi::placeholder{color:var(--txt3)}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bf{width:100%;padding:14px;border-radius:var(--r);font-size:14px;font-weight:700;border:none;cursor:pointer;transition:.2s;font-family:inherit}
+.bn{background:var(--orange);color:#fff}
+.bn:hover{background:var(--orangeH)}
+.bb{background:var(--bg);color:var(--txt);margin-bottom:8px}
+.bb:hover{background:var(--border)}
+.rr{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
+.rr .k{color:var(--txt2)}
+.rr .v{font-weight:700}
+.r-save{text-align:center;font-size:14px;color:var(--green);font-weight:700;margin:14px 0 4px}
+.r-total{text-align:center;font-size:26px;font-weight:900;color:var(--orange);margin-bottom:18px}
+
+/* ── LEAD POPUP ── */
+.lead-ov{display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.5);backdrop-filter:blur(3px)}
+.lead-ov.active{display:flex;align-items:center;justify-content:center;padding:20px}
+.lead-box{background:var(--white);border-radius:var(--rx);width:100%;max-width:400px;padding:32px;text-align:center;position:relative;animation:mIn .3s ease}
+.lead-x{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;border:none;background:var(--bg);cursor:pointer;font-size:14px;color:var(--txt2);display:flex;align-items:center;justify-content:center}
+.lead-box .ic{font-size:28px;margin-bottom:6px}
+.lead-box h3{font-size:16px;font-weight:800;text-transform:uppercase;margin-bottom:4px}
+.lead-box .desc{font-size:11px;color:var(--txt2);margin-bottom:14px;line-height:1.5}
+.lead-box .fi{margin-bottom:8px}
+.lead-sub{width:100%;padding:12px;background:var(--orange);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+.lead-sub:hover{background:var(--orangeH)}
+.lead-skip{margin-top:10px;font-size:10px;color:var(--txt3);cursor:pointer;background:none;border:none;font-family:inherit}
+
+/* ── TOAST ── */
+.toast-c{position:fixed;top:74px;right:20px;z-index:2000;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--white);border-radius:var(--r);padding:12px 18px;box-shadow:var(--shL);display:flex;align-items:center;gap:8px;animation:tIn .3s ease;min-width:260px;border-left:4px solid var(--green);font-size:12px;font-weight:500}
+.toast.err{border-left-color:var(--orange)}
+@keyframes tIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+
+/* ── NOTIF ── */
+.notif{position:fixed;bottom:86px;left:20px;z-index:160;background:var(--white);border-radius:var(--rl);padding:12px 16px;box-shadow:var(--shL);display:none;align-items:center;gap:8px;animation:nIn .4s ease;max-width:300px;border-left:4px solid var(--green)}
+.notif.show{display:flex}
+@keyframes nIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.notif-text{font-size:11px;color:var(--txt2);line-height:1.4}
+.notif-text strong{color:var(--txt);font-weight:700}
+.notif-time{font-size:9px;color:var(--txt3)}
+
+/* ── WA FAB ── */
+.wa{position:fixed;bottom:80px;right:20px;z-index:160;width:50px;height:50px;border-radius:50%;background:#25D366;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(37,211,102,.35);transition:.2s;text-decoration:none;border:none}
+.wa:hover{transform:scale(1.06)}
+.wa svg{width:24px;height:24px}
+
+/* ── SUCCESS ── */
+.ok{text-align:center;padding:28px 0}
+.ok .ic{font-size:36px;margin-bottom:8px}
+.ok h3{font-size:16px;font-weight:800;text-transform:uppercase;margin-bottom:4px}
+.ok .ref{font-size:13px;color:var(--orange);font-weight:700;margin-bottom:4px}
+.ok p{font-size:12px;color:var(--txt2);line-height:1.5}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .hero h1{font-size:22px}
+  .hero-proof{gap:10px}
+  .carousel>.car{min-width:290px}
+  .why-grid{grid-template-columns:1fr}
+  .rev-card{min-width:260px}
+  .m-top{flex-direction:column;text-align:center}
+  .m-img{width:100%;height:150px}
+  .m-info .m-sp{justify-content:center}
+  .m-body{padding:18px 20px 22px}
+  .fr{grid-template-columns:1fr}
+  .footer-inner{flex-direction:column;text-align:center}
+  .sticky-inner{flex-direction:column;text-align:center;gap:6px}
+  .sticky-text{font-size:12px}
+  .carousel-nav{display:none}
+}
+@media(max-width:480px){
+  .car-bottom{flex-direction:column;gap:10px;align-items:flex-start}
+  .car-cta{width:100%;text-align:center}
+  .trust-inner{gap:14px}
+  .trust-item{font-size:10px}
+}
+</style>
 </head>
 <body>
-  <!-- TOPBAR -->
-  <div class="topbar">
-    <div class="topbar-content">
-      <span>EXCLUSIVE OFFER ENDS IN</span>
-      <div class="countdown-badges" id="countdown">
-        <div>
-          <div class="countdown-unit" id="days">00</div>
-          <span class="countdown-label">Days</span>
-        </div>
-        <div>
-          <div class="countdown-unit" id="hours">00</div>
-          <span class="countdown-label">Hrs</span>
-        </div>
-        <div>
-          <div class="countdown-unit" id="minutes">00</div>
-          <span class="countdown-label">Min</span>
-        </div>
-        <div>
-          <div class="countdown-unit" id="seconds">00</div>
-          <span class="countdown-label">Sec</span>
-        </div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">FAST<b>RACK</b></a>
+    <a class="nav-cta" href="#offers">View Offers &#8594;</a>
+  </div>
+</nav>
+
+<!-- HERO (compact - no image) -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-urgency">&#9202; Offer Ends Soon — Limited Spots</div>
+    <h1>SAVE UP TO <span class="o">40%</span> ON MONTHLY CAR RENTAL</h1>
+    <p class="hero-sub">Premium cars from AED 999/month. Full insurance, free UAE delivery, zero hidden fees.</p>
+    <div class="hero-proof">
+      <div class="hero-proof-item">&#11088; <strong>4.9/5</strong> from 2,500+ customers</div>
+      <div class="hero-proof-item">&#9989; <strong>143</strong> booked this week</div>
+    </div>
+    <div class="hero-ctas">
+      <a href="#offers" class="btn-big btn-orange">Claim Your Deal &#8594;</a>
+      <a href="https://wa.me/971585969960" class="btn-big btn-outline" target="_blank">&#128172; WhatsApp Us</a>
+    </div>
+    <div class="hero-live"><span class="dot"></span><span id="liveCount">24</span> people viewing offers right now</div>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<div class="trust">
+  <div class="trust-inner">
+    <div class="trust-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Full Insurance</div>
+    <div class="trust-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Free Delivery</div>
+    <div class="trust-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>24/7 Assist</div>
+    <div class="trust-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>No Hidden Fees</div>
+    <div class="trust-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Cancel Anytime</div>
+  </div>
+</div>
+
+<!-- COUNTDOWN -->
+<div class="cd-bar">
+  <div class="cd-inner">
+    <span class="cd-text">&#128293; DEAL EXPIRES IN:</span>
+    <div class="cd-timer">
+      <div class="cd-b"><div class="cd-n" id="cdD">00</div><div class="cd-u">Days</div></div>
+      <div class="cd-b"><div class="cd-n" id="cdH">00</div><div class="cd-u">Hrs</div></div>
+      <div class="cd-b"><div class="cd-n" id="cdM">00</div><div class="cd-u">Min</div></div>
+      <div class="cd-b"><div class="cd-n" id="cdS">00</div><div class="cd-u">Sec</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-track" id="ticker">
+    <span class="ticker-item"><span class="g">&#9989;</span> Ahmed from Dubai Marina just booked a Mitsubishi ASX</span>
+    <span class="ticker-item"><span class="g">&#9989;</span> Sara saved AED 2,400 on a 3-month plan</span>
+    <span class="ticker-item"><span class="g">&#9989;</span> Mohammed from Business Bay booked 2 min ago</span>
+    <span class="ticker-item"><span class="g">&#9989;</span> 143 rentals booked this week</span>
+    <span class="ticker-item"><span class="g">&#9989;</span> 4.9&#9733; average from 2,500+ customers</span>
+    <span class="ticker-item"><span class="g">&#9989;</span> Ahmed from Dubai Marina just booked a Mitsubishi ASX</span>
+    <span class="ticker-item"><span class="g">&#9989;</span> Sara saved AED 2,400 on a 3-month plan</span>
+    <span class="ticker-item"><span class="g">&#9989;</span> Mohammed from Business Bay booked 2 min ago</span>
+    <span class="ticker-item"><span class="g">&#9989;</span> 143 rentals booked this week</span>
+    <span class="ticker-item"><span class="g">&#9989;</span> 4.9&#9733; average from 2,500+ customers</span>
+  </div>
+</div>
+
+<!-- CARS CAROUSEL -->
+<section class="cars-section" id="offers">
+  <div class="cars-head">
+    <div class="tag">&#128293; Limited Spots Available</div>
+    <h2>CHOOSE YOUR <span class="o">DEAL</span></h2>
+    <p>Lock in your discounted monthly rate before it's gone.</p>
+  </div>
+  <div class="carousel-wrap">
+    <button class="carousel-nav carousel-prev" onclick="scrollCar(-1)">&#8249;</button>
+    <div class="carousel" id="carCarousel"></div>
+    <button class="carousel-nav carousel-next" onclick="scrollCar(1)">&#8250;</button>
+  </div>
+</section>
+
+<!-- WHY US (compact) -->
+<section class="sec-compact" id="why">
+  <div class="inner">
+    <div class="sec-head">
+      <div class="sec-label">Why 2,500+ Customers Trust Us</div>
+      <h2 class="sec-title">THE FASTRACK DIFFERENCE</h2>
+    </div>
+    <div class="why-grid">
+      <div class="why-card"><div class="ic">&#128737;&#65039;</div><h3>Full Insurance</h3><p>Comprehensive coverage. Zero deductibles, zero worries.</p></div>
+      <div class="why-card"><div class="ic">&#128666;</div><h3>Free Delivery</h3><p>To your doorstep anywhere in UAE. No pickup hassle.</p></div>
+      <div class="why-card"><div class="ic">&#128176;</div><h3>No Hidden Fees</h3><p>Price you see is the price you pay. Period.</p></div>
+      <div class="why-card"><div class="ic">&#9889;</div><h3>2-Min Booking</h3><p>Pick, confirm, done. Car at your door tomorrow.</p></div>
+      <div class="why-card"><div class="ic">&#128260;</div><h3>Flexible Plans</h3><p>Switch cars, extend, or cancel anytime. No penalties.</p></div>
+      <div class="why-card"><div class="ic">&#128222;</div><h3>24/7 Support</h3><p>Phone & WhatsApp support around the clock.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- REVIEWS CAROUSEL -->
+<section class="reviews-section">
+  <div class="inner">
+    <div class="sec-head">
+      <div class="sec-label">Real Reviews</div>
+      <h2 class="sec-title">WHAT OUR CUSTOMERS SAY</h2>
+    </div>
+    <div class="rev-carousel" id="revCarousel">
+      <div class="rev-card">
+        <div class="rev-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p class="rev-text">"Saved AED 2,400 on a 3-month rental. Car delivered to my apartment next morning. Best deal in Dubai."</p>
+        <div class="rev-author">Ahmed K.</div><div class="rev-role">Business Consultant, Dubai Marina</div>
+      </div>
+      <div class="rev-card">
+        <div class="rev-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p class="rev-text">"Compared 5 companies. Fastrack was 40% cheaper AND included insurance. No brainer. 6th month now."</p>
+        <div class="rev-author">Sara M.</div><div class="rev-role">Marketing Manager, Business Bay</div>
+      </div>
+      <div class="rev-card">
+        <div class="rev-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p class="rev-text">"Booked in 2 minutes. Car next day. Insurance, delivery, everything included. Why go anywhere else?"</p>
+        <div class="rev-author">Omar H.</div><div class="rev-role">Entrepreneur, JBR</div>
+      </div>
+      <div class="rev-card">
+        <div class="rev-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p class="rev-text">"I was paying AED 2,200/month before. Switched to Fastrack and now paying 1,299 for the same class. Incredible."</p>
+        <div class="rev-author">Khalid R.</div><div class="rev-role">Sales Director, Downtown</div>
+      </div>
+      <div class="rev-card">
+        <div class="rev-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p class="rev-text">"Needed a car urgently. Called at 9pm, car was at my hotel by 8am. The 24/7 support is legit."</p>
+        <div class="rev-author">Fatima A.</div><div class="rev-role">Consultant, Abu Dhabi</div>
+      </div>
+      <div class="rev-card">
+        <div class="rev-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p class="rev-text">"Third time renting from them. Always clean cars, great prices, and the team is super responsive on WhatsApp."</p>
+        <div class="rev-author">Rami T.</div><div class="rev-role">Freelancer, Deira</div>
+      </div>
+      <div class="rev-card">
+        <div class="rev-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p class="rev-text">"Rented a JS4 for 6 months. Panoramic roof, 360 camera — felt premium. Saved AED 3,000 vs competition."</p>
+        <div class="rev-author">Layla S.</div><div class="rev-role">Interior Designer, JBR</div>
+      </div>
+      <div class="rev-card">
+        <div class="rev-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p class="rev-text">"My company rents 3 cars from Fastrack. The fleet management and pricing can't be beat in Dubai."</p>
+        <div class="rev-author">Nasser Q.</div><div class="rev-role">CEO, Small Business, Sharjah</div>
       </div>
     </div>
   </div>
+</section>
 
-  <!-- NAVIGATION -->
-  <nav>
-    <div class="nav-container">
-      <div class="nav-logo">FASTRACK</div>
-      <div class="nav-center" id="viewerCount">XX viewing</div>
-      <button class="nav-cta" onclick="document.querySelector('#carsSection').scrollIntoView({behavior:'smooth'})">View Offers</button>
-    </div>
-  </nav>
+<!-- GUARANTEE (compact) -->
+<section class="guarantee">
+  <div class="guarantee-inner">
+    <div class="ic">&#127942;</div>
+    <h3>PRICE MATCH <span>GUARANTEE</span></h3>
+    <p>Found a cheaper monthly rate? We'll match it + give you extra 5% off.</p>
+  </div>
+</section>
 
-  <!-- HERO SECTION -->
-  <section class="hero">
-    <div class="hero-container">
-      <div class="hero-tag">Limited Availability</div>
-      <h1 class="hero-heading">
-        Premium Rides. <span class="hero-heading-secondary">Exceptional Prices.</span>
-      </h1>
-      <p class="hero-subtitle">Monthly car rental in Dubai from AED 999. Zero deposit. Zero hidden fees.</p>
+<!-- FINAL CTA (compact) -->
+<section class="final-cta">
+  <h2>DON'T MISS OUT — <span>LOCK YOUR RATE</span></h2>
+  <p>Prices go up when spots are filled. Secure your deal today.</p>
+  <a href="#offers" class="btn-big btn-orange">View Deals &#8594;</a>
+</section>
 
-      <div class="hero-buttons">
-        <button class="btn btn-primary" onclick="document.querySelector('#carsSection').scrollIntoView({behavior:'smooth'})">Explore Deals ↓</button>
-        <button class="btn btn-secondary" onclick="openLeadPopup()">Contact Us</button>
-      </div>
-
-      <div class="hero-social-proof">
-        <div class="avatar-group">
-          <div class="avatar">SA</div>
-          <div class="avatar">MK</div>
-          <div class="avatar">AZ</div>
-          <div class="avatar">JH</div>
-        </div>
-        <span>248 booked this week</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- STATS BAR -->
-  <div class="stats-bar">
-    <div class="stats-container">
-      <div class="stat-item">
-        <div class="stat-number">3,000+</div>
-        <div class="stat-label">Happy Drivers</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-number">4.9★</div>
-        <div class="stat-label">Avg Rating</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-number">24/7</div>
-        <div class="stat-label">Support</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-number">AED 0</div>
-        <div class="stat-label">Deposit</div>
-      </div>
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-left">&copy; 2024 Fastrack Rent a Car &bull; Dubai, UAE</div>
+    <div class="footer-links">
+      <a href="tel:+971585969960">+971 58 596 9960</a>
+      <a href="https://wa.me/971585969960">WhatsApp</a>
+      <a href="mailto:info@fasttrackrac.com">Email</a>
+      <a href="/dashboard">Dashboard</a>
     </div>
   </div>
+</footer>
 
-  <!-- CARS SECTION -->
-  <section class="cars-section" id="carsSection">
-    <div class="cars-container">
-      <div class="cars-header">
-        <div class="cars-tag">Curated Collection</div>
-        <h2 class="cars-heading">Select Your Vehicle.</h2>
-        <p class="cars-subtitle">Limited monthly rates. Ends when the <span class="cars-subtitle-urgent">timer hits zero.</span></p>
-        <div class="cars-viewers" id="carsViewers">XX people viewing</div>
-      </div>
-
-      <div class="cars-carousel" id="carsCarousel"></div>
-      <div class="carousel-dots" id="carouselDots"></div>
-    </div>
-  </section>
-
-  <!-- URGENCY BANNER -->
-  <div class="urgency-banner">
-    <div class="urgency-container">
-      <span class="urgency-text">⏰ Prices expire when the timer runs out</span>
-      <div class="urgency-countdown">
-        <span id="urgencyCountdown">00:00:00</span>
-      </div>
-    </div>
+<!-- STICKY BOTTOM -->
+<div class="sticky-bottom">
+  <div class="sticky-inner">
+    <div class="sticky-text">From <span class="was">AED 1,399</span> <span class="price">AED 999/mo</span></div>
+    <button class="sticky-btn" onclick="document.getElementById('offers').scrollIntoView({behavior:'smooth'})">Claim Deal &#8594;</button>
   </div>
+</div>
 
-  <!-- WHY SECTION -->
-  <section class="why-section">
-    <div class="why-container">
-      <div class="why-header">
-        <div class="why-tag">Why Fastrack</div>
-        <h2 class="why-heading">The Smarter Way to Rent</h2>
-      </div>
-
-      <div class="why-grid">
-        <div class="why-card">
-          <div class="why-card-emoji">⚡</div>
-          <div class="why-card-title">30-Sec Booking</div>
-          <div class="why-card-description">Complete your rental in half a minute. Simple, fast, zero complexity.</div>
-        </div>
-        <div class="why-card">
-          <div class="why-card-emoji">💰</div>
-          <div class="why-card-title">No Hidden Fees</div>
-          <div class="why-card-description">Transparent pricing. What you see is what you pay. No surprises.</div>
-        </div>
-        <div class="why-card">
-          <div class="why-card-emoji">🚗</div>
-          <div class="why-card-title">Free Delivery</div>
-          <div class="why-card-description">We bring the car to you anywhere in Dubai. Complimentary, always.</div>
-        </div>
-        <div class="why-card">
-          <div class="why-card-emoji">🔒</div>
-          <div class="why-card-title">Full Insurance</div>
-          <div class="why-card-description">Comprehensive coverage included. Drive with complete peace of mind.</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- GUARANTEE SECTION -->
-  <section class="guarantee-section">
-    <div class="guarantee-container">
-      <div class="guarantee-emoji">🛡️</div>
-      <h3 class="guarantee-title">100% Satisfaction Guarantee</h3>
-      <p class="guarantee-description">Not happy with your rental? We'll swap it or refund you within 24 hours, no questions asked.</p>
-    </div>
-  </section>
-
-  <!-- FLOATING CTA -->
-  <div class="floating-cta" id="floatingCta" onclick="document.querySelector('#carsSection').scrollIntoView({behavior:'smooth'})">Deals Ending Soon</div>
-
-  <!-- FOOTER -->
-  <footer>
-    <div class="footer-container">
-      <div class="footer-col">
-        <h3>FASTRACK</h3>
-        <p>Premium car rentals designed for the modern traveler.</p>
-      </div>
-      <div class="footer-col">
-        <h3>Company</h3>
-        <div class="footer-links">
-          <a href="#" class="footer-link">About Us</a>
-          <a href="#" class="footer-link">Blog</a>
-          <a href="#" class="footer-link">Careers</a>
-        </div>
-      </div>
-      <div class="footer-col">
-        <h3>Support</h3>
-        <div class="footer-links">
-          <a href="#" class="footer-link">Help Center</a>
-          <a href="#" class="footer-link">Contact</a>
-          <a href="#" class="footer-link">Terms & Conditions</a>
-        </div>
-      </div>
-      <div class="footer-col">
-        <h3>Connect</h3>
-        <div class="footer-links">
-          <a href="#" class="footer-link">Instagram</a>
-          <a href="#" class="footer-link">Facebook</a>
-          <a href="#" class="footer-link">Twitter</a>
-        </div>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <p>&copy; 2026 Fastrack Rent a Car. All rights reserved. Premium Monthly Rentals in Dubai.</p>
-    </div>
-  </footer>
-
-  <!-- LEAD POPUP -->
-  <div class="lead-popup-overlay" id="leadPopup">
-    <div class="lead-popup">
-      <div class="lead-popup-header">
-        <button class="lead-popup-close" onclick="closeLeadPopup()">×</button>
-        <div class="lead-popup-emoji">🔥</div>
-        <div class="lead-popup-title">Unlock Your Exclusive Deal</div>
-        <div class="lead-popup-subtitle">Personalized prices & priority delivery</div>
-      </div>
-      <form class="lead-popup-form" onsubmit="submitLead(event)">
-        <div class="form-group">
-          <label>Full Name</label>
-          <input type="text" class="form-input" id="leadName" required>
-        </div>
-        <div class="form-group">
-          <label>Phone Number</label>
-          <input type="tel" class="form-input" id="leadPhone" placeholder="+971" required>
-        </div>
-        <div class="form-group">
-          <label>Interested In</label>
-          <select class="form-select" id="leadInterest" required>
-            <option value="">Select a vehicle type</option>
-            <option value="economy">Economy Sedan</option>
-            <option value="sport">Sport Sedan</option>
-            <option value="compact-suv">Compact SUV</option>
-            <option value="crossover-suv">Crossover SUV</option>
-          </select>
-        </div>
-        <button type="submit" class="form-submit">Get My Deal</button>
-      </form>
-    </div>
+<!-- MODAL -->
+<div class="modal-overlay" id="mOverlay">
+  <div class="modal">
+    <div class="m-top" id="mTop"></div>
+    <div class="m-steps"><div class="m-step active" id="ms1"></div><div class="m-step" id="ms2"></div><div class="m-step" id="ms3"></div></div>
+    <div class="m-body" id="mBody"></div>
   </div>
+</div>
 
-  <!-- BOOKING MODAL -->
-  <div class="booking-modal-overlay" id="bookingModal">
-    <div class="booking-modal">
-      <div style="position: relative;">
-        <img class="booking-modal-image" id="bookingImage" src="" alt="Car">
-        <button class="booking-modal-close" onclick="closeBookingModal()">×</button>
-      </div>
-      <div class="booking-modal-content">
-        <div class="booking-step-progress" id="stepProgress">
-          <div class="progress-dot active"></div>
-          <div class="progress-dot"></div>
-          <div class="progress-dot"></div>
-        </div>
-
-        <!-- STEP 1: Booking Details -->
-        <div id="step1">
-          <h3 class="booking-modal-title">Booking Details</h3>
-          <div class="booking-form-group">
-            <label>Start Date</label>
-            <input type="date" class="form-input" id="bookingStartDate" required>
-          </div>
-          <div class="booking-form-group">
-            <label>End Date</label>
-            <input type="date" class="form-input" id="bookingEndDate" required>
-          </div>
-          <div class="booking-form-group">
-            <label>Delivery Location</label>
-            <select class="form-select" id="bookingLocation" required>
-              <option value="">Select location</option>
-              <option value="airport">Dubai Airport</option>
-              <option value="marina">Dubai Marina</option>
-              <option value="downtown">Downtown Dubai</option>
-              <option value="jbr">Jumeirah Beach</option>
-            </select>
-          </div>
-          <button class="booking-button" onclick="nextStep()">Continue →</button>
-        </div>
-
-        <!-- STEP 2: Personal Info -->
-        <div id="step2" style="display: none;">
-          <h3 class="booking-modal-title">Your Information</h3>
-          <div class="booking-form-group">
-            <label>Full Name</label>
-            <input type="text" class="form-input" id="bookingName" required>
-          </div>
-          <div class="booking-form-group">
-            <label>Email</label>
-            <input type="email" class="form-input" id="bookingEmail" required>
-          </div>
-          <div class="booking-form-group">
-            <label>Phone</label>
-            <input type="tel" class="form-input" id="bookingPhone" required>
-          </div>
-          <div class="booking-form-group">
-            <label>Driver License</label>
-            <input type="text" class="form-input" id="bookingLicense" required>
-          </div>
-          <button class="booking-button" onclick="nextStep()">Continue →</button>
-        </div>
-
-        <!-- STEP 3: Review & Confirm -->
-        <div id="step3" style="display: none;">
-          <h3 class="booking-modal-title">Review & Confirm</h3>
-          <div class="booking-review">
-            <div class="booking-review-item">
-              <span>Vehicle</span>
-              <span id="reviewCar">-</span>
-            </div>
-            <div class="booking-review-item">
-              <span>Duration</span>
-              <span id="reviewDuration">-</span>
-            </div>
-            <div class="booking-review-item">
-              <span>Daily Rate</span>
-              <span id="reviewRate">-</span>
-            </div>
-            <div class="booking-review-item">
-              <span>Insurance & Delivery</span>
-              <span>Included</span>
-            </div>
-            <div class="booking-review-total">
-              <span>Total</span>
-              <span class="booking-review-total-amount" id="reviewTotal">AED 0</span>
-            </div>
-          </div>
-          <button class="booking-button booking-button-confirm" onclick="confirmBooking()">Confirm & Book</button>
-        </div>
-
-        <!-- SUCCESS SCREEN -->
-        <div id="successScreen" style="display: none;">
-          <div class="booking-success">
-            <div class="booking-success-check">✓</div>
-            <h3 class="booking-success-title">Booking Confirmed!</h3>
-            <p class="booking-success-message">Your car rental is locked in. Check your email for confirmation details and delivery arrangements.</p>
-            <button class="booking-button" onclick="closeBookingModal()">Close</button>
-          </div>
-        </div>
-      </div>
-    </div>
+<!-- LEAD POPUP -->
+<div class="lead-ov" id="leadOv">
+  <div class="lead-box">
+    <button class="lead-x" onclick="closeLead()">&times;</button>
+    <div class="ic">&#128293;</div>
+    <h3>Wait — Get 5% Extra Off</h3>
+    <div class="desc">Drop your WhatsApp and we'll send you an exclusive discount code.</div>
+    <form onsubmit="submitLead(event)">
+      <input class="fi" type="text" id="lName" placeholder="Your name" required>
+      <input class="fi" type="tel" id="lPhone" placeholder="WhatsApp number" required>
+      <select class="fi" id="lInt" style="margin-bottom:8px;color:var(--txt3)">
+        <option value="">Interested in... (optional)</option>
+        <option>Economy Sedan</option><option>Sport Sedan</option><option>Compact SUV</option><option>Crossover SUV</option><option>Any car</option>
+      </select>
+      <button type="submit" class="lead-sub">Send Me The Deal</button>
+    </form>
+    <button class="lead-skip" onclick="closeLead()">No thanks, I'll pay full price</button>
   </div>
+</div>
 
-  <!-- TOAST CONTAINER -->
-  <div class="toast-container" id="toastContainer"></div>
+<!-- TOAST -->
+<div class="toast-c" id="toasts"></div>
 
-  <script>
-    // FALLBACK CAR DATA
-    const fallbackCars = [
-      {id:1,name:'Mitsubishi Attrage',cat:'Economy Sedan',img:'https://fasttrackrac.com/cdn/shop/products/fastrack-Mitsubishi-attrage-car.jpg?v=1726815463&width=900',price:999,was:1399,type:'Sedan',viewers:12,spots:3,badge:'Best Value',feats:['A/C','Reverse Camera','Bluetooth','Fog Lights'],includes:'Insurance + UAE delivery included'},
-      {id:2,name:'JAC J7',cat:'Sport Sedan',img:'https://fasttrackrac.com/cdn/shop/products/3_4084eaf4-7efa-4c62-bc2d-85fb8ee7faaa.jpg?v=1676898190&width=900',price:1299,was:1899,type:'Liftback',viewers:9,spots:5,badge:'Hot Deal',feats:['Premium Audio','Leather Seats','Touchscreen','Keyless Entry'],includes:'Full insurance + Free delivery'},
-      {id:3,name:'Mitsubishi ASX',cat:'Compact SUV',img:'https://fasttrackrac.com/cdn/shop/files/20240622_110500.jpg?v=1726652270&width=900',price:1299,was:1899,type:'SUV',viewers:18,spots:2,badge:'Most Popular',feats:['Apple CarPlay','Cruise Control','Rear Camera','Fuel Efficient'],includes:'Insurance + Unlimited km'},
-      {id:4,name:'JAC JS4',cat:'Crossover SUV',img:'https://fasttrackrac.com/cdn/shop/products/11_1ae257ad-721e-4766-9db8-38e299289cab.jpg?v=1676898117&width=900',price:1499,was:1999,type:'SUV',viewers:7,spots:4,badge:'SUV Special',feats:['10.25" Display','Panoramic Roof','360 Camera','Keyless Entry'],includes:'Full insurance + Free delivery'}
-    ];
+<!-- NOTIF -->
+<div class="notif" id="notif"><div class="notif-text" id="notifText"></div></div>
 
-    let cars = [];
-    let currentStep = 1;
-    let selectedCarId = null;
-    const toastNames = ['Sarah Ahmed', 'Mohammed Khan', 'Aisha Patel', 'Hassan Al-Mansoori', 'Leah Cohen'];
-    const toastActions = ['booked a Mitsubishi Attrage', 'locked in a JAC J7', 'secured a Compact SUV', 'reserved a Crossover SUV', 'grabbed the best deal'];
+<!-- WA FAB -->
+<a href="https://wa.me/971585969960" class="wa" target="_blank"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg></a>
 
-    // LOAD CARS
-    async function loadCars() {
-      try {
-        const response = await fetch('/api/cars');
-        cars = await response.json();
-      } catch (e) {
-        console.log('Using fallback cars');
-        cars = fallbackCars;
-      }
-      renderCars();
-    }
+<script>
+var API='',CARS=[
+  {id:1,name:'Mitsubishi Attrage',cat:'Economy Sedan',img:'https://fasttrackrac.com/cdn/shop/products/fastrack-Mitsubishi-attrage-car.jpg?v=1726815463&width=900',price:999,was:1399,type:'Sedan',viewers:12,spots:3,badge:'Best Value',bt:'gr',feats:['A/C','Reverse Cam','Bluetooth','Fog Lights'],includes:'Insurance + UAE delivery included',seats:5,doors:4,trans:'Auto',bags:3},
+  {id:2,name:'JAC J7',cat:'Sport Sedan',img:'https://fasttrackrac.com/cdn/shop/products/3_4084eaf4-7efa-4c62-bc2d-85fb8ee7faaa.jpg?v=1676898190&width=900',price:1299,was:1899,type:'Liftback',viewers:9,spots:5,badge:'Hot Deal',bt:'or',feats:['Premium Audio','Leather','Touchscreen','Keyless'],includes:'Full insurance + Free delivery',seats:5,doors:4,trans:'Auto',bags:4},
+  {id:3,name:'Mitsubishi ASX',cat:'Compact SUV',img:'https://fasttrackrac.com/cdn/shop/files/20240622_110500.jpg?v=1726652270&width=900',price:1299,was:1899,type:'SUV',viewers:18,spots:2,badge:'Most Popular',bt:'or',feats:['CarPlay','Cruise Ctrl','Rear Cam','Fuel Saver'],includes:'Insurance + Unlimited km',seats:5,doors:4,trans:'Auto',bags:4},
+  {id:4,name:'JAC JS4',cat:'Crossover SUV',img:'https://fasttrackrac.com/cdn/shop/products/11_1ae257ad-721e-4766-9db8-38e299289cab.jpg?v=1676898117&width=900',price:1499,was:1999,type:'SUV',viewers:7,spots:4,badge:'SUV Special',bt:'wh',feats:['10.25" Screen','Pano Roof','360 Cam','Keyless'],includes:'Full insurance + Free delivery',seats:5,doors:4,trans:'Auto',bags:4}
+],cD=[],sel=null,bS=1;
 
-    // RENDER CARS
-    function renderCars() {
-      const carousel = document.getElementById('carsCarousel');
-      carousel.innerHTML = '';
+document.addEventListener('DOMContentLoaded',function(){loadCars();initCD();initLead();initNotifs();initLive();});
 
-      cars.forEach((car, index) => {
-        const save = car.was - car.price;
-        const savePercent = Math.round((save / car.was) * 100);
+async function loadCars(){try{var r=await fetch(API+'/api/cars');cD=await r.json();}catch(e){cD=CARS;}renderCars();}
 
-        const card = document.createElement('div');
-        card.className = 'car-card';
-        card.innerHTML = `
-          <div class="car-card-image-wrapper">
-            <img src="${car.img}" alt="${car.name}" class="car-card-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22200%22%3E%3Crect fill=%22%231E1B18%22 width=%22300%22 height=%22200%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-family=%22Inter%22 font-size=%2216%22 fill=%22%239B9088%22%3E${car.name}%3C/text%3E%3C/svg%3E'">
-            <div class="car-card-badge">${car.badge}</div>
-            <div class="car-card-spots">Only ${car.spots} left!</div>
-            <div class="car-card-viewers">${car.viewers} viewing</div>
-          </div>
-          <div class="car-card-content">
-            <div class="car-category">${car.cat}</div>
-            <h3 class="car-name">${car.name}</h3>
-            <div class="car-specs">
-              <div class="car-spec-item">5 Seats</div>
-              <div class="car-spec-item">4 Doors</div>
-              <div class="car-spec-item">Auto</div>
-            </div>
-            <div class="car-features">
-              ${car.feats.slice(0, 3).map(f => `<div class="feature-pill">${f}</div>`).join('')}
-            </div>
-            <div class="car-price-box">
-              <div class="car-price-was">AED ${car.was}</div>
-              <div class="car-price-save">Save ${savePercent}% (AED ${save})</div>
-              <div class="car-price-current">
-                <span class="car-price-currency">AED</span>
-                <span class="car-price-amount">${car.price}</span>
-                <span class="car-price-period">/month</span>
-              </div>
-              <div class="car-includes">${car.includes}</div>
-            </div>
-            <div class="car-urgency">${car.spots} booked today — selling fast</div>
-            <button class="car-book-btn" onclick="openBookingModal(${car.id})">Book Now — Lock This Price →</button>
-          </div>
-        `;
-        carousel.appendChild(card);
-      });
+function renderCars(){
+  document.getElementById('carCarousel').innerHTML=cD.map(function(c){
+    var v=c.viewers||Math.floor(Math.random()*15)+5,sp=c.spots||Math.floor(Math.random()*5)+1;
+    var pct=Math.round((c.was-c.price)/c.was*100);
+    return '<div class="car" onclick=\'openB('+JSON.stringify(c).replace(/'/g,"&#39;")+')\'>'+
+      '<div class="car-badge b-'+(c.bt||'or')+'">'+c.badge+'</div>'+
+      '<div class="car-fomo"><span class="dot"></span>'+v+' viewing</div>'+
+      '<div class="car-head"><div class="car-name">'+c.name+'</div><div class="car-type">'+(c.cat||c.type)+'</div></div>'+
+      '<div class="car-photo"><img src="'+c.img+'" alt="'+c.name+'" loading="lazy"></div>'+
+      '<div class="car-specs">'+
+        '<div class="car-spec">&#128100; '+(c.seats||5)+'</div>'+
+        '<div class="car-spec">&#128682; '+(c.doors||4)+' doors</div>'+
+        '<div class="car-spec">&#9881;&#65039; '+(c.trans||'Auto')+'</div>'+
+        '<div class="car-spec">&#128188; '+(c.bags||3)+' bags</div>'+
+      '</div>'+
+      '<div class="car-included"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>'+c.includes+'</div>'+
+      '<div class="car-bottom">'+
+        '<div><div class="car-price-was">AED '+c.was.toLocaleString()+'/mo</div>'+
+        '<div class="car-price-now"><span class="sm">from </span><span class="sm">AED</span><span class="big">'+c.price.toLocaleString()+'</span><span class="mo"> | month*</span></div>'+
+        '<div class="car-save">SAVE '+pct+'% — AED '+(c.was-c.price).toLocaleString()+' off</div>'+
+        '<div class="car-spots">&#128293; Only '+sp+' left at this price</div></div>'+
+        '<button class="car-cta" onclick="event.stopPropagation();openB('+JSON.stringify(c).replace(/'/g,"&#39;")+')">Book Now</button>'+
+      '</div></div>';
+  }).join('');
+}
 
-      renderCarouselDots();
-    }
+function scrollCar(dir){
+  var el=document.getElementById('carCarousel');
+  el.scrollBy({left:dir*360,behavior:'smooth'});
+}
 
-    // CAROUSEL DOTS
-    function renderCarouselDots() {
-      const dotsContainer = document.getElementById('carouselDots');
-      dotsContainer.innerHTML = '';
-      cars.forEach((_, index) => {
-        const dot = document.createElement('div');
-        dot.className = `carousel-dot ${index === 0 ? 'active' : ''}`;
-        dot.onclick = () => {
-          document.getElementById('carsCarousel').children[index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
-          updateCarouselDots();
-        };
-        dotsContainer.appendChild(dot);
-      });
-    }
+// COUNTDOWN
+function initCD(){
+  var e=new Date();e.setDate(e.getDate()+3);e.setHours(23,59,59,0);
+  function t(){var d=Math.max(0,e-new Date())/1000;var dd=Math.floor(d/86400);d%=86400;var hh=Math.floor(d/3600);d%=3600;var mm=Math.floor(d/60);var ss=Math.floor(d%60);
+    document.getElementById('cdD').textContent=String(dd).padStart(2,'0');document.getElementById('cdH').textContent=String(hh).padStart(2,'0');
+    document.getElementById('cdM').textContent=String(mm).padStart(2,'0');document.getElementById('cdS').textContent=String(ss).padStart(2,'0');}
+  t();setInterval(t,1000);
+}
 
-    function updateCarouselDots() {
-      const carousel = document.getElementById('carsCarousel');
-      const scrollLeft = carousel.scrollLeft;
-      const cardWidth = carousel.children[0]?.offsetWidth + 24;
-      const activeIndex = Math.round(scrollLeft / cardWidth);
-      const dots = document.querySelectorAll('.carousel-dot');
-      dots.forEach((dot, i) => {
-        dot.classList.toggle('active', i === activeIndex);
-      });
-    }
+// BOOKING
+function openB(c){
+  sel=c;bS=1;
+  document.getElementById('mTop').innerHTML='<button class="m-close" onclick="closeB()">&times;</button>'+
+    '<img src="'+c.img+'" class="m-img" alt="'+c.name+'">'+
+    '<div class="m-info"><div class="m-name">'+c.name+'</div><div class="m-cat">'+(c.cat||c.type)+'</div>'+
+    '<div class="m-pr">from AED '+c.price.toLocaleString()+' | month*</div>'+
+    '<div class="m-sp"><span class="m-s">&#128100; '+(c.seats||5)+'</span><span class="m-s">&#128682; '+(c.doors||4)+'</span><span class="m-s">&#9881;&#65039; '+(c.trans||'Auto')+'</span><span class="m-s">&#128188; '+(c.bags||3)+'</span></div></div>';
+  rStep();document.getElementById('mOverlay').classList.add('active');document.body.style.overflow='hidden';
+}
+function closeB(){document.getElementById('mOverlay').classList.remove('active');document.body.style.overflow='';}
 
-    document.getElementById('carsCarousel')?.addEventListener('scroll', updateCarouselDots);
+function rStep(){
+  ['ms1','ms2','ms3'].forEach(function(id,i){document.getElementById(id).className='m-step'+(i+1===bS?' active':'')+(i+1<bS?' done':'');});
+  var b=document.getElementById('mBody'),td=new Date().toISOString().split('T')[0];
+  if(bS===1){
+    b.innerHTML='<div class="fg"><label class="fl">Start Date</label><input class="fi" type="date" id="bD" min="'+td+'"></div>'+
+      '<div class="fg"><label class="fl">Duration</label><select class="fs" id="bDu"><option value="1">1 Month</option><option value="3" selected>3 Months (Best Value)</option><option value="6">6 Months</option><option value="12">12 Months</option></select></div>'+
+      '<div class="fg"><label class="fl">Delivery Location</label><select class="fs" id="bL"><option value="">Select area</option><option>Dubai Marina</option><option>Downtown Dubai</option><option>Business Bay</option><option>JBR</option><option>Deira</option><option>Dubai Airport</option><option>Abu Dhabi</option><option>Sharjah</option><option>Other</option></select></div>'+
+      '<button class="bf bn" onclick="nS()">Next &#8594;</button>';
+  } else if(bS===2){
+    b.innerHTML='<button class="bf bb" onclick="pS()">&larr; Back</button>'+
+      '<div class="fg"><label class="fl">Full Name</label><input class="fi" type="text" id="bN" placeholder="John Doe"></div>'+
+      '<div class="fr"><div class="fg"><label class="fl">Phone</label><input class="fi" type="tel" id="bP" placeholder="+971 5X XXX XXXX"></div><div class="fg"><label class="fl">WhatsApp</label><input class="fi" type="tel" id="bW" placeholder="Same as phone?"></div></div>'+
+      '<div class="fg"><label class="fl">Email (optional)</label><input class="fi" type="email" id="bE" placeholder="you@email.com"></div>'+
+      '<button class="bf bn" onclick="nS()">Review Booking &#8594;</button>';
+  } else {
+    var du=window._du||'3',tot=sel.price*parseInt(du),was=sel.was*parseInt(du),sv=was-tot;
+    b.innerHTML='<button class="bf bb" onclick="pS()">&larr; Back</button>'+
+      '<div class="rr"><span class="k">Car</span><span class="v">'+sel.name+'</span></div>'+
+      '<div class="rr"><span class="k">Start</span><span class="v">'+(window._dt||'-')+'</span></div>'+
+      '<div class="rr"><span class="k">Duration</span><span class="v">'+du+' month'+(du>1?'s':'')+'</span></div>'+
+      '<div class="rr"><span class="k">Location</span><span class="v">'+(window._lc||'-')+'</span></div>'+
+      '<div class="rr"><span class="k">Name</span><span class="v">'+(window._nm||'-')+'</span></div>'+
+      '<div class="rr"><span class="k">Phone</span><span class="v">'+(window._ph||'-')+'</span></div>'+
+      '<div class="r-save">&#127881; You\'re saving AED '+sv.toLocaleString()+'!</div>'+
+      '<div class="r-total">AED '+tot.toLocaleString()+'</div>'+
+      '<button class="bf bn" onclick="subB()">&#128274; Confirm Booking</button>';
+  }
+}
+function nS(){
+  if(bS===1){window._dt=document.getElementById('bD').value;window._du=document.getElementById('bDu').value;window._lc=document.getElementById('bL').value;}
+  else if(bS===2){var n=document.getElementById('bN').value.trim(),p=document.getElementById('bP').value.trim();if(!n||!p){toast('Please fill in name and phone.','err');return;}window._nm=n;window._ph=p;window._wa=document.getElementById('bW').value.trim();window._em=document.getElementById('bE').value.trim();}
+  bS++;rStep();
+}
+function pS(){bS--;rStep();}
 
-    // COUNTDOWN TIMER
-    function updateCountdown() {
-      const now = new Date();
-      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
-      const diff = endOfMonth - now;
+async function subB(){
+  var du=window._du||'3',tot=sel.price*parseInt(du),sv=sel.was*parseInt(du)-tot;
+  var pl={carId:sel.id,carName:sel.name,startDate:window._dt,duration:du,location:window._lc,fullName:window._nm,phone:window._ph,email:window._em||'',whatsapp:window._wa||'',totalAed:tot,savedAed:sv};
+  try{var r=await fetch(API+'/api/bookings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(pl)});var d=await r.json();if(d.success){showOK(d.ref);toast('Booking confirmed! Ref: '+d.ref);}else toast(d.error||'Failed','err');}
+  catch(e){showOK('FT-OFFLINE');toast('Booking saved! We\'ll confirm via WhatsApp.');}
+}
+function showOK(ref){
+  document.getElementById('mBody').innerHTML='<div class="ok"><div class="ic">&#9989;</div><h3>Booking Confirmed!</h3><div class="ref">'+ref+'</div><p>We\'ll contact you on WhatsApp within 30 minutes to finalize delivery.</p><button class="bf bn" style="margin-top:16px" onclick="closeB()">Done</button></div>';
+  ['ms1','ms2','ms3'].forEach(function(id){document.getElementById(id).className='m-step done';});
+}
 
-      if (diff <= 0) {
-        document.getElementById('days').textContent = '00';
-        document.getElementById('hours').textContent = '00';
-        document.getElementById('minutes').textContent = '00';
-        document.getElementById('seconds').textContent = '00';
-        document.getElementById('urgencyCountdown').textContent = '00:00:00';
-        return;
-      }
+// LEAD
+function initLead(){if(localStorage.getItem('ft_lead'))return;setTimeout(function(){document.getElementById('leadOv').classList.add('active');},15000);}
+function closeLead(){document.getElementById('leadOv').classList.remove('active');localStorage.setItem('ft_lead','skip');}
+async function submitLead(e){
+  e.preventDefault();var p={fullName:document.getElementById('lName').value.trim(),phone:document.getElementById('lPhone').value.trim(),interest:document.getElementById('lInt').value,source:'popup'};
+  if(!p.fullName||!p.phone){toast('Enter name and phone.','err');return;}
+  try{await fetch(API+'/api/leads',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)});}catch(e){}
+  localStorage.setItem('ft_lead','yes');document.getElementById('leadOv').classList.remove('active');toast('Awesome! Check WhatsApp for your exclusive code.');
+}
 
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-      const minutes = Math.floor((diff / 1000 / 60) % 60);
-      const seconds = Math.floor((diff / 1000) % 60);
+// TOAST
+function toast(m,t){var c=document.getElementById('toasts'),el=document.createElement('div');el.className='toast'+(t==='err'?' err':'');el.innerHTML='<span>'+(t==='err'?'&#9888;&#65039;':'&#9989;')+'</span><span>'+m+'</span>';c.appendChild(el);setTimeout(function(){el.style.opacity='0';setTimeout(function(){el.remove();},300);},4000);}
 
-      document.getElementById('days').textContent = String(days).padStart(2, '0');
-      document.getElementById('hours').textContent = String(hours).padStart(2, '0');
-      document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
-      document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+// SOCIAL PROOF NOTIFS
+function initNotifs(){
+  var msgs=['<strong>Ahmed</strong> from Dubai Marina just booked <strong>Mitsubishi ASX</strong>','<strong>Sara</strong> from JBR saved <strong>AED 2,400</strong>','<strong>Mohammed</strong> from Business Bay booked <strong>2 min ago</strong>','<strong>Fatima</strong> from Downtown claimed the <strong>JAC J7</strong> deal','<strong>Ali</strong> from Sharjah booked <strong>Mitsubishi Attrage</strong>','<strong>Khalid</strong> from Abu Dhabi just booked <strong>JAC JS4</strong>'];
+  var i=0;function show(){var n=document.getElementById('notif'),nt=document.getElementById('notifText');nt.innerHTML=msgs[i%msgs.length]+'<div class="notif-time">Just now</div>';n.classList.add('show');setTimeout(function(){n.classList.remove('show');},5000);i++;}
+  setTimeout(show,8000);setInterval(show,25000);
+}
 
-      const urgencyTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-      document.getElementById('urgencyCountdown').textContent = urgencyTime;
-    }
+// LIVE COUNT
+function initLive(){
+  setInterval(function(){var el=document.getElementById('liveCount');var c=parseInt(el.textContent)||24;el.textContent=Math.max(12,Math.min(40,c+(Math.random()>.5?1:-1)));},5000);
+  setInterval(function(){document.querySelectorAll('.car-fomo').forEach(function(el){var c=parseInt(el.textContent)||10;el.innerHTML='<span class="dot"></span>'+Math.max(3,Math.min(25,c+(Math.random()>.5?1:-1)))+' viewing';});},7000);
+}
 
-    setInterval(updateCountdown, 1000);
-    updateCountdown();
+// OVERLAY
+document.getElementById('mOverlay').addEventListener('click',function(e){if(e.target===e.currentTarget)closeB();});
+document.getElementById('leadOv').addEventListener('click',function(e){if(e.target===e.currentTarget)closeLead();});
 
-    // LIVE VIEWER COUNT
-    function updateViewers() {
-      const count = Math.floor(Math.random() * (52 - 38 + 1)) + 38;
-      document.getElementById('viewerCount').textContent = `${count} viewing`;
-      document.getElementById('carsViewers').textContent = `${count} people viewing`;
-    }
-
-    setInterval(updateViewers, 5000);
-    updateViewers();
-
-    // TOAST NOTIFICATIONS
-    function showToast() {
-      const name = toastNames[Math.floor(Math.random() * toastNames.length)];
-      const action = toastActions[Math.floor(Math.random() * toastActions.length)];
-      const container = document.getElementById('toastContainer');
-
-      const toast = document.createElement('div');
-      toast.className = 'toast';
-      toast.innerHTML = `
-        <div class="toast-avatar">${name.split(' ').map(n => n[0]).join('')}</div>
-        <div class="toast-content">
-          <div class="toast-name">${name}</div>
-          <div class="toast-message">${action}</div>
-        </div>
-      `;
-
-      container.appendChild(toast);
-      setTimeout(() => toast.remove(), 4000);
-    }
-
-    setInterval(showToast, 8000);
-
-    // FLOATING CTA
-    window.addEventListener('scroll', () => {
-      const carsSection = document.getElementById('carsSection');
-      const scrollTop = window.scrollY;
-      const showFloating = scrollTop > 500;
-      document.getElementById('floatingCta').classList.toggle('visible', showFloating);
-    });
-
-    // LEAD POPUP
-    function openLeadPopup() {
-      document.getElementById('leadPopup').classList.add('active');
-    }
-
-    function closeLeadPopup() {
-      document.getElementById('leadPopup').classList.remove('active');
-    }
-
-    function submitLead(event) {
-      event.preventDefault();
-      const name = document.getElementById('leadName').value;
-      const phone = document.getElementById('leadPhone').value;
-      const interest = document.getElementById('leadInterest').value;
-
-      const leadData = { name, phone, interest };
-
-      fetch('/api/leads', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(leadData)
-      }).catch(e => console.log('Lead submission error (expected in demo):', e.message));
-
-      setTimeout(() => {
-        closeLeadPopup();
-        document.getElementById('leadName').value = '';
-        document.getElementById('leadPhone').value = '';
-        document.getElementById('leadInterest').value = '';
-      }, 500);
-    }
-
-    // AUTO SHOW LEAD POPUP AFTER 3 SECONDS
-    setTimeout(() => {
-      if (!localStorage.getItem('fastrack_lead_captured')) {
-        openLeadPopup();
-        localStorage.setItem('fastrack_lead_captured', 'true');
-      }
-    }, 3000);
-
-    // BOOKING MODAL
-    function openBookingModal(carId) {
-      selectedCarId = carId;
-      const car = cars.find(c => c.id === carId);
-      if (!car) return;
-
-      document.getElementById('bookingImage').src = car.img;
-      document.getElementById('bookingModal').classList.add('active');
-      currentStep = 1;
-      showStep(1);
-    }
-
-    function closeBookingModal() {
-      document.getElementById('bookingModal').classList.remove('active');
-      currentStep = 1;
-      showStep(1);
-    }
-
-    function showStep(step) {
-      for (let i = 1; i <= 3; i++) {
-        const stepEl = document.getElementById(`step${i}`);
-        if (stepEl) stepEl.style.display = i === step ? 'block' : 'none';
-      }
-      document.getElementById('successScreen').style.display = 'none';
-
-      const dots = document.querySelectorAll('.progress-dot');
-      dots.forEach((dot, i) => {
-        if (i < step - 1) {
-          dot.classList.remove('active');
-          dot.classList.add('done');
-        } else if (i === step - 1) {
-          dot.classList.add('active');
-          dot.classList.remove('done');
-        } else {
-          dot.classList.remove('active', 'done');
-        }
-      });
-    }
-
-    function nextStep() {
-      if (currentStep < 3) {
-        currentStep++;
-        showStep(currentStep);
-        if (currentStep === 3) updateReview();
-      }
-    }
-
-    function updateReview() {
-      const car = cars.find(c => c.id === selectedCarId);
-      const startDate = new Date(document.getElementById('bookingStartDate').value);
-      const endDate = new Date(document.getElementById('bookingEndDate').value);
-      const days = Math.max(1, Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)));
-      const total = days * car.price;
-
-      document.getElementById('reviewCar').textContent = car.name;
-      document.getElementById('reviewDuration').textContent = `${days} day${days > 1 ? 's' : ''}`;
-      document.getElementById('reviewRate').textContent = `AED ${car.price}`;
-      document.getElementById('reviewTotal').textContent = `${total}`;
-    }
-
-    function confirmBooking() {
-      const car = cars.find(c => c.id === selectedCarId);
-      const name = document.getElementById('bookingName').value;
-      const email = document.getElementById('bookingEmail').value;
-      const phone = document.getElementById('bookingPhone').value;
-      const startDate = document.getElementById('bookingStartDate').value;
-      const endDate = document.getElementById('bookingEndDate').value;
-      const location = document.getElementById('bookingLocation').value;
-
-      const bookingData = {
-        carId: selectedCarId,
-        carName: car.name,
-        name,
-        email,
-        phone,
-        startDate,
-        endDate,
-        location
-      };
-
-      fetch('/api/bookings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(bookingData)
-      }).catch(e => console.log('Booking submission error (expected in demo):', e.message));
-
-      setTimeout(() => {
-        document.getElementById('step3').style.display = 'none';
-        document.getElementById('successScreen').style.display = 'block';
-      }, 500);
-
-      setTimeout(() => {
-        closeBookingModal();
-      }, 3000);
-    }
-
-    // INITIALIZE
-    loadCars();
-  </script>
+// EXIT INTENT
+var exitS=false;
+document.addEventListener('mouseout',function(e){if(!exitS&&!localStorage.getItem('ft_lead')&&e.clientY<5){exitS=true;document.getElementById('leadOv').classList.add('active');}});
+</script>
 </body>
 </html>
