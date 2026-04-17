@@ -37,8 +37,14 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.json({ limit: '5mb' }));
+app.use(express.json({ limit: '10mb' }));
 app.use(express.static(__dirname));
+
+// ── Uploads directory ──
+const fs = require('fs');
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+app.use('/uploads', express.static(uploadsDir));
 
 // ── Rate limiter (in-memory) ──
 const rateLimitMap = new Map();
@@ -601,6 +607,34 @@ app.delete('/api/bookings/:id', auth, requireRole('superadmin', 'manager'), (req
   const deleted = bookings.splice(idx, 1)[0];
   logActivity(req.user.id, 'booking_deleted', `Deleted booking ${deleted.ref}`);
   res.json({ success: true });
+});
+
+// ══════════════════════════════
+// FILE UPLOAD API
+// ══════════════════════════════
+
+app.post('/api/upload', auth, requireRole('superadmin', 'manager'), (req, res) => {
+  const { data, name } = req.body;
+  if (!data || !name) return res.status(400).json({ error: 'File data and name required' });
+
+  // Validate base64 image
+  const match = data.match(/^data:image\/(png|jpeg|jpg|webp|gif);base64,(.+)$/);
+  if (!match) return res.status(400).json({ error: 'Invalid image format. Use PNG, JPG, or WebP.' });
+
+  const ext = match[1] === 'jpeg' ? 'jpg' : match[1];
+  const buffer = Buffer.from(match[2], 'base64');
+
+  // Max 5MB per image
+  if (buffer.length > 5 * 1024 * 1024) return res.status(400).json({ error: 'Image too large. Maximum 5MB.' });
+
+  // Generate unique filename
+  const safeName = name.replace(/[^a-zA-Z0-9-_]/g, '').substring(0, 40) || 'image';
+  const filename = safeName + '-' + Date.now() + '.' + ext;
+  const filepath = path.join(uploadsDir, filename);
+
+  fs.writeFileSync(filepath, buffer);
+  logActivity(req.user.id, 'image_uploaded', `Uploaded image: ${filename}`);
+  res.json({ success: true, url: '/uploads/' + filename, filename });
 });
 
 // ══════════════════════════════

@@ -1150,10 +1150,10 @@ function openCarModal(editId){
         <div class="form-group"><label>Description</label><textarea class="form-input" id="cfDesc" rows="2" placeholder="Short description of the car...">${esc(c?.description||'')}</textarea></div>
 
         <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin:18px 0 10px;padding-top:14px;border-top:1px solid var(--border)">Images</div>
-        <div class="form-group"><label>Main Image URL (used everywhere as fallback)</label><input class="form-input" id="cfImg" value="${esc(c?.img||'')}" oninput="previewCarImg('main',this.value)" placeholder="https://..."></div>
+        <div class="form-group"><label>Main Image URL (fallback)</label><div style="display:flex;gap:6px"><input class="form-input" id="cfImg" value="${esc(c?.img||'')}" placeholder="https://... or upload below" style="flex:1"><label class="btn btn-secondary btn-sm" style="cursor:pointer;flex-shrink:0"><input type="file" accept="image/*" onchange="uploadCarImage(this,'cfImg','prevMain')" style="display:none">Upload</label></div><div class="img-preview" id="prevMain" style="height:100px;margin-top:6px">${c?.img?`<img src="${esc(c.img)}" style="width:100%;height:100%;object-fit:cover">`:'No image'}</div></div>
         <div class="form-row">
-            <div class="form-group"><label>Card Image (640x840 portrait)</label><input class="form-input" id="cfImgCard" value="${esc(c?.imgCard||'')}" oninput="previewCarImg('card',this.value)" placeholder="Leave empty to use main"><div class="img-preview" id="prevCard" style="height:140px">${(c?.imgCard||c?.img)?`<img src="${esc(c?.imgCard||c?.img)}">`:'Card preview'}</div></div>
-            <div class="form-group"><label>Booking Image (1200x560 landscape)</label><input class="form-input" id="cfImgBooking" value="${esc(c?.imgBooking||'')}" oninput="previewCarImg('booking',this.value)" placeholder="Leave empty to use main"><div class="img-preview" id="prevBooking" style="height:100px">${(c?.imgBooking||c?.img)?`<img src="${esc(c?.imgBooking||c?.img)}">`:'Booking preview'}</div></div>
+            <div class="form-group"><label>Card Image <span style="font-weight:400;color:var(--text-muted)">(640x840 portrait)</span></label><div style="display:flex;gap:6px"><input class="form-input" id="cfImgCard" value="${esc(c?.imgCard||'')}" placeholder="Optional — uses main" style="flex:1"><label class="btn btn-secondary btn-sm" style="cursor:pointer;flex-shrink:0"><input type="file" accept="image/*" onchange="uploadCarImage(this,'cfImgCard','prevCard')" style="display:none">Upload</label></div><div class="img-preview" id="prevCard" style="height:160px;margin-top:6px">${(c?.imgCard)?`<img src="${esc(c.imgCard)}" style="width:100%;height:100%;object-fit:cover">`:(c?.img?`<img src="${esc(c.img)}" style="width:100%;height:100%;object-fit:cover;opacity:.5">`:'Uses main image')}</div></div>
+            <div class="form-group"><label>Booking Image <span style="font-weight:400;color:var(--text-muted)">(1200x560 landscape)</span></label><div style="display:flex;gap:6px"><input class="form-input" id="cfImgBooking" value="${esc(c?.imgBooking||'')}" placeholder="Optional — uses main" style="flex:1"><label class="btn btn-secondary btn-sm" style="cursor:pointer;flex-shrink:0"><input type="file" accept="image/*" onchange="uploadCarImage(this,'cfImgBooking','prevBooking')" style="display:none">Upload</label></div><div class="img-preview" id="prevBooking" style="height:110px;margin-top:6px">${(c?.imgBooking)?`<img src="${esc(c.imgBooking)}" style="width:100%;height:100%;object-fit:cover">`:(c?.img?`<img src="${esc(c.img)}" style="width:100%;height:100%;object-fit:cover;opacity:.5">`:'Uses main image')}</div></div>
         </div>
 
         <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin:18px 0 10px;padding-top:14px;border-top:1px solid var(--border)">Pricing</div>
@@ -1174,12 +1174,34 @@ function openCarModal(editId){
     </form>`;
     openModal();
 }
-function previewCarImg(type, url){
-    const ids = {main:null, card:'prevCard', booking:'prevBooking'};
-    const elId = ids[type];
-    if(!elId) return;
-    const p = document.getElementById(elId);
-    if(p) p.innerHTML = url ? `<img src="${esc(url)}" onerror="this.parentElement.innerHTML='Invalid URL'" style="width:100%;height:100%;object-fit:cover">` : (type==='card'?'Card preview':'Booking preview');
+async function uploadCarImage(fileInput, urlFieldId, previewId) {
+    const file = fileInput.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { toast('Please select an image file', 'error'); return; }
+    if (file.size > 5 * 1024 * 1024) { toast('Image too large. Maximum 5MB.', 'error'); return; }
+
+    // Show loading in preview
+    const prev = document.getElementById(previewId);
+    if (prev) prev.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted);font-size:12px"><div class="spinner" style="margin-right:8px"></div>Uploading...</div>';
+
+    // Read as base64
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        const base64 = e.target.result;
+        try {
+            const safeName = file.name.replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9-_]/g, '').substring(0, 30) || 'car';
+            const data = await api('POST', '/upload', { data: base64, name: safeName });
+            if (data.url) {
+                document.getElementById(urlFieldId).value = data.url;
+                if (prev) prev.innerHTML = `<img src="${data.url}" style="width:100%;height:100%;object-fit:cover">`;
+                toast('Image uploaded', 'success');
+            }
+        } catch (err) {
+            toast('Upload failed: ' + err.message, 'error');
+            if (prev) prev.innerHTML = 'Upload failed';
+        }
+    };
+    reader.readAsDataURL(file);
 }
 async function submitCar(e,editId){
     e.preventDefault();
