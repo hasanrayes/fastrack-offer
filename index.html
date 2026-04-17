@@ -506,7 +506,7 @@ function renderCars(){
     var v=c.viewers||Math.floor(Math.random()*15)+5,sp=c.spots||Math.floor(Math.random()*5)+1;
     var pct=Math.round((c.was-c.price)/c.was*100);
     return '<div class="car" data-car-id="'+c.id+'" onclick="openBooking(carMap['+c.id+'])">'+
-      '<img src="'+c.img+'" alt="'+c.name+'" class="car-bg" loading="lazy" onerror="this.src=\''+imgPlaceholder+'\'">'+
+      '<img src="'+(c.imgCard||c.img)+'" alt="'+c.name+'" class="car-bg" loading="lazy" onerror="this.src=\''+imgPlaceholder+'\'">'+
       '<div class="car-badge b-'+(c.bt||'or')+'">'+c.badge+'</div>'+
       '<div class="car-fomo"><span class="dot" style="animation-delay:'+(idx*0.3)+'s"></span>'+v+' viewing</div>'+
       '<div class="car-overlay-top">'+
@@ -560,7 +560,7 @@ function openBooking(c){
   sel=c;bkStep=1;
   document.getElementById('bkHero').innerHTML=
     '<button class="bk-back" onclick="closeBooking()">&#8592;</button>'+
-    '<img src="'+c.img+'" class="bk-car-img" alt="'+c.name+'" onerror="this.src=\''+imgPlaceholder+'\'">';
+    '<img src="'+(c.imgBooking||c.img)+'" class="bk-car-img" alt="'+c.name+'" onerror="this.src=\''+imgPlaceholder+'\'">';
   document.getElementById('bkOverlay').scrollTop=0;
   renderBkStep();
   document.getElementById('bkOverlay').classList.add('active');

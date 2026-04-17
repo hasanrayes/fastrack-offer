@@ -614,13 +614,15 @@ app.get('/api/cars/admin', auth, (req, res) => {
 });
 
 app.post('/api/cars', auth, requireRole('superadmin', 'manager'), (req, res) => {
-  const { name, cat, img, price, was, type, seats, doors, transmission, bags, badge, feats, includes, spots } = req.body;
+  const { name, cat, img, imgCard, imgBooking, price, was, type, seats, doors, transmission, bags, badge, feats, includes, spots, description, year, color, mileage, fuelType } = req.body;
   if (!name || !price) return res.status(400).json({ error: 'Name and price required' });
   const car = {
     id: nextCarId++,
-    name, cat: cat || '', img: img || '', price: Number(price), was: Number(was) || Number(price),
+    name, cat: cat || '', img: img || '', imgCard: imgCard || '', imgBooking: imgBooking || '',
+    price: Number(price), was: Number(was) || Number(price),
     type: type || '', seats: seats || 5, doors: doors || 4, transmission: transmission || 'Automatic', bags: bags || 2,
     badge: badge || '', feats: feats || [], includes: includes || '',
+    description: description || '', year: year || '', color: color || '', mileage: mileage || '', fuelType: fuelType || 'Petrol',
     spots: spots || 5, viewers: Math.floor(Math.random() * 15) + 5,
     active: true, order: cars.length
   };

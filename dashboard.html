@@ -1092,15 +1092,31 @@ function renderCars(){
     const el=document.getElementById('carsContent'),ed=canEdit();
     if(!carsData.length){el.innerHTML='<div class="empty-state" style="padding:60px"><div class="empty-state-icon">&#128663;</div><div class="empty-state-title">No cars yet</div><p style="color:var(--text-muted);font-size:12px;margin-top:6px">Click "+ Add Car" above to add your first vehicle</p></div>';return;}
     if(carsViewMode==='grid'){
+        const cardImg = c => c.imgCard || c.img;
         el.innerHTML=`<div class="cars-grid">${carsData.map(c=>`<div class="car-card ${c.active===false?'inactive':''}" draggable="${ed}" ondragstart="dragCar(event,${c.id})" ondragover="event.preventDefault()" ondrop="dropCar(event,${c.id})">
-            <div class="car-img">${c.img?`<img src="${esc(c.img)}" alt="${esc(c.name)}" loading="lazy">`:'<span style="color:var(--text-muted)">No image</span>'}
-            ${c.active===false?'<div class="car-status-badge"><span class="badge badge-cancelled">Hidden</span></div>':''}</div>
+            <div class="car-img">${(c.imgCard||c.img)?`<img src="${esc(c.imgCard||c.img)}" alt="${esc(c.name)}" loading="lazy">`:'<span style="color:var(--text-muted)">No image</span>'}
+            ${c.active===false?'<div class="car-status-badge"><span class="badge badge-cancelled">Hidden</span></div>':''}
+            ${c.imgCard?'<div style="position:absolute;bottom:4px;left:4px"><span class="badge badge-active" style="font-size:9px">Card img</span></div>':''}</div>
             <div class="car-body">
-                <div class="car-name">${esc(c.name)}</div><div class="car-cat">${esc(c.cat||'')}</div>
+                <div class="car-name">${esc(c.name)}</div>
+                <div class="car-cat">${esc(c.cat||'')}${c.year?' &middot; '+esc(c.year):''}${c.color?' &middot; '+esc(c.color):''}</div>
                 <div class="car-pricing"><span class="car-price">AED ${(c.price||0).toLocaleString()}</span>${c.was?`<span class="car-was">AED ${c.was.toLocaleString()}</span>`:''}</div>
                 ${c.badge?`<div class="car-badge-tag">${esc(c.badge)}</div>`:''}
-                <div class="car-specs"><span class="car-spec">${esc(c.type||'')}</span><span class="car-spec">${c.seats||5} seats</span><span class="car-spec">${c.doors||4} doors</span><span class="car-spec">${esc(c.transmission||'Auto')}</span><span class="car-spec">${c.bags||0} bags</span></div>
-                ${ed?`<div class="car-actions">
+                <div class="car-specs">
+                    <span class="car-spec">${esc(c.type||'')}</span>
+                    <span class="car-spec">${c.seats||5} seats</span>
+                    <span class="car-spec">${c.doors||4} doors</span>
+                    <span class="car-spec">${esc(c.transmission||'Auto')}</span>
+                    <span class="car-spec">${c.bags||0} bags</span>
+                    ${c.fuelType?`<span class="car-spec">${esc(c.fuelType)}</span>`:''}
+                </div>
+                ${c.description?`<div style="font-size:11px;color:var(--text-muted);margin-top:4px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(c.description)}</div>`:''}
+                <div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap">
+                    ${c.imgCard?'<span class="badge badge-confirmed" style="font-size:9px">Card</span>':''}
+                    ${c.imgBooking?'<span class="badge badge-confirmed" style="font-size:9px">Booking</span>':''}
+                    ${c.mileage?`<span class="badge badge-viewer" style="font-size:9px">${esc(c.mileage)}</span>`:''}
+                </div>
+                ${ed?`<div class="car-actions" style="margin-top:8px">
                     <button class="btn btn-secondary btn-xs" style="flex:1" onclick="openCarModal(${c.id})">Edit</button>
                     <button class="btn btn-secondary btn-xs" onclick="toggleCarActive(${c.id})">${c.active===false?'Show':'Hide'}</button>
                     <button class="btn btn-secondary btn-xs" onclick="duplicateCar(${c.id})">Dup</button>
@@ -1109,11 +1125,13 @@ function renderCars(){
             </div>
         </div>`).join('')}</div>`;
     } else {
-        el.innerHTML=`<div class="data-section"><div class="table-wrap"><table><thead><tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Type</th><th>Seats</th><th>Status</th><th>Actions</th></tr></thead><tbody>${carsData.map(c=>`<tr style="${c.active===false?'opacity:0.5':''}">
-            <td><div style="width:60px;height:40px;border-radius:6px;overflow:hidden;background:var(--bg-input)">${c.img?`<img src="${esc(c.img)}" style="width:100%;height:100%;object-fit:cover">`:''}</div></td>
-            <td><strong>${esc(c.name)}</strong></td><td>${esc(c.cat||'')}</td>
+        el.innerHTML=`<div class="data-section"><div class="table-wrap"><table><thead><tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Specs</th><th>Images</th><th>Status</th><th>Actions</th></tr></thead><tbody>${carsData.map(c=>`<tr style="${c.active===false?'opacity:0.5':''}">
+            <td><div style="width:60px;height:40px;border-radius:6px;overflow:hidden;background:var(--bg-input)">${(c.imgCard||c.img)?`<img src="${esc(c.imgCard||c.img)}" style="width:100%;height:100%;object-fit:cover">`:''}</div></td>
+            <td><strong>${esc(c.name)}</strong>${c.year?`<div style="font-size:10px;color:var(--text-muted)">${esc(c.year)}${c.color?' &middot; '+esc(c.color):''}</div>`:''}</td>
+            <td>${esc(c.cat||'')}</td>
             <td>AED ${(c.price||0).toLocaleString()}${c.was?` <span style="text-decoration:line-through;color:var(--text-muted);font-size:11px">${c.was.toLocaleString()}</span>`:''}</td>
-            <td>${esc(c.type||'')}</td><td>${c.seats||5}</td>
+            <td style="font-size:11px">${c.seats||5}s &middot; ${c.doors||4}d &middot; ${esc(c.transmission||'A')} &middot; ${esc(c.fuelType||'')}</td>
+            <td><div style="display:flex;gap:3px">${c.imgCard?'<span class="badge badge-confirmed" style="font-size:9px">Card</span>':''}${c.imgBooking?'<span class="badge badge-confirmed" style="font-size:9px">Book</span>':''}${!c.imgCard&&!c.imgBooking?'<span style="font-size:10px;color:var(--text-muted)">Main only</span>':''}</div></td>
             <td><span class="badge badge-${c.active===false?'cancelled':'active'}">${c.active===false?'Hidden':'Active'}</span></td>
             <td>${ed?`<div style="display:flex;gap:3px"><button class="btn btn-secondary btn-xs" onclick="openCarModal(${c.id})">Edit</button><button class="btn btn-secondary btn-xs" onclick="toggleCarActive(${c.id})">${c.active===false?'Show':'Hide'}</button><button class="btn btn-secondary btn-xs" onclick="duplicateCar(${c.id})">Dup</button><button class="btn btn-danger btn-xs" onclick="deleteCar(${c.id})">&#128465;</button></div>`:''}</td>
         </tr>`).join('')}</tbody></table></div></div>`;
@@ -1122,29 +1140,74 @@ function renderCars(){
 
 function openCarModal(editId){
     const c=editId?carsData.find(x=>x.id===editId):null;
-    document.getElementById('modal').classList.remove('wide');
+    document.getElementById('modal').classList.add('wide');
     document.getElementById('modalTitle').textContent=c?'Edit Car':'Add New Car';
     document.getElementById('modalBody').innerHTML=`
     <form onsubmit="submitCar(event,${editId||'null'})">
-        <div class="form-row"><div class="form-group"><label>Name *</label><input class="form-input" id="cfName" value="${esc(c?.name||'')}" required></div><div class="form-group"><label>Category</label><input class="form-input" id="cfCat" value="${esc(c?.cat||'')}"></div></div>
-        <div class="form-group"><label>Image URL</label><input class="form-input" id="cfImg" value="${esc(c?.img||'')}" oninput="previewCarImg(this.value)"><div class="img-preview" id="carImgPreview">${c?.img?`<img src="${esc(c.img)}">`:'Enter URL to preview'}</div></div>
-        <div class="form-row"><div class="form-group"><label>Price (AED) *</label><input type="number" class="form-input" id="cfPrice" value="${c?.price||''}" required></div><div class="form-group"><label>Was Price</label><input type="number" class="form-input" id="cfWas" value="${c?.was||''}"></div></div>
-        <div class="form-row"><div class="form-group"><label>Type</label><input class="form-input" id="cfType" value="${esc(c?.type||'')}"></div><div class="form-group"><label>Badge</label><input class="form-input" id="cfBadge" value="${esc(c?.badge||'')}"></div></div>
+        <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Basic Info</div>
+        <div class="form-row"><div class="form-group"><label>Car Name *</label><input class="form-input" id="cfName" value="${esc(c?.name||'')}" required placeholder="e.g. Mitsubishi Attrage"></div><div class="form-group"><label>Category</label><input class="form-input" id="cfCat" value="${esc(c?.cat||'')}" placeholder="e.g. Economy Sedan"></div></div>
+        <div class="form-row"><div class="form-group"><label>Type</label><input class="form-input" id="cfType" value="${esc(c?.type||'')}" placeholder="Sedan, SUV, Liftback..."></div><div class="form-group"><label>Badge Label</label><input class="form-input" id="cfBadge" value="${esc(c?.badge||'')}" placeholder="Best Value, Hot Deal..."></div></div>
+        <div class="form-group"><label>Description</label><textarea class="form-input" id="cfDesc" rows="2" placeholder="Short description of the car...">${esc(c?.description||'')}</textarea></div>
+
+        <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin:18px 0 10px;padding-top:14px;border-top:1px solid var(--border)">Images</div>
+        <div class="form-group"><label>Main Image URL (used everywhere as fallback)</label><input class="form-input" id="cfImg" value="${esc(c?.img||'')}" oninput="previewCarImg('main',this.value)" placeholder="https://..."></div>
+        <div class="form-row">
+            <div class="form-group"><label>Card Image (640x840 portrait)</label><input class="form-input" id="cfImgCard" value="${esc(c?.imgCard||'')}" oninput="previewCarImg('card',this.value)" placeholder="Leave empty to use main"><div class="img-preview" id="prevCard" style="height:140px">${(c?.imgCard||c?.img)?`<img src="${esc(c?.imgCard||c?.img)}">`:'Card preview'}</div></div>
+            <div class="form-group"><label>Booking Image (1200x560 landscape)</label><input class="form-input" id="cfImgBooking" value="${esc(c?.imgBooking||'')}" oninput="previewCarImg('booking',this.value)" placeholder="Leave empty to use main"><div class="img-preview" id="prevBooking" style="height:100px">${(c?.imgBooking||c?.img)?`<img src="${esc(c?.imgBooking||c?.img)}">`:'Booking preview'}</div></div>
+        </div>
+
+        <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin:18px 0 10px;padding-top:14px;border-top:1px solid var(--border)">Pricing</div>
+        <div class="form-row"><div class="form-group"><label>Monthly Price (AED) *</label><input type="number" class="form-input" id="cfPrice" value="${c?.price||''}" required placeholder="999"></div><div class="form-group"><label>Was Price (AED)</label><input type="number" class="form-input" id="cfWas" value="${c?.was||''}" placeholder="1399"></div></div>
+
+        <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin:18px 0 10px;padding-top:14px;border-top:1px solid var(--border)">Specifications</div>
         <div class="form-row"><div class="form-group"><label>Seats</label><input type="number" class="form-input" id="cfSeats" value="${c?.seats||5}"></div><div class="form-group"><label>Doors</label><input type="number" class="form-input" id="cfDoors" value="${c?.doors||4}"></div></div>
-        <div class="form-row"><div class="form-group"><label>Transmission</label><select class="form-input" id="cfTrans"><option value="Automatic" ${(c?.transmission||'Automatic')==='Automatic'?'selected':''}>Automatic</option><option value="Manual" ${c?.transmission==='Manual'?'selected':''}>Manual</option></select></div><div class="form-group"><label>Bags</label><input type="number" class="form-input" id="cfBags" value="${c?.bags||2}"></div></div>
-        <div class="form-group"><label>Features (comma-separated)</label><input class="form-input" id="cfFeats" value="${esc(Array.isArray(c?.feats)?c.feats.join(', '):(c?.feats||''))}"></div>
-        <div class="form-group"><label>Includes</label><input class="form-input" id="cfIncludes" value="${esc(c?.includes||'')}"></div>
+        <div class="form-row"><div class="form-group"><label>Transmission</label><select class="form-input" id="cfTrans"><option value="Automatic" ${(c?.transmission||'Automatic')==='Automatic'?'selected':''}>Automatic</option><option value="Manual" ${c?.transmission==='Manual'?'selected':''}>Manual</option></select></div><div class="form-group"><label>Luggage Bags</label><input type="number" class="form-input" id="cfBags" value="${c?.bags||2}"></div></div>
+        <div class="form-row"><div class="form-group"><label>Year</label><input class="form-input" id="cfYear" value="${esc(c?.year||'')}" placeholder="2024"></div><div class="form-group"><label>Color</label><input class="form-input" id="cfColor" value="${esc(c?.color||'')}" placeholder="White, Black..."></div></div>
+        <div class="form-row"><div class="form-group"><label>Fuel Type</label><select class="form-input" id="cfFuel"><option value="Petrol" ${(c?.fuelType||'Petrol')==='Petrol'?'selected':''}>Petrol</option><option value="Diesel" ${c?.fuelType==='Diesel'?'selected':''}>Diesel</option><option value="Hybrid" ${c?.fuelType==='Hybrid'?'selected':''}>Hybrid</option><option value="Electric" ${c?.fuelType==='Electric'?'selected':''}>Electric</option></select></div><div class="form-group"><label>Mileage</label><input class="form-input" id="cfMileage" value="${esc(c?.mileage||'')}" placeholder="Unlimited, 3000km/mo..."></div></div>
+
+        <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin:18px 0 10px;padding-top:14px;border-top:1px solid var(--border)">Features & Availability</div>
+        <div class="form-group"><label>Features (comma-separated)</label><input class="form-input" id="cfFeats" value="${esc(Array.isArray(c?.feats)?c.feats.join(', '):(c?.feats||''))}" placeholder="A/C, Bluetooth, Reverse Camera..."></div>
+        <div class="form-group"><label>Includes</label><input class="form-input" id="cfIncludes" value="${esc(c?.includes||'')}" placeholder="Insurance + UAE delivery included"></div>
         <div class="form-group"><label>Spots Available</label><input type="number" class="form-input" id="cfSpots" value="${c?.spots||5}"></div>
-        <div style="display:flex;gap:8px;margin-top:16px"><button type="submit" class="btn btn-primary" style="flex:1">${c?'Save Changes':'Add Car'}</button><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button></div>
+
+        <div style="display:flex;gap:8px;margin-top:20px;padding-top:14px;border-top:1px solid var(--border)"><button type="submit" class="btn btn-primary" style="flex:1">${c?'Save Changes':'Add Car'}</button><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button></div>
     </form>`;
     openModal();
 }
-function previewCarImg(url){ const p=document.getElementById('carImgPreview'); p.innerHTML=url?`<img src="${esc(url)}" onerror="this.parentElement.innerHTML='Invalid URL'">`:'Enter URL to preview'; }
+function previewCarImg(type, url){
+    const ids = {main:null, card:'prevCard', booking:'prevBooking'};
+    const elId = ids[type];
+    if(!elId) return;
+    const p = document.getElementById(elId);
+    if(p) p.innerHTML = url ? `<img src="${esc(url)}" onerror="this.parentElement.innerHTML='Invalid URL'" style="width:100%;height:100%;object-fit:cover">` : (type==='card'?'Card preview':'Booking preview');
+}
 async function submitCar(e,editId){
     e.preventDefault();
     const featsStr=document.getElementById('cfFeats').value;
     const feats=featsStr?featsStr.split(',').map(f=>f.trim()).filter(Boolean):[];
-    const body={name:document.getElementById('cfName').value,cat:document.getElementById('cfCat').value,img:document.getElementById('cfImg').value,price:Number(document.getElementById('cfPrice').value),was:Number(document.getElementById('cfWas').value)||null,type:document.getElementById('cfType').value,badge:document.getElementById('cfBadge').value,seats:Number(document.getElementById('cfSeats').value),doors:Number(document.getElementById('cfDoors').value),transmission:document.getElementById('cfTrans').value,bags:Number(document.getElementById('cfBags').value),feats,includes:document.getElementById('cfIncludes').value,spots:Number(document.getElementById('cfSpots').value)};
+    const body={
+        name:document.getElementById('cfName').value,
+        cat:document.getElementById('cfCat').value,
+        img:document.getElementById('cfImg').value,
+        imgCard:document.getElementById('cfImgCard').value,
+        imgBooking:document.getElementById('cfImgBooking').value,
+        price:Number(document.getElementById('cfPrice').value),
+        was:Number(document.getElementById('cfWas').value)||null,
+        type:document.getElementById('cfType').value,
+        badge:document.getElementById('cfBadge').value,
+        description:document.getElementById('cfDesc').value,
+        seats:Number(document.getElementById('cfSeats').value),
+        doors:Number(document.getElementById('cfDoors').value),
+        transmission:document.getElementById('cfTrans').value,
+        bags:Number(document.getElementById('cfBags').value),
+        year:document.getElementById('cfYear').value,
+        color:document.getElementById('cfColor').value,
+        fuelType:document.getElementById('cfFuel').value,
+        mileage:document.getElementById('cfMileage').value,
+        feats,
+        includes:document.getElementById('cfIncludes').value,
+        spots:Number(document.getElementById('cfSpots').value)
+    };
     try{if(editId){await api('PUT','/cars/'+editId,body);toast('Car updated','success');}else{await api('POST','/cars',body);toast('Car added','success');}closeModal();await loadCars();loadStats();}catch(e){toast(e.message,'error');}
 }
 async function deleteCar(id){ if(!await showConfirm('Delete Car','This car will be permanently removed from the fleet. This cannot be undone.'))return; try{await api('DELETE','/cars/'+id);await loadCars();loadStats();toast('Car deleted','success');}catch(e){toast(e.message,'error');} }
