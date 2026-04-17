@@ -674,6 +674,8 @@ var exitS=false;
 document.addEventListener('mouseout',function(e){if(!exitS&&!localStorage.getItem('ft_lead')&&e.clientY<5){exitS=true;document.getElementById('leadOv').classList.add('active');}});
 </script>
 <script>
+// Page view tracker
+(function(){var sid='v_'+Math.random().toString(36).slice(2);function ping(){fetch('/api/track/view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sid:sid})}).catch(function(){});}ping();setInterval(ping,30000);})();
 // CMS Config Loader — fetches overrides from dashboard, applies to page
 (function(){
   fetch('/api/config').then(r=>r.json()).then(function(cfg){

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fastrack Admin Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
@@ -334,6 +335,25 @@
             .kpi-grid { grid-template-columns:1fr; }
             .kpi-value { font-size:22px; }
         }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+        .chart-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; padding:0 28px 16px; }
+        .chart-grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; padding:0 28px 16px; }
+        @media(max-width:768px) { .chart-grid-2,.chart-grid-3 { grid-template-columns:1fr; } }
+        .funnel-bar { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+        .funnel-bar-fill { height:32px; border-radius:8px; display:flex; align-items:center; padding:0 12px; font-size:12px; font-weight:700; color:#fff; transition:width 0.5s ease; }
+        .funnel-bar-label { font-size:12px; color:var(--text-secondary); min-width:80px; }
+        .compare-row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); font-size:13px; }
+        .compare-row:last-child { border-bottom:none; }
+        .compare-label { color:var(--text-muted); }
+        .compare-values { display:flex; gap:16px; }
+        .compare-today { font-weight:700; }
+        .compare-yesterday { color:var(--text-muted); }
+        .hot-lead-item { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); }
+        .hot-lead-item:last-child { border-bottom:none; }
+        .hot-lead-dot { width:8px; height:8px; border-radius:50%; background:var(--red); animation:pulse 1.5s infinite; flex-shrink:0; }
+        .hot-lead-info { flex:1; }
+        .hot-lead-name { font-size:13px; font-weight:600; }
+        .hot-lead-time { font-size:11px; color:var(--text-muted); }
         /* ─── CMS ─── */
         .cms-panel { display:none; padding-top:20px; }
         .cms-panel.active { display:block; }
@@ -442,18 +462,58 @@
         </header>
 
         <div class="content" id="content">
-            <!-- DASHBOARD -->
+            <!-- DASHBOARD / ANALYTICS -->
             <div class="view active" id="dashboardView">
-                <div class="view-header"><div><h1 class="view-title" id="dashboardGreeting">Good morning</h1><p class="view-subtitle" id="dashboardDate"></p></div></div>
-                <div class="kpi-grid">
-                    <div class="kpi-card"><div class="kpi-top"><div class="kpi-icon-box" style="background:var(--blue-bg);color:var(--blue);">&#128101;</div></div><div class="kpi-value" id="kpiLeads">0</div><div class="kpi-label">Total Leads</div></div>
-                    <div class="kpi-card"><div class="kpi-top"><div class="kpi-icon-box" style="background:var(--green-bg);color:var(--green);">&#128203;</div></div><div class="kpi-value" id="kpiBookings">0</div><div class="kpi-label">Total Bookings</div></div>
-                    <div class="kpi-card"><div class="kpi-top"><div class="kpi-icon-box" style="background:var(--primary-bg);color:var(--primary);">&#128176;</div></div><div class="kpi-value" id="kpiRevenue">AED 0</div><div class="kpi-label">Revenue</div></div>
+                <div class="view-header"><div><h1 class="view-title" id="dashboardGreeting">Good morning</h1><p class="view-subtitle" id="dashboardDate"></p></div>
+                <div class="view-actions"><div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted)"><span style="width:10px;height:10px;background:var(--green);border-radius:50%;display:inline-block;animation:pulse 2s infinite"></span> <span id="kpiLiveVisitors">0</span> live visitors</div></div></div>
+
+                <!-- KPI Cards -->
+                <div class="kpi-grid" id="kpiGrid">
+                    <div class="kpi-card"><div class="kpi-top"><div class="kpi-icon-box" style="background:var(--blue-bg);color:var(--blue);">&#128101;</div><div class="kpi-trend" id="kpiLeadsTrend"></div></div><div class="kpi-value" id="kpiLeads">0</div><div class="kpi-label">Total Leads</div><div style="font-size:11px;color:var(--text-muted);margin-top:4px"><span id="kpiLeadsToday">0</span> today &middot; <span id="kpiLeadsWeek">0</span> this week</div></div>
+                    <div class="kpi-card"><div class="kpi-top"><div class="kpi-icon-box" style="background:var(--green-bg);color:var(--green);">&#128203;</div><div class="kpi-trend" id="kpiBookingsTrend"></div></div><div class="kpi-value" id="kpiBookings">0</div><div class="kpi-label">Total Bookings</div><div style="font-size:11px;color:var(--text-muted);margin-top:4px"><span id="kpiBookingsToday">0</span> today &middot; <span id="kpiBookingsWeek">0</span> this week</div></div>
+                    <div class="kpi-card"><div class="kpi-top"><div class="kpi-icon-box" style="background:var(--primary-bg);color:var(--primary);">&#128176;</div><div class="kpi-trend" id="kpiRevenueTrend"></div></div><div class="kpi-value" id="kpiRevenue">AED 0</div><div class="kpi-label">Revenue</div><div style="font-size:11px;color:var(--text-muted);margin-top:4px">AED <span id="kpiRevenueToday">0</span> today</div></div>
                     <div class="kpi-card"><div class="kpi-top"><div class="kpi-icon-box" style="background:var(--purple-bg);color:var(--purple);">&#128200;</div></div><div class="kpi-value" id="kpiConversion">0%</div><div class="kpi-label">Conversion Rate</div></div>
                     <div class="kpi-card"><div class="kpi-top"><div class="kpi-icon-box" style="background:var(--yellow-bg);color:var(--yellow);">&#9888;</div></div><div class="kpi-value" id="kpiNewLeads">0</div><div class="kpi-label">New Leads</div></div>
                     <div class="kpi-card"><div class="kpi-top"><div class="kpi-icon-box" style="background:var(--green-bg);color:var(--green);">&#128663;</div></div><div class="kpi-value" id="kpiCars">0</div><div class="kpi-label">Active Cars</div></div>
                 </div>
-                <div class="data-section"><div style="font-size:15px;font-weight:700;margin-bottom:12px;">Recent Activity</div><div class="table-wrap"><table><thead><tr><th>Type</th><th>Date</th><th>Customer</th><th>Details</th><th>Status</th></tr></thead><tbody id="recentActivityTbody"><tr><td colspan="5" class="empty-state"><div class="empty-state-icon">&#128203;</div><div class="empty-state-title">No activity yet</div></td></tr></tbody></table></div></div>
+
+                <!-- Charts Row 1 -->
+                <div style="padding:0 28px 16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                    <span style="font-size:15px;font-weight:700">Analytics</span>
+                    <select class="filter-select" id="chartPeriod" onchange="loadCharts()"><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select>
+                    <input type="date" class="filter-select" id="chartFrom" onchange="loadCharts()">
+                    <input type="date" class="filter-select" id="chartTo" onchange="loadCharts()">
+                </div>
+                <div class="chart-grid-2">
+                    <div class="kpi-card" style="padding:16px"><div style="font-size:13px;font-weight:700;margin-bottom:10px">Leads Over Time</div><canvas id="chartLeads" height="200"></canvas></div>
+                    <div class="kpi-card" style="padding:16px"><div style="font-size:13px;font-weight:700;margin-bottom:10px">Bookings Over Time</div><canvas id="chartBookings" height="200"></canvas></div>
+                </div>
+                <div class="chart-grid-2">
+                    <div class="kpi-card" style="padding:16px"><div style="font-size:13px;font-weight:700;margin-bottom:10px">Revenue (AED)</div><canvas id="chartRevenue" height="200"></canvas></div>
+                    <div class="kpi-card" style="padding:16px"><div style="font-size:13px;font-weight:700;margin-bottom:10px">Conversion Funnel</div><div id="funnelContainer" style="padding:10px 0"></div></div>
+                </div>
+
+                <!-- Charts Row 2 -->
+                <div class="chart-grid-3">
+                    <div class="kpi-card" style="padding:16px"><div style="font-size:13px;font-weight:700;margin-bottom:10px">Leads by Source</div><canvas id="chartSources" height="220"></canvas></div>
+                    <div class="kpi-card" style="padding:16px"><div style="font-size:13px;font-weight:700;margin-bottom:10px">Popular Cars</div><canvas id="chartPopularCars" height="220"></canvas></div>
+                    <div class="kpi-card" style="padding:16px"><div style="font-size:13px;font-weight:700;margin-bottom:10px">Bookings by Location</div><canvas id="chartLocations" height="220"></canvas></div>
+                </div>
+
+                <!-- Real-time Panel: Today vs Yesterday + Hot Leads + Activity Feed -->
+                <div class="chart-grid-2">
+                    <div class="kpi-card" style="padding:16px">
+                        <div style="font-size:13px;font-weight:700;margin-bottom:12px">Today vs Yesterday</div>
+                        <div id="todayVsYesterday"></div>
+                    </div>
+                    <div class="kpi-card" style="padding:16px">
+                        <div style="font-size:13px;font-weight:700;margin-bottom:12px">Hot Leads <span style="font-size:11px;color:var(--red);font-weight:400">(last 30 min, uncontacted)</span></div>
+                        <div id="hotLeadsList"></div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity Table -->
+                <div class="data-section"><div style="font-size:15px;font-weight:700;margin-bottom:12px">Recent Activity</div><div class="table-wrap"><table><thead><tr><th>Type</th><th>Date</th><th>Customer</th><th>Details</th><th>Status</th></tr></thead><tbody id="recentActivityTbody"><tr><td colspan="5" class="empty-state"><div class="empty-state-icon">&#128203;</div><div class="empty-state-title">No activity yet</div></td></tr></tbody></table></div></div>
             </div>
 
             <!-- LEADS -->
@@ -653,6 +713,9 @@ async function enterDashboard(){
     try{ currentUser=await api('GET','/auth/me'); saveSession(); }catch(e){ clearSession(); document.getElementById('app').classList.add('hidden'); document.getElementById('loginScreen').classList.remove('hidden'); return; }
     updateUserUI(); applyRBAC(); updateGreeting(); loadAllData();
     if(window._ri) clearInterval(window._ri); window._ri=setInterval(loadAllData,30000);
+    // Live visitor counter refresh every 5s
+    if(window._liveInterval) clearInterval(window._liveInterval);
+    window._liveInterval=setInterval(async()=>{ try{ const d=await api('GET','/analytics/overview'); document.getElementById('kpiLiveVisitors').textContent=d.liveVisitors||0; }catch(e){} },5000);
 }
 function updateUserUI(){ if(!currentUser)return; const i=currentUser.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); document.getElementById('userAvatar').textContent=i; document.getElementById('userName').textContent=currentUser.name; document.getElementById('userRole').textContent=currentUser.role; document.getElementById('settingsEmail').textContent=currentUser.email; const r=document.getElementById('settingsRole'); r.textContent=currentUser.role; r.className='badge badge-'+currentUser.role; }
 function applyRBAC(){ if(!currentUser)return; document.querySelectorAll('.nav-item[data-roles]').forEach(n=>{n.style.display=n.dataset.roles.split(',').includes(currentUser.role)?'':'none';}); if(currentUser.role==='viewer') document.getElementById('carsActions').style.display='none'; }
@@ -660,7 +723,7 @@ function canEdit(){ return currentUser&&(currentUser.role==='superadmin'||curren
 function isSuperAdmin(){ return currentUser&&currentUser.role==='superadmin'; }
 
 // ═══════ DATA LOAD ═══════
-function loadAllData(){ loadStats(); loadLeads(); loadBookings(); loadCars(); if(currentView==='team'&&isSuperAdmin())loadTeam(); if(currentView==='activity')loadActivity(); }
+function loadAllData(){ loadStats(); loadLeads(); loadBookings(); loadCars(); if(currentView==='dashboard')loadCharts(); if(currentView==='team'&&isSuperAdmin())loadTeam(); if(currentView==='activity')loadActivity(); }
 async function loadStats(){ try{ statsData=await api('GET','/stats'); document.getElementById('kpiLeads').textContent=statsData.totalLeads||0; document.getElementById('kpiBookings').textContent=statsData.totalBookings||0; document.getElementById('kpiRevenue').textContent='AED '+(statsData.totalRevenue||0).toLocaleString(); document.getElementById('kpiConversion').textContent=(statsData.conversionRate||0)+'%'; document.getElementById('kpiNewLeads').textContent=statsData.newLeads||0; document.getElementById('kpiCars').textContent=statsData.totalCars||0; const lb=document.getElementById('leadsNavBadge'); if(statsData.newLeads>0){lb.textContent=statsData.newLeads;lb.style.display='';}else lb.style.display='none'; const bb=document.getElementById('bookingsNavBadge'); if(statsData.newBookings>0){bb.textContent=statsData.newBookings;bb.style.display='';}else bb.style.display='none'; }catch(e){} }
 async function loadLeads(){ try{ leadsData=await api('GET','/leads'); if(!Array.isArray(leadsData))leadsData=[]; document.getElementById('leadsCount').textContent=leadsData.length+' leads'; renderLeads(); renderRecentActivity(); }catch(e){} }
 async function loadBookings(){ try{ bookingsData=await api('GET','/bookings'); if(!Array.isArray(bookingsData))bookingsData=[]; document.getElementById('bookingsCount').textContent=bookingsData.length+' bookings'; renderBookings(); renderRecentActivity(); if(bookingViewMode==='calendar')renderCalendar(); }catch(e){} }
@@ -971,6 +1034,7 @@ function switchView(name,navEl){
     document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
     const v=document.getElementById(name+'View');if(v)v.classList.add('active');
     document.getElementById('breadcrumbCurrent').textContent=cap(name);
+    if(name==='dashboard')loadCharts();
     if(name==='team'&&isSuperAdmin())loadTeam();
     if(name==='activity')loadActivity();
     if((name==='cms'||name==='sections'||name==='pagesettings')&&!cmsConfig)loadCmsConfig();
@@ -1000,6 +1064,182 @@ function updateSortArrows(prefix,sortState){document.querySelectorAll(`[id^="${p
 function handleGlobalSearch(e){if(e.key==='Enter'){const q=e.target.value.trim().toLowerCase();if(!q)return;if(leadsData.find(l=>`${l.fullName} ${l.phone}`.toLowerCase().includes(q))){switchView('leads');document.getElementById('leadsSearch').value=q;renderLeads();return;}if(bookingsData.find(b=>`${b.fullName} ${b.phone} ${b.ref} ${b.carName}`.toLowerCase().includes(q))){switchView('bookings');document.getElementById('bookingsSearch').value=q;renderBookings();return;}toast('No results for "'+q+'"','info');}}
 document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();const el=document.getElementById('globalSearch');if(el){el.focus();el.select();}}});
 function updateGreeting(){const h=new Date().getHours();const g=h<12?'Good morning':h<18?'Good afternoon':'Good evening';document.getElementById('dashboardGreeting').textContent=g+(currentUser?', '+currentUser.name.split(' ')[0]:'');document.getElementById('dashboardDate').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});}
+
+// ═══════ ANALYTICS ═══════
+let chartInstances = {};
+
+function destroyChart(id) { if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; } }
+
+function getChartColors() {
+    const isDark = (localStorage.getItem('ft_theme') || 'dark') === 'dark';
+    return {
+        grid: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
+        text: isDark ? '#999' : '#666',
+        primary: '#FF5F00', blue: '#3B82F6', green: '#10B981', red: '#EF4444',
+        yellow: '#F59E0B', purple: '#8B5CF6', colors: ['#FF5F00','#3B82F6','#10B981','#F59E0B','#8B5CF6','#EF4444','#06B6D4','#EC4899']
+    };
+}
+
+async function loadAnalyticsOverview() {
+    try {
+        const d = await api('GET', '/analytics/overview');
+        document.getElementById('kpiLeads').textContent = d.leads.total;
+        document.getElementById('kpiLeadsToday').textContent = d.leads.today;
+        document.getElementById('kpiLeadsWeek').textContent = d.leads.week;
+        document.getElementById('kpiBookings').textContent = d.bookings.total;
+        document.getElementById('kpiBookingsToday').textContent = d.bookings.today;
+        document.getElementById('kpiBookingsWeek').textContent = d.bookings.week;
+        document.getElementById('kpiRevenue').textContent = 'AED ' + (d.revenue.total || 0).toLocaleString();
+        document.getElementById('kpiRevenueToday').textContent = (d.revenue.today || 0).toLocaleString();
+        document.getElementById('kpiConversion').textContent = d.conversionRate + '%';
+        document.getElementById('kpiNewLeads').textContent = d.leads.today;
+        document.getElementById('kpiCars').textContent = d.activeCars;
+        document.getElementById('kpiLiveVisitors').textContent = d.liveVisitors || 0;
+
+        // Trends
+        setTrend('kpiLeadsTrend', d.leads.today, d.leads.yesterday);
+        setTrend('kpiBookingsTrend', d.bookings.today, d.bookings.yesterday);
+        setTrend('kpiRevenueTrend', d.revenue.today, d.revenue.yesterday);
+
+        // Nav badges
+        const lb = document.getElementById('leadsNavBadge');
+        if (d.leads.today > 0) { lb.textContent = d.leads.today; lb.style.display = ''; } else lb.style.display = 'none';
+        const bb = document.getElementById('bookingsNavBadge');
+        if (d.bookings.today > 0) { bb.textContent = d.bookings.today; bb.style.display = ''; } else bb.style.display = 'none';
+
+        // Today vs Yesterday
+        renderTodayVsYesterday(d);
+        // Hot leads
+        renderHotLeads(d.hotLeads || []);
+    } catch(e) { console.error('Analytics overview:', e); }
+}
+
+function setTrend(elId, current, previous) {
+    const el = document.getElementById(elId); if (!el) return;
+    if (current > previous) { el.innerHTML = '&#9650; ' + current; el.style.color = 'var(--green)'; }
+    else if (current < previous) { el.innerHTML = '&#9660; ' + current; el.style.color = 'var(--red)'; }
+    else { el.innerHTML = '&#8212; ' + current; el.style.color = 'var(--text-muted)'; }
+}
+
+function renderTodayVsYesterday(d) {
+    const el = document.getElementById('todayVsYesterday'); if (!el) return;
+    el.innerHTML = `
+        <div class="compare-row"><span class="compare-label">Leads</span><div class="compare-values"><span class="compare-today">${d.leads.today} today</span><span class="compare-yesterday">${d.leads.yesterday} yesterday</span></div></div>
+        <div class="compare-row"><span class="compare-label">Bookings</span><div class="compare-values"><span class="compare-today">${d.bookings.today} today</span><span class="compare-yesterday">${d.bookings.yesterday} yesterday</span></div></div>
+        <div class="compare-row"><span class="compare-label">Revenue</span><div class="compare-values"><span class="compare-today">AED ${(d.revenue.today||0).toLocaleString()}</span><span class="compare-yesterday">AED ${(d.revenue.yesterday||0).toLocaleString()}</span></div></div>
+        <div class="compare-row"><span class="compare-label">Page Views</span><div class="compare-values"><span class="compare-today">${d.pageViews||0} total</span><span class="compare-yesterday">${d.liveVisitors||0} live now</span></div></div>`;
+}
+
+function renderHotLeads(hotLeads) {
+    const el = document.getElementById('hotLeadsList'); if (!el) return;
+    if (!hotLeads.length) { el.innerHTML = '<div style="color:var(--text-muted);font-size:13px;padding:16px 0;text-align:center">No hot leads right now</div>'; return; }
+    el.innerHTML = hotLeads.map(l => {
+        const ago = Math.round((Date.now() - new Date(l.createdAt).getTime()) / 60000);
+        return `<div class="hot-lead-item"><div class="hot-lead-dot"></div><div class="hot-lead-info"><div class="hot-lead-name">${esc(l.fullName)}</div><div class="hot-lead-time">${esc(l.phone)} &middot; ${ago}m ago &middot; ${esc(l.interest||'General')}</div></div>
+        <a href="https://wa.me/${l.phone.replace(/[^0-9]/g,'')}" target="_blank" class="btn btn-success btn-xs">WhatsApp</a></div>`;
+    }).join('');
+}
+
+async function loadCharts() {
+    const period = document.getElementById('chartPeriod').value;
+    const from = document.getElementById('chartFrom').value;
+    const to = document.getElementById('chartTo').value;
+    const qs = `period=${period}${from?'&from='+from:''}${to?'&to='+to:''}`;
+    const cc = getChartColors();
+
+    try {
+        const [leadsTime, bookingsTime, revenueTime, sources, popularCars, locations, funnel] = await Promise.all([
+            api('GET', '/analytics/leads?' + qs),
+            api('GET', '/analytics/bookings?' + qs),
+            api('GET', '/analytics/revenue?' + qs),
+            api('GET', '/analytics/sources'),
+            api('GET', '/analytics/popular-cars'),
+            api('GET', '/analytics/locations'),
+            api('GET', '/analytics/funnel')
+        ]);
+
+        // Leads line chart
+        destroyChart('chartLeads');
+        const lLabels = Object.keys(leadsTime).sort();
+        chartInstances.chartLeads = new Chart(document.getElementById('chartLeads'), {
+            type: 'line', data: { labels: lLabels, datasets: [{ label: 'Leads', data: lLabels.map(k => leadsTime[k]), borderColor: cc.blue, backgroundColor: cc.blue + '22', fill: true, tension: 0.3 }] },
+            options: chartOpts(cc)
+        });
+
+        // Bookings line chart
+        destroyChart('chartBookings');
+        const bLabels = Object.keys(bookingsTime).sort();
+        chartInstances.chartBookings = new Chart(document.getElementById('chartBookings'), {
+            type: 'line', data: { labels: bLabels, datasets: [{ label: 'Bookings', data: bLabels.map(k => bookingsTime[k]), borderColor: cc.green, backgroundColor: cc.green + '22', fill: true, tension: 0.3 }] },
+            options: chartOpts(cc)
+        });
+
+        // Revenue bar chart
+        destroyChart('chartRevenue');
+        const rLabels = Object.keys(revenueTime).sort();
+        chartInstances.chartRevenue = new Chart(document.getElementById('chartRevenue'), {
+            type: 'bar', data: { labels: rLabels, datasets: [{ label: 'Revenue (AED)', data: rLabels.map(k => revenueTime[k]), backgroundColor: cc.primary + 'CC', borderRadius: 6 }] },
+            options: chartOpts(cc)
+        });
+
+        // Sources doughnut
+        destroyChart('chartSources');
+        const sLabels = Object.keys(sources);
+        chartInstances.chartSources = new Chart(document.getElementById('chartSources'), {
+            type: 'doughnut', data: { labels: sLabels.map(cap), datasets: [{ data: sLabels.map(k => sources[k]), backgroundColor: cc.colors.slice(0, sLabels.length) }] },
+            options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: cc.text, font: { size: 11 } } } } }
+        });
+
+        // Popular cars horizontal bar
+        destroyChart('chartPopularCars');
+        chartInstances.chartPopularCars = new Chart(document.getElementById('chartPopularCars'), {
+            type: 'bar', data: { labels: popularCars.map(c => c.name), datasets: [{ label: 'Bookings', data: popularCars.map(c => c.count), backgroundColor: cc.colors.slice(0, popularCars.length), borderRadius: 6 }] },
+            options: { ...chartOpts(cc), indexAxis: 'y' }
+        });
+
+        // Locations pie
+        destroyChart('chartLocations');
+        const locLabels = Object.keys(locations);
+        chartInstances.chartLocations = new Chart(document.getElementById('chartLocations'), {
+            type: 'pie', data: { labels: locLabels, datasets: [{ data: locLabels.map(k => locations[k]), backgroundColor: cc.colors.slice(0, locLabels.length) }] },
+            options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: cc.text, font: { size: 11 } } } } }
+        });
+
+        // Funnel
+        renderFunnel(funnel);
+    } catch(e) { console.error('Charts:', e); }
+}
+
+function chartOpts(cc) {
+    return {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { grid: { color: cc.grid }, ticks: { color: cc.text, font: { size: 10 } } },
+            y: { grid: { color: cc.grid }, ticks: { color: cc.text, font: { size: 10 } }, beginAtZero: true }
+        }
+    };
+}
+
+function renderFunnel(data) {
+    const el = document.getElementById('funnelContainer'); if (!el) return;
+    const max = Math.max(data.pageViews, 1);
+    const items = [
+        { label: 'Page Views', value: data.pageViews, color: 'var(--blue)' },
+        { label: 'Leads', value: data.leads, color: 'var(--yellow)' },
+        { label: 'Bookings', value: data.bookings, color: 'var(--green)' }
+    ];
+    el.innerHTML = items.map(i => {
+        const pct = Math.max((i.value / max) * 100, 8);
+        const rate = i.label === 'Page Views' ? '' : ` (${max > 0 ? ((i.value / max) * 100).toFixed(1) : 0}%)`;
+        return `<div class="funnel-bar"><span class="funnel-bar-label">${i.label}</span><div class="funnel-bar-fill" style="width:${pct}%;background:${i.color}">${i.value.toLocaleString()}${rate}</div></div>`;
+    }).join('');
+}
+
+// Override loadStats to use analytics overview
+async function loadStats() {
+    await loadAnalyticsOverview();
+}
 
 // ═══════ CMS ═══════
 let cmsConfig = null;
