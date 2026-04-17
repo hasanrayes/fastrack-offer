@@ -189,13 +189,15 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--dark);color:var(-
 .bk-back:hover{background:rgba(0,0,0,.6)}
 .bk-car-img{width:100%;height:280px;display:block;object-fit:cover}
 .bk-info{padding:20px 20px 0;max-width:600px;margin:0 auto}
-.bk-name{font-size:clamp(18px,4vw,24px);font-weight:900;color:var(--onDark);text-transform:uppercase;line-height:1.15}
-.bk-cat{font-size:12px;color:var(--onDarkM);margin-top:3px}
-.bk-specs{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:14px 0}
-.bk-spec{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--onDarkM);font-weight:500}
-.bk-spec .si{font-size:16px;opacity:.6}
-.bk-more-btn{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--orange);cursor:pointer;background:none;border:none;font-family:inherit;padding:4px 0}
-.bk-more-btn:hover{text-decoration:underline}
+.bk-name{font-size:clamp(20px,4.5vw,28px);font-weight:900;color:var(--txt);text-transform:uppercase;line-height:1.15;letter-spacing:-.02em}
+.bk-cat{font-size:13px;color:var(--txt2);margin-top:4px}
+.bk-specs{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px;padding:16px 0}
+.bk-spec{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--txt);font-weight:500}
+.bk-spec svg{flex-shrink:0;color:var(--txt);opacity:.9}
+.bk-more-btn{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--txt);cursor:pointer;background:none;border:none;font-family:inherit;padding:0;justify-content:flex-start}
+.bk-more-btn svg{color:var(--txt);opacity:.9}
+.bk-more-btn span{text-decoration:underline}
+.bk-more-btn:hover span{color:var(--orange)}
 .bk-details{display:none;padding:12px 0;border-top:1px solid var(--borderD)}
 .bk-details.open{display:block}
 .bk-detail-row{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--onDarkM);padding:4px 0}
@@ -517,6 +519,16 @@ async function loadCars(){try{var r=await fetch(API+'/api/cars');cD=await r.json
 
 var imgPlaceholder="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' fill='%23333'%3E%3Crect width='400' height='200' fill='%23232323'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23666' font-size='14'%3EImage unavailable%3C/text%3E%3C/svg%3E";
 
+// SVG icons (Sixt-style clean)
+var ICON={
+  seats:'<svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>',
+  doors:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h10l6 6v10a2 2 0 0 1-2 2z"/><circle cx="15.5" cy="13" r="1" fill="currentColor" stroke="none"/></svg>',
+  trans:'<svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><rect x="3" y="3" width="18" height="18" rx="3.5" ry="3.5"/><text x="12" y="17" text-anchor="middle" fill="#fff" font-size="14" font-weight="900" font-family="Inter,sans-serif" style="letter-spacing:-.04em">A</text></svg>',
+  bags:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><rect x="4" y="7" width="16" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="9" y1="12" x2="9" y2="17"/><line x1="15" y1="12" x2="15" y2="17"/></svg>',
+  more:'<svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>',
+  fuel:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M3 22V5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v17"/><path d="M3 22h11"/><path d="M14 10h2a2 2 0 0 1 2 2v5a1.5 1.5 0 0 0 3 0V8l-3-3"/></svg>'
+};
+
 function renderCars(){
   cD.forEach(function(c){carMap[c.id]=c;});
   document.getElementById('carCarousel').innerHTML=cD.map(function(c,idx){
@@ -530,10 +542,10 @@ function renderCars(){
         '<div class="car-name">'+c.name+'</div>'+
         '<div class="car-type">'+(c.cat||c.type)+' <span class="sep">|</span> '+(c.type||'Sedan')+'</div>'+
         '<div class="car-pills">'+
-          '<div class="car-pill"><span class="pi">&#128100;</span> '+(c.seats||5)+'</div>'+
-          '<div class="car-pill"><span class="pi">&#128682;</span> '+(c.doors||4)+'</div>'+
-          '<div class="car-pill"><span class="pi">&#9881;&#65039;</span> '+(c.trans||'Auto')+'</div>'+
-          '<div class="car-pill"><span class="pi">&#128188;</span> '+(c.bags||3)+'</div>'+
+          '<div class="car-pill">'+ICON.seats+' '+(c.seats||5)+'</div>'+
+          '<div class="car-pill">'+ICON.doors+' '+(c.doors||4)+'</div>'+
+          '<div class="car-pill">'+ICON.trans+' '+(c.trans||'Auto')+'</div>'+
+          '<div class="car-pill">'+ICON.bags+' '+(c.bags||3)+'</div>'+
         '</div>'+
       '</div>'+
       '<div class="car-overlay-bottom">'+
@@ -602,10 +614,10 @@ function renderBkStep(){
     b.innerHTML=
       '<div style="padding-bottom:4px"><div class="bk-name">'+sel.name+'</div><div class="bk-cat">'+(sel.cat||sel.type)+' or similar | '+(sel.type||'Sedan')+'</div></div>'+
       '<div class="bk-specs">'+
-        '<div class="bk-spec"><span class="si">&#128100;</span>'+(sel.seats||5)+' Seats</div>'+
-        '<div class="bk-spec"><span class="si">&#128682;</span>'+(sel.doors||4)+' Doors</div>'+
-        '<div class="bk-spec"><span class="si">&#9881;&#65039;</span>'+(sel.trans||'Automatic')+'</div>'+
-        '<button class="bk-more-btn" onclick="toggleDetails()">&#8942; More details</button>'+
+        '<div class="bk-spec">'+ICON.seats+' '+(sel.seats||5)+' Seats</div>'+
+        '<div class="bk-spec">'+ICON.doors+' '+(sel.doors||4)+' Doors</div>'+
+        '<div class="bk-spec">'+ICON.trans+' '+(sel.trans||'Automatic')+'</div>'+
+        '<button class="bk-more-btn" onclick="toggleDetails()">'+ICON.more+' <span style="text-decoration:underline">More details</span></button>'+
       '</div>'+
       '<div class="bk-details" id="bkDetails">'+
         '<div style="font-size:12px;font-weight:700;margin-bottom:6px;color:var(--txt)">Features & Includes</div>'+featsHtml+
