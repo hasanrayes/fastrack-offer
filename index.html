@@ -11,14 +11,14 @@
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
   --white:#fff;--bg:#F7F7F7;--dark:#1A1A1A;--card:#232323;--card-h:#2C2C2C;
-  --txt:#1A1A1A;--txt2:#666;--txt3:#999;--onDark:#fff;--onDarkM:rgba(255,255,255,.55);
-  --orange:#FF5F00;--orangeH:#E55500;--green:#22C55E;--red:#EF4444;
+  --txt:#1A1A1A;--txt2:#666;--txt3:#999;--onDark:#fff;--onDarkM:rgba(255,255,255,.75);
+  --orange:#FF5F00;--orangeH:#E55500;--green:#22C55E;--red:#EF4444;--onDarkS:rgba(255,255,255,.75);
   --border:#E5E5E5;--borderD:rgba(255,255,255,.1);
   --sh:0 2px 12px rgba(0,0,0,.08);--shL:0 8px 30px rgba(0,0,0,.12);
   --r:8px;--rl:12px;--rx:16px;
 }
 html{scroll-behavior:smooth}
-body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--txt);-webkit-font-smoothing:antialiased;overflow-x:hidden;padding-bottom:72px}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--txt);-webkit-font-smoothing:antialiased;overflow-x:clip;padding-bottom:72px}
 
 /* ── NAV ── */
 .nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);border-bottom:1px solid var(--border);height:58px;display:flex;align-items:center}
@@ -33,7 +33,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .hero-inner{max-width:1200px;margin:0 auto;padding:0 24px}
 .hero-urgency{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;background:var(--red);color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;border-radius:4px;margin-bottom:14px;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
-.hero h1{font-size:clamp(22px,3.5vw,38px);font-weight:900;color:var(--onDark);line-height:1.12;letter-spacing:-.03em;text-transform:uppercase;margin-bottom:10px}
+.hero h1{font-size:clamp(22px,3.5vw,48px);font-weight:900;color:var(--onDark);line-height:1.12;letter-spacing:-.03em;text-transform:uppercase;margin-bottom:10px}
 .hero h1 .o{color:var(--orange)}
 .hero-sub{font-size:14px;color:var(--onDarkM);line-height:1.6;margin-bottom:12px;max-width:520px;margin-left:auto;margin-right:auto}
 .hero-proof{display:flex;align-items:center;justify-content:center;gap:18px;margin-bottom:18px;flex-wrap:wrap}
@@ -62,7 +62,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .cd-timer{display:flex;gap:5px}
 .cd-b{background:rgba(255,255,255,.08);padding:6px 10px;border-radius:5px;text-align:center;min-width:44px}
 .cd-n{font-size:16px;font-weight:800;color:var(--orange)}
-.cd-u{font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:var(--onDarkM);font-weight:600}
+.cd-u{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--onDarkM);font-weight:600}
 
 /* ── SOCIAL PROOF TICKER ── */
 .ticker{background:var(--white);padding:8px 0;overflow:hidden;border-bottom:1px solid var(--border)}
@@ -72,7 +72,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 @keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 
 /* ── CARS CAROUSEL SECTION ── */
-.cars-section{max-width:1200px;margin:0 auto;padding:28px 24px 36px}
+.cars-section{max-width:1200px;margin:0 auto;padding:36px 24px}
 .cars-head{text-align:center;margin-bottom:20px}
 .cars-head .tag{display:inline-block;padding:4px 12px;background:var(--orange);color:#fff;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;border-radius:4px;margin-bottom:8px}
 .cars-head h2{font-size:clamp(18px,2.5vw,28px);font-weight:900;text-transform:uppercase;letter-spacing:-.02em}
@@ -101,7 +101,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .car-fomo .dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 1.5s infinite}
 .car-head{padding:14px 16px 0}
 .car-name{font-size:14px;font-weight:800;color:var(--onDark);text-transform:uppercase;letter-spacing:.01em}
-.car-type{font-size:10px;color:var(--onDarkM);margin-top:1px}
+.car-type{font-size:12px;color:var(--onDarkM);margin-top:1px}
 .car-photo{padding:6px 16px 0;height:160px;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .car-photo img{width:100%;height:100%;object-fit:cover;border-radius:var(--r);transition:transform .4s}
 .car-specs{display:flex;align-items:center;justify-content:center;gap:10px;padding:10px 16px;flex-wrap:wrap}
@@ -131,7 +131,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .why-card:hover{border-color:var(--orange)}
 .why-card .ic{width:36px;height:36px;background:var(--dark);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;font-size:16px}
 .why-card h3{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.01em;margin-bottom:4px}
-.why-card p{font-size:11px;color:var(--txt2);line-height:1.55}
+.why-card p{font-size:12px;color:var(--txt2);line-height:1.55}
 
 /* ── REVIEWS CAROUSEL ── */
 .reviews-section{background:var(--dark);padding:36px 0}
@@ -146,7 +146,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .rev-role{font-size:10px;color:var(--onDarkM)}
 
 /* ── GUARANTEE (compact) ── */
-.guarantee{background:var(--white);padding:32px 0;border-top:1px solid var(--border)}
+.guarantee{background:var(--white);padding:36px 0;border-top:1px solid var(--border)}
 .guarantee-inner{max-width:600px;margin:0 auto;padding:0 24px;text-align:center}
 .guarantee-inner .ic{font-size:28px;margin-bottom:8px}
 .guarantee-inner h3{font-size:18px;font-weight:900;text-transform:uppercase;margin-bottom:6px}
@@ -160,11 +160,11 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .final-cta p{font-size:13px;color:var(--onDarkM);margin-bottom:18px}
 
 /* ── FOOTER (compact) ── */
-.footer{background:var(--dark);border-top:1px solid var(--borderD);padding:24px 0 16px}
+.footer{background:var(--dark);border-top:1px solid var(--borderD);padding:24px 0}
 .footer-inner{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
-.footer-left{font-size:11px;color:rgba(255,255,255,.3)}
+.footer-left{font-size:11px;color:rgba(255,255,255,.55)}
 .footer-links{display:flex;gap:16px}
-.footer-links a{font-size:11px;color:rgba(255,255,255,.5);text-decoration:none;transition:.2s}
+.footer-links a{font-size:11px;color:rgba(255,255,255,.7);text-decoration:none;transition:.2s}
 .footer-links a:hover{color:var(--orange)}
 
 /* ── STICKY BOTTOM CTA ── */
@@ -527,15 +527,20 @@ document.addEventListener('DOMContentLoaded',function(){loadCars();initCD();init
 
 async function loadCars(){try{var r=await fetch(API+'/api/cars');cD=await r.json();}catch(e){cD=CARS;}renderCars();}
 
+var carMap={};
 function renderCars(){
-  document.getElementById('carCarousel').innerHTML=cD.map(function(c){
+  cD.forEach(function(c){carMap[c.id]=c;});
+  var imgPlaceholder="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' fill='%23333'%3E%3Crect width='400' height='200' fill='%23232323'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23666' font-size='14'%3EImage unavailable%3C/text%3E%3C/svg%3E";
+  document.getElementById('carCarousel').innerHTML=cD.map(function(c,idx){
     var v=c.viewers||Math.floor(Math.random()*15)+5,sp=c.spots||Math.floor(Math.random()*5)+1;
     var pct=Math.round((c.was-c.price)/c.was*100);
-    return '<div class="car" onclick=\'openB('+JSON.stringify(c).replace(/'/g,"&#39;")+')\'>'+
+    var imgSrc=c.img,srcset='';
+    if(imgSrc&&imgSrc.includes('width=900'))srcset='srcset="'+imgSrc.replace('width=900','width=400')+' 400w, '+imgSrc+' 900w" sizes="(max-width:768px) 290px, 380px"';
+    return '<div class="car" data-car-id="'+c.id+'" onclick="openB(carMap['+c.id+'])">'+
       '<div class="car-badge b-'+(c.bt||'or')+'">'+c.badge+'</div>'+
-      '<div class="car-fomo"><span class="dot"></span>'+v+' viewing</div>'+
+      '<div class="car-fomo"><span class="dot" style="animation-delay:'+(idx*0.3)+'s"></span>'+v+' viewing</div>'+
       '<div class="car-head"><div class="car-name">'+c.name+'</div><div class="car-type">'+(c.cat||c.type)+'</div></div>'+
-      '<div class="car-photo"><img src="'+c.img+'" alt="'+c.name+'" loading="lazy"></div>'+
+      '<div class="car-photo"><img src="'+imgSrc+'" '+srcset+' alt="'+c.name+'" loading="lazy" onerror="this.src=\''+imgPlaceholder+'\'"></div>'+
       '<div class="car-specs">'+
         '<div class="car-spec">&#128100; '+(c.seats||5)+'</div>'+
         '<div class="car-spec">&#128682; '+(c.doors||4)+' doors</div>'+
@@ -548,7 +553,7 @@ function renderCars(){
         '<div class="car-price-now"><span class="sm">from </span><span class="sm">AED</span><span class="big">'+c.price.toLocaleString()+'</span><span class="mo"> | month*</span></div>'+
         '<div class="car-save">SAVE '+pct+'% — AED '+(c.was-c.price).toLocaleString()+' off</div>'+
         '<div class="car-spots">&#128293; Only '+sp+' left at this price</div></div>'+
-        '<button class="car-cta" onclick="event.stopPropagation();openB('+JSON.stringify(c).replace(/'/g,"&#39;")+')">Book Now</button>'+
+        '<button class="car-cta" onclick="event.stopPropagation();openB(carMap['+c.id+'])">Book Now</button>'+
       '</div></div>';
   }).join('');
   initDots();
@@ -574,7 +579,9 @@ function initDots(){
 
 // COUNTDOWN
 function initCD(){
-  var e=new Date();e.setDate(e.getDate()+3);e.setHours(23,59,59,0);
+  var stored=localStorage.getItem('ft_cd_end');
+  var e;
+  if(stored){e=new Date(stored);}else{e=new Date();e.setDate(e.getDate()+3);e.setHours(23,59,59,0);localStorage.setItem('ft_cd_end',e.toISOString());}
   function t(){var d=Math.max(0,e-new Date())/1000;var dd=Math.floor(d/86400);d%=86400;var hh=Math.floor(d/3600);d%=3600;var mm=Math.floor(d/60);var ss=Math.floor(d%60);
     document.getElementById('cdD').textContent=String(dd).padStart(2,'0');document.getElementById('cdH').textContent=String(hh).padStart(2,'0');
     document.getElementById('cdM').textContent=String(mm).padStart(2,'0');document.getElementById('cdS').textContent=String(ss).padStart(2,'0');}
@@ -597,15 +604,15 @@ function rStep(){
   ['ms1','ms2','ms3'].forEach(function(id,i){document.getElementById(id).className='m-step'+(i+1===bS?' active':'')+(i+1<bS?' done':'');});
   var b=document.getElementById('mBody'),td=new Date().toISOString().split('T')[0];
   if(bS===1){
-    b.innerHTML='<div class="fg"><label class="fl">Start Date</label><input class="fi" type="date" id="bD" min="'+td+'"></div>'+
-      '<div class="fg"><label class="fl">Duration</label><select class="fs" id="bDu"><option value="1">1 Month</option><option value="3" selected>3 Months (Best Value)</option><option value="6">6 Months</option><option value="12">12 Months</option></select></div>'+
-      '<div class="fg"><label class="fl">Delivery Location</label><select class="fs" id="bL"><option value="">Select area</option><option>Dubai Marina</option><option>Downtown Dubai</option><option>Business Bay</option><option>JBR</option><option>Deira</option><option>Dubai Airport</option><option>Abu Dhabi</option><option>Sharjah</option><option>Other</option></select></div>'+
+    b.innerHTML='<div class="fg"><label class="fl" for="bD">Start Date</label><input class="fi" type="date" id="bD" min="'+td+'"></div>'+
+      '<div class="fg"><label class="fl" for="bDu">Duration</label><select class="fs" id="bDu"><option value="1">1 Month</option><option value="3" selected>3 Months (Best Value)</option><option value="6">6 Months</option><option value="12">12 Months</option></select></div>'+
+      '<div class="fg"><label class="fl" for="bL">Delivery Location</label><select class="fs" id="bL"><option value="">Select area</option><option>Dubai Marina</option><option>Downtown Dubai</option><option>Business Bay</option><option>JBR</option><option>Deira</option><option>Dubai Airport</option><option>Abu Dhabi</option><option>Sharjah</option><option>Other</option></select></div>'+
       '<button class="bf bn" onclick="nS()">Next &#8594;</button>';
   } else if(bS===2){
     b.innerHTML='<button class="bf bb" onclick="pS()">&larr; Back</button>'+
-      '<div class="fg"><label class="fl">Full Name</label><input class="fi" type="text" id="bN" placeholder="John Doe"></div>'+
-      '<div class="fr"><div class="fg"><label class="fl">Phone</label><input class="fi" type="tel" id="bP" placeholder="+971 5X XXX XXXX"></div><div class="fg"><label class="fl">WhatsApp</label><input class="fi" type="tel" id="bW" placeholder="Same as phone?"></div></div>'+
-      '<div class="fg"><label class="fl">Email (optional)</label><input class="fi" type="email" id="bE" placeholder="you@email.com"></div>'+
+      '<div class="fg"><label class="fl" for="bN">Full Name</label><input class="fi" type="text" id="bN" placeholder="John Doe"></div>'+
+      '<div class="fr"><div class="fg"><label class="fl" for="bP">Phone</label><input class="fi" type="tel" id="bP" placeholder="+971 5X XXX XXXX"></div><div class="fg"><label class="fl" for="bW">WhatsApp</label><input class="fi" type="tel" id="bW" placeholder="Same as phone?"></div></div>'+
+      '<div class="fg"><label class="fl" for="bE">Email (optional)</label><input class="fi" type="email" id="bE" placeholder="you@email.com"></div>'+
       '<button class="bf bn" onclick="nS()">Review Booking &#8594;</button>';
   } else {
     var du=window._du||'3',tot=sel.price*parseInt(du),was=sel.was*parseInt(du),sv=was-tot;
@@ -622,7 +629,12 @@ function rStep(){
   }
 }
 function nS(){
-  if(bS===1){window._dt=document.getElementById('bD').value;window._du=document.getElementById('bDu').value;window._lc=document.getElementById('bL').value;}
+  if(bS===1){
+    var dt=document.getElementById('bD').value,lc=document.getElementById('bL').value;
+    if(!dt){toast('Please select a start date.','err');document.getElementById('bD').focus();return;}
+    if(!lc){toast('Please select a delivery location.','err');document.getElementById('bL').focus();return;}
+    window._dt=dt;window._du=document.getElementById('bDu').value;window._lc=lc;
+  }
   else if(bS===2){var n=document.getElementById('bN').value.trim(),p=document.getElementById('bP').value.trim();if(!n||!p){toast('Please fill in name and phone.','err');return;}window._nm=n;window._ph=p;window._wa=document.getElementById('bW').value.trim();window._em=document.getElementById('bE').value.trim();}
   bS++;rStep();
 }
@@ -650,11 +662,12 @@ async function submitLead(e){
 }
 
 // TOAST
-function toast(m,t){var c=document.getElementById('toasts'),el=document.createElement('div');el.className='toast'+(t==='err'?' err':'');el.innerHTML='<span>'+(t==='err'?'&#9888;&#65039;':'&#9989;')+'</span><span>'+m+'</span>';c.appendChild(el);setTimeout(function(){el.style.opacity='0';setTimeout(function(){el.remove();},300);},4000);}
+function toast(m,t){var c=document.getElementById('toasts');while(c.children.length>=3)c.removeChild(c.firstChild);var el=document.createElement('div');el.className='toast'+(t==='err'?' err':'');el.innerHTML='<span>'+(t==='err'?'&#9888;&#65039;':'&#9989;')+'</span><span>'+m+'</span>';c.appendChild(el);setTimeout(function(){el.style.opacity='0';setTimeout(function(){el.remove();},300);},4000);}
 
 // SOCIAL PROOF NOTIFS
 function initNotifs(){
   var msgs=['<strong>Ahmed</strong> from Dubai Marina just booked <strong>Mitsubishi ASX</strong>','<strong>Sara</strong> from JBR saved <strong>AED 2,400</strong>','<strong>Mohammed</strong> from Business Bay booked <strong>2 min ago</strong>','<strong>Fatima</strong> from Downtown claimed the <strong>JAC J7</strong> deal','<strong>Ali</strong> from Sharjah booked <strong>Mitsubishi Attrage</strong>','<strong>Khalid</strong> from Abu Dhabi just booked <strong>JAC JS4</strong>'];
+  for(var j=msgs.length-1;j>0;j--){var k=Math.floor(Math.random()*(j+1));var tmp=msgs[j];msgs[j]=msgs[k];msgs[k]=tmp;}
   var i=0;function show(){var n=document.getElementById('notif'),nt=document.getElementById('notifText');nt.innerHTML=msgs[i%msgs.length]+'<div class="notif-time">Just now</div>';n.classList.add('show');setTimeout(function(){n.classList.remove('show');},5000);i++;}
   setTimeout(show,8000);setInterval(show,25000);
 }
@@ -668,10 +681,11 @@ function initLive(){
 // OVERLAY
 document.getElementById('mOverlay').addEventListener('click',function(e){if(e.target===e.currentTarget)closeB();});
 document.getElementById('leadOv').addEventListener('click',function(e){if(e.target===e.currentTarget)closeLead();});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeB();closeLead();}});
 
 // EXIT INTENT
 var exitS=false;
-document.addEventListener('mouseout',function(e){if(!exitS&&!localStorage.getItem('ft_lead')&&e.clientY<5){exitS=true;document.getElementById('leadOv').classList.add('active');}});
+document.addEventListener('mouseout',function(e){if(!exitS&&!localStorage.getItem('ft_lead')&&e.clientY<0){exitS=true;document.getElementById('leadOv').classList.add('active');}});
 </script>
 <script>
 // Page view tracker

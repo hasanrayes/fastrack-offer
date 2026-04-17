@@ -8,7 +8,7 @@ try { helmet = require('helmet'); } catch(e) { helmet = null; }
 const app = express();
 const PORT = process.env.PORT || 3000;
 const ADMIN_PASS = process.env.ADMIN_PASS || 'fastrack2024';
-const JWT_SECRET = process.env.JWT_SECRET || 'fastrack-secret-' + crypto.randomBytes(16).toString('hex');
+const JWT_SECRET = process.env.JWT_SECRET || 'fastrack-jwt-secret-2024-prod';
 const JWT_EXPIRY = '24h';
 const JWT_REFRESH_EXPIRY = '7d';
 const RAILWAY_URL = process.env.RAILWAY_STATIC_URL || '';
@@ -65,20 +65,32 @@ setInterval(() => {
   for (const [k, v] of rateLimitMap) { if (v.start < cutoff) rateLimitMap.delete(k); }
 }, 300000);
 
-// ── Input sanitizer ──
+// ── Input sanitizer (deep recursive) ──
 function sanitize(str) {
   if (typeof str !== 'string') return str;
-  return str.replace(/[<>]/g, '').trim();
+  return str.replace(/[<>]/g, '').replace(/javascript:/gi, '').replace(/on\w+\s*=/gi, '').trim();
+}
+function deepSanitize(obj) {
+  if (typeof obj === 'string') return sanitize(obj);
+  if (Array.isArray(obj)) return obj.map(deepSanitize);
+  if (obj && typeof obj === 'object') {
+    for (const key of Object.keys(obj)) { obj[key] = deepSanitize(obj[key]); }
+  }
+  return obj;
 }
 function sanitizeBody(req, res, next) {
-  if (req.body && typeof req.body === 'object') {
-    for (const key of Object.keys(req.body)) {
-      if (typeof req.body[key] === 'string') req.body[key] = sanitize(req.body[key]);
-    }
-  }
+  if (req.body && typeof req.body === 'object') req.body = deepSanitize(req.body);
   next();
 }
 app.use(sanitizeBody);
+
+// ── HTTPS redirect for production ──
+app.use((req, res, next) => {
+  if (req.headers['x-forwarded-proto'] && req.headers['x-forwarded-proto'] !== 'https' && process.env.NODE_ENV === 'production') {
+    return res.redirect(301, 'https://' + req.headers.host + req.url);
+  }
+  next();
+});
 
 // ── Utility ──
 function hashPassword(pw) {
@@ -107,12 +119,15 @@ let refreshTokens = new Map();
 let resetTokens = new Map();
 let activityLog = [];
 let notifications = [];
-let nextNotifId = 1;
 
 function addNotification(type, title, body, userId) {
-  notifications.unshift({ id: nextNotifId++, type, title, body, read: false, userId: userId || null, createdAt: new Date().toISOString() });
+  notifications.unshift({ id: Date.now().toString(36) + crypto.randomBytes(3).toString('hex'), type, title, body, read: false, userId: userId || null, createdAt: new Date().toISOString() });
   if (notifications.length > 200) notifications.length = 200;
 }
+
+// ── Status whitelists ──
+const VALID_LEAD_STATUSES = ['new', 'contacted', 'qualified', 'converted', 'lost'];
+const VALID_BOOKING_STATUSES = ['pending', 'confirmed', 'active', 'completed', 'cancelled'];
 
 let cars = [
   {id:1,name:'Mitsubishi Attrage',cat:'Economy Sedan',img:'https://fasttrackrac.com/cdn/shop/products/fastrack-Mitsubishi-attrage-car.jpg?v=1726815463&width=900',price:999,was:1399,type:'Sedan',seats:5,doors:4,transmission:'Automatic',bags:2,viewers:12,spots:3,badge:'Best Value',feats:['A/C','Reverse Camera','Bluetooth','Fog Lights'],includes:'Insurance + UAE delivery included',active:true,order:0},
@@ -138,6 +153,7 @@ function logActivity(userId, action, details) {
     details,
     timestamp: new Date().toISOString()
   });
+  if (activityLog.length > 490 && activityLog.length <= 500) console.warn('Activity log approaching limit: ' + activityLog.length + '/500');
   if (activityLog.length > 500) activityLog.length = 500;
 }
 
@@ -358,7 +374,11 @@ app.put('/api/team/:id', jwtAuth, requireRole('superadmin'), (req, res) => {
   if (!user) return res.status(404).json({ error: 'User not found' });
   const { name, email, role, active, password } = req.body;
   if (name) user.name = name;
-  if (email) user.email = email.toLowerCase();
+  if (email) {
+    const dup = users.find(u => u.id !== user.id && u.email.toLowerCase() === email.toLowerCase());
+    if (dup) return res.status(400).json({ error: 'Email already in use by another member' });
+    user.email = email.toLowerCase();
+  }
   if (role) user.role = role;
   if (active !== undefined) user.active = active;
   if (password) user.passwordHash = hashPassword(password);
@@ -398,8 +418,8 @@ app.get('/api/leads', auth, (req, res) => {
     const s = req.query.search.toLowerCase();
     result = result.filter(l => `${l.fullName} ${l.phone} ${l.interest} ${l.email} ${l.whatsapp}`.toLowerCase().includes(s));
   }
-  if (req.query.from) result = result.filter(l => new Date(l.createdAt) >= new Date(req.query.from));
-  if (req.query.to) result = result.filter(l => new Date(l.createdAt) <= new Date(req.query.to + 'T23:59:59'));
+  if (req.query.from) result = result.filter(l => new Date(l.createdAt) >= new Date(req.query.from + 'T00:00:00+04:00'));
+  if (req.query.to) result = result.filter(l => new Date(l.createdAt) <= new Date(req.query.to + 'T23:59:59+04:00'));
   // Sorting
   if (req.query.sort) {
     const dir = req.query.dir === 'asc' ? 1 : -1;
@@ -452,6 +472,7 @@ app.post('/api/leads/bulk', auth, requireRole('superadmin', 'manager'), (req, re
 app.patch('/api/leads/:id', auth, (req, res) => {
   const l = leads.find(x => x.id === parseInt(req.params.id));
   if (!l) return res.status(404).json({ error: 'Not found' });
+  if (req.body.status && !VALID_LEAD_STATUSES.includes(req.body.status)) return res.status(400).json({ error: 'Invalid status' });
   const fields = ['status', 'fullName', 'phone', 'whatsapp', 'email', 'interest', 'source', 'convertedToBooking'];
   fields.forEach(f => { if (req.body[f] !== undefined) l[f] = req.body[f]; });
   logActivity(req.user.id, 'lead_updated', `Updated lead ${l.fullName}`);
@@ -531,6 +552,7 @@ app.get('/api/bookings/:id', auth, (req, res) => {
 app.patch('/api/bookings/:id', auth, (req, res) => {
   const b = bookings.find(x => x.id === parseInt(req.params.id));
   if (!b) return res.status(404).json({ error: 'Not found' });
+  if (req.body.status && !VALID_BOOKING_STATUSES.includes(req.body.status)) return res.status(400).json({ error: 'Invalid status' });
   const fields = ['status', 'carName', 'carId', 'startDate', 'endDate', 'duration', 'location', 'fullName', 'phone', 'email', 'whatsapp', 'totalAed', 'savedAed'];
   const changed = [];
   fields.forEach(f => {
@@ -1059,7 +1081,7 @@ app.get('/api/notifications', auth, (req, res) => {
 });
 
 app.patch('/api/notifications/:id/read', auth, (req, res) => {
-  const n = notifications.find(x => x.id === parseInt(req.params.id));
+  const n = notifications.find(x => String(x.id) === req.params.id);
   if (n) n.read = true;
   res.json({ success: true });
 });

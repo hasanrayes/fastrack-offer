@@ -308,3 +308,50 @@ fastrack-offer/
 - Start with Phase 1, get it solid, then move to Phase 2, etc.
 - Each phase should be fully functional before moving to the next
 - Test everything works before pushing
+
+---
+
+## UI/UX Audit — RESOLVED
+
+Full audit completed and all 33 issues fixed:
+
+### CRITICAL (1-6)
+1. JWT_SECRET now uses stable hardcoded fallback — sessions survive deploys
+2. WCAG contrast fixed: --onDarkM raised to .75 opacity, footer text to .55/.70
+3. Deep recursive sanitizer for nested objects/arrays — prevents XSS
+4. HTTPS redirect middleware for production (x-forwarded-proto check)
+5. Car card onclick uses data-car-id + JS map — no inline JSON injection
+6. Booking modal step 1 validates date + location before proceeding
+
+### HIGH (7-14)
+7. Mobile responsive below 480px: stacked filters, smaller tables, full-width modals
+8. Escape key closes booking modal and lead popup
+9. Car images have onerror fallback SVG placeholder + srcset for responsive loading
+10. Empty states improved with helpful action hints
+11. Toast max 3 limit — oldest removed when 4th appears
+12. Charts rebuild on theme toggle — colors update with dark/light mode
+13. Countdown syncs across tabs via localStorage
+14. Global loading spinner during API calls (top-right indicator)
+
+### MEDIUM (15-26)
+15. Section padding standardized to 36px
+16. Typography minimums: car-type 12px, cd-u 10px, why-card p 12px
+17. Drag handles 44px minimum, toggle switches 48x28px (WCAG compliant)
+18. Form labels have matching for="" attributes
+19. Status whitelist validation on PATCH leads/bookings
+20. Inline edit fields max-width:160px
+21. Date filtering uses Dubai UTC+4 timezone
+22. Danger buttons use red background, white text on hover
+23. Car images have srcset (400w + 900w) for responsive loading
+24. Image onerror shows SVG placeholder
+25. Activity log warns at 490+ entries approaching 500 limit
+26. Team email uniqueness check on PUT update
+
+### LOW (27-33)
+27. Hero headline clamp raised to 48px max
+28. Exit intent trigger changed to clientY < 0
+29. Notification messages shuffled on init
+30. Car FOMO dots staggered with animation-delay
+31. Body overflow-x:clip replaces overflow-x:hidden (Safari fix)
+32. Breadcrumbs update when modals open/close
+33. Notification IDs use timestamp+random (restart-safe)

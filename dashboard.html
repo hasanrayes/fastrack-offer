@@ -70,8 +70,8 @@
         .btn-primary:hover:not(:disabled) { background:var(--primary-dark); }
         .btn-secondary { background:transparent; color:var(--text-primary); border:1px solid var(--border); }
         .btn-secondary:hover:not(:disabled) { border-color:var(--border-hover); background:var(--bg-card-hover); }
-        .btn-danger { background:transparent; color:var(--red); border:1px solid var(--red); }
-        .btn-danger:hover:not(:disabled) { background:var(--red-bg); }
+        .btn-danger { background:var(--red-bg); color:var(--red); border:1px solid var(--red); }
+        .btn-danger:hover:not(:disabled) { background:var(--red); color:#fff; }
         .btn-success { background:var(--green); color:#fff; }
         .btn-success:hover:not(:disabled) { opacity:0.9; }
         .btn-ghost { background:transparent; color:var(--text-secondary); padding:6px; border:none; }
@@ -171,7 +171,7 @@
         .row-checkbox { width:16px; height:16px; accent-color:var(--primary); cursor:pointer; }
 
         /* Inline edit */
-        .inline-edit { background:transparent; border:1px solid transparent; color:var(--text-primary); font-size:13px; font-family:inherit; padding:2px 4px; border-radius:4px; outline:none; width:100%; transition:all var(--transition); }
+        .inline-edit { background:transparent; border:1px solid transparent; color:var(--text-primary); font-size:13px; font-family:inherit; padding:2px 4px; border-radius:4px; outline:none; width:100%; max-width:160px; transition:all var(--transition); }
         .inline-edit:hover { border-color:var(--border); }
         .inline-edit:focus { border-color:var(--primary); background:var(--bg-input); box-shadow:0 0 0 2px var(--primary-bg); }
 
@@ -334,6 +334,17 @@
         @media (max-width:480px) {
             .kpi-grid { grid-template-columns:1fr; }
             .kpi-value { font-size:22px; }
+            .view-header { flex-direction:column; gap:8px; }
+            .view-actions { width:100%; flex-wrap:wrap; }
+            .filter-bar { flex-direction:column; }
+            .filter-select,.search-input { width:100%; }
+            table { font-size:11px; }
+            th,td { padding:8px 6px; }
+            .modal { max-width:100%; border-radius:12px 12px 0 0; }
+            .modal-body { padding:16px 12px; }
+            .form-row { grid-template-columns:1fr; }
+            .chart-grid-2,.chart-grid-3 { grid-template-columns:1fr; }
+            .notif-btn + div > div[id="notifPanel"] { width:calc(100vw - 20px); right:-60px; }
         }
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
         .chart-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; padding:0 28px 16px; }
@@ -413,23 +424,24 @@
         .cms-list-item { display:flex; align-items:center; gap:10px; padding:10px 12px; background:var(--bg-input); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; cursor:grab; }
         .cms-list-item:active { cursor:grabbing; opacity:0.7; }
         .cms-list-item.dragging { opacity:0.4; }
-        .cms-list-item .drag-handle { color:var(--text-muted); font-size:16px; cursor:grab; flex-shrink:0; }
+        .cms-list-item .drag-handle { color:var(--text-muted); font-size:16px; cursor:grab; flex-shrink:0; min-width:44px; min-height:44px; display:flex; align-items:center; justify-content:center; }
         .cms-list-item .item-content { flex:1; min-width:0; }
         .cms-list-item .item-name { font-size:13px; font-weight:600; }
         .cms-list-item .item-type { font-size:11px; color:var(--text-muted); }
         .cms-list-item .item-actions { display:flex; gap:4px; align-items:center; }
-        .toggle-switch { position:relative; width:36px; height:20px; }
+        .toggle-switch { position:relative; width:48px; height:28px; }
         .toggle-switch input { opacity:0; width:0; height:0; }
-        .toggle-slider { position:absolute; cursor:pointer; inset:0; background:var(--border); border-radius:20px; transition:0.2s; }
-        .toggle-slider:before { content:''; position:absolute; height:16px; width:16px; left:2px; bottom:2px; background:#fff; border-radius:50%; transition:0.2s; }
+        .toggle-slider { position:absolute; cursor:pointer; inset:0; background:var(--border); border-radius:28px; transition:0.2s; }
+        .toggle-slider:before { content:''; position:absolute; height:22px; width:22px; left:3px; bottom:3px; background:#fff; border-radius:50%; transition:0.2s; }
         .toggle-switch input:checked + .toggle-slider { background:var(--green); }
-        .toggle-switch input:checked + .toggle-slider:before { transform:translateX(16px); }
+        .toggle-switch input:checked + .toggle-slider:before { transform:translateX(20px); }
         .color-input-wrap { display:flex; align-items:center; gap:8px; }
         .color-input-wrap input[type="color"] { width:36px; height:36px; border:1px solid var(--border); border-radius:8px; padding:2px; cursor:pointer; background:var(--bg-input); }
     </style>
 </head>
 <body>
 <div class="toast-container" id="toastContainer"></div>
+<div id="globalSpinner" style="display:none;position:fixed;top:var(--header-height,64px);right:28px;z-index:8000;padding:6px 14px;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-md);font-size:12px;color:var(--text-secondary);display:none;align-items:center;gap:8px"><div class="spinner"></div>Loading...</div>
 
 <!-- LOGIN -->
 <div class="login-screen" id="loginScreen">
@@ -782,10 +794,15 @@ let calMonth=new Date().getMonth(), calYear=new Date().getFullYear();
 // ═══════ THEME ═══════
 function initTheme(){ applyTheme(localStorage.getItem('ft_theme')||'dark'); }
 function applyTheme(t){ document.documentElement.className=t==='light'?'light-mode':''; document.body.className=t==='light'?'light-mode':''; localStorage.setItem('ft_theme',t); const b=document.getElementById('themeBtn'); if(b) b.textContent=t==='dark'?'\u263E':'\u2600'; const l=document.getElementById('themeLabel'); if(l) l.textContent=t==='dark'?'Dark Mode':'Light Mode'; }
-function toggleTheme(){ applyTheme((localStorage.getItem('ft_theme')||'dark')==='dark'?'light':'dark'); }
+function toggleTheme(){ applyTheme((localStorage.getItem('ft_theme')||'dark')==='dark'?'light':'dark'); Object.values(chartInstances||{}).forEach(function(c){try{c.destroy();}catch(e){}}); chartInstances={}; if(currentView==='dashboard')setTimeout(loadCharts,100); }
 
 // ═══════ API ═══════
+let _apiCallCount=0;
+function showSpinner(){_apiCallCount++;const s=document.getElementById('globalSpinner');if(s)s.style.display='flex';}
+function hideSpinner(){_apiCallCount=Math.max(0,_apiCallCount-1);if(_apiCallCount===0){const s=document.getElementById('globalSpinner');if(s)s.style.display='none';}}
 async function api(method,endpoint,body){
+    showSpinner();
+    try{
     const opts={method,headers:{'Content-Type':'application/json'}};
     if(accessToken) opts.headers['Authorization']='Bearer '+accessToken;
     if(body) opts.body=JSON.stringify(body);
@@ -794,6 +811,7 @@ async function api(method,endpoint,body){
     const data=await res.json();
     if(!res.ok) throw new Error(data.error||'Failed');
     return data;
+    }finally{hideSpinner();}
 }
 async function tryRefresh(){ try{ const r=await fetch(API+'/auth/refresh',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({refreshToken})}); const d=await r.json(); if(d.success){accessToken=d.accessToken;saveSession();return true;} }catch(e){} return false; }
 
@@ -1072,7 +1090,7 @@ function renderCalendar(){
 function setCarsViewMode(mode,btn){ carsViewMode=mode; btn.parentElement.querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderCars(); }
 function renderCars(){
     const el=document.getElementById('carsContent'),ed=canEdit();
-    if(!carsData.length){el.innerHTML='<div class="empty-state" style="padding:60px"><div class="empty-state-icon">&#128663;</div><div class="empty-state-title">No cars yet</div></div>';return;}
+    if(!carsData.length){el.innerHTML='<div class="empty-state" style="padding:60px"><div class="empty-state-icon">&#128663;</div><div class="empty-state-title">No cars yet</div><p style="color:var(--text-muted);font-size:12px;margin-top:6px">Click "+ Add Car" above to add your first vehicle</p></div>';return;}
     if(carsViewMode==='grid'){
         el.innerHTML=`<div class="cars-grid">${carsData.map(c=>`<div class="car-card ${c.active===false?'inactive':''}" draggable="${ed}" ondragstart="dragCar(event,${c.id})" ondragover="event.preventDefault()" ondrop="dropCar(event,${c.id})">
             <div class="car-img">${c.img?`<img src="${esc(c.img)}" alt="${esc(c.name)}" loading="lazy">`:'<span style="color:var(--text-muted)">No image</span>'}
@@ -1172,12 +1190,12 @@ function toggleMobileSidebar(){ document.getElementById('sidebar').classList.tog
 function closeMobileSidebar(){ document.getElementById('sidebar').classList.remove('mobile-open'); document.getElementById('sidebarOverlay').classList.remove('active'); }
 
 // ═══════ MODAL ═══════
-function openModal(){ document.getElementById('modalOverlay').classList.add('active'); }
-function closeModal(){ document.getElementById('modalOverlay').classList.remove('active'); document.getElementById('modal').classList.remove('wide'); }
+function openModal(){ document.getElementById('modalOverlay').classList.add('active'); document.getElementById('breadcrumbCurrent').textContent=cap(currentView)+' / '+document.getElementById('modalTitle').textContent; }
+function closeModal(){ document.getElementById('modalOverlay').classList.remove('active'); document.getElementById('modal').classList.remove('wide'); document.getElementById('breadcrumbCurrent').textContent=cap(currentView); }
 function switchDetailTab(tab,panelId){ tab.parentElement.querySelectorAll('.detail-tab').forEach(t=>t.classList.remove('active')); tab.classList.add('active'); const parent=tab.parentElement.parentElement; parent.querySelectorAll('.detail-panel').forEach(p=>p.classList.remove('active')); document.getElementById(panelId).classList.add('active'); }
 
 // ═══════ TOAST ═══════
-function toast(msg,type='info'){ const c=document.getElementById('toastContainer'),el=document.createElement('div'); el.className='toast '+type; el.textContent=msg; c.appendChild(el); setTimeout(()=>{el.style.animation='slideOut 0.3s ease forwards';setTimeout(()=>el.remove(),300);},3000); }
+function toast(msg,type='info'){ const c=document.getElementById('toastContainer'); while(c.children.length>=3)c.removeChild(c.firstChild); const el=document.createElement('div'); el.className='toast '+type; el.textContent=msg; c.appendChild(el); setTimeout(()=>{el.style.animation='slideOut 0.3s ease forwards';setTimeout(()=>el.remove(),300);},3000); }
 
 // ═══════ UTILITIES ═══════
 function esc(s){if(!s)return '';const d=document.createElement('div');d.textContent=String(s);return d.innerHTML;}
