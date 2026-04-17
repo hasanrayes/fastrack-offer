@@ -2,6 +2,8 @@ const express = require('express');
 const path = require('path');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
+let helmet;
+try { helmet = require('helmet'); } catch(e) { helmet = null; }
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -9,9 +11,74 @@ const ADMIN_PASS = process.env.ADMIN_PASS || 'fastrack2024';
 const JWT_SECRET = process.env.JWT_SECRET || 'fastrack-secret-' + crypto.randomBytes(16).toString('hex');
 const JWT_EXPIRY = '24h';
 const JWT_REFRESH_EXPIRY = '7d';
+const RAILWAY_URL = process.env.RAILWAY_STATIC_URL || '';
 
-app.use(express.json());
+// ── Security middleware ──
+if (helmet) {
+  app.use(helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+    crossOriginOpenerPolicy: false,
+    crossOriginResourcePolicy: false
+  }));
+}
+
+// CORS
+app.use((req, res, next) => {
+  const origin = req.headers.origin || '';
+  const allowed = ['http://localhost:' + PORT, 'http://127.0.0.1:' + PORT];
+  if (RAILWAY_URL) allowed.push('https://' + RAILWAY_URL);
+  if (!origin || allowed.some(a => origin.startsWith(a)) || origin.includes('railway.app')) {
+    res.setHeader('Access-Control-Allow-Origin', origin || '*');
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization,x-admin-token');
+  if (req.method === 'OPTIONS') return res.sendStatus(200);
+  next();
+});
+
+app.use(express.json({ limit: '5mb' }));
 app.use(express.static(__dirname));
+
+// ── Rate limiter (in-memory) ──
+const rateLimitMap = new Map();
+function rateLimit(maxAttempts, windowMs) {
+  return (req, res, next) => {
+    const key = req.ip + ':' + req.path;
+    const now = Date.now();
+    let entry = rateLimitMap.get(key);
+    if (!entry || now - entry.start > windowMs) {
+      entry = { count: 1, start: now };
+      rateLimitMap.set(key, entry);
+      return next();
+    }
+    entry.count++;
+    if (entry.count > maxAttempts) {
+      return res.status(429).json({ error: 'Too many attempts. Please wait and try again.' });
+    }
+    next();
+  };
+}
+// Cleanup stale entries every 5 min
+setInterval(() => {
+  const cutoff = Date.now() - 300000;
+  for (const [k, v] of rateLimitMap) { if (v.start < cutoff) rateLimitMap.delete(k); }
+}, 300000);
+
+// ── Input sanitizer ──
+function sanitize(str) {
+  if (typeof str !== 'string') return str;
+  return str.replace(/[<>]/g, '').trim();
+}
+function sanitizeBody(req, res, next) {
+  if (req.body && typeof req.body === 'object') {
+    for (const key of Object.keys(req.body)) {
+      if (typeof req.body[key] === 'string') req.body[key] = sanitize(req.body[key]);
+    }
+  }
+  next();
+}
+app.use(sanitizeBody);
 
 // ── Utility ──
 function hashPassword(pw) {
@@ -186,7 +253,7 @@ app.post('/api/bookings', (req, res) => {
 // AUTH API
 // ══════════════════════════════
 
-app.post('/api/auth/login', (req, res) => {
+app.post('/api/auth/login', rateLimit(5, 60000), (req, res) => {
   const { email, password, rememberMe } = req.body;
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password required' });
@@ -244,7 +311,7 @@ app.get('/api/auth/me', jwtAuth, (req, res) => {
   res.json({ id: req.user.id, email: req.user.email, name: req.user.name, role: req.user.role, avatar: req.user.avatar, active: req.user.active, createdAt: req.user.createdAt });
 });
 
-app.post('/api/auth/reset-request', (req, res) => {
+app.post('/api/auth/reset-request', rateLimit(3, 60000), (req, res) => {
   const { email } = req.body;
   const user = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.active);
   if (!user) return res.json({ success: true, message: 'If the email exists, a reset link has been generated' });
@@ -344,6 +411,15 @@ app.get('/api/leads', auth, (req, res) => {
       return dir * String(va).localeCompare(String(vb));
     });
   }
+  // Pagination
+  const total = result.length;
+  if (req.query.page) {
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 25));
+    const offset = (page - 1) * limit;
+    result = result.slice(offset, offset + limit);
+    return res.json({ items: result, total, page, limit, totalPages: Math.ceil(total / limit) });
+  }
   res.json(result);
 });
 
@@ -432,6 +508,15 @@ app.get('/api/bookings', auth, (req, res) => {
       if (field === 'totalAed') return dir * (Number(va) - Number(vb));
       return dir * String(va).localeCompare(String(vb));
     });
+  }
+  // Pagination
+  const total = result.length;
+  if (req.query.page) {
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 25));
+    const offset = (page - 1) * limit;
+    result = result.slice(offset, offset + limit);
+    return res.json({ items: result, total, page, limit, totalPages: Math.ceil(total / limit) });
   }
   res.json(result);
 });

@@ -354,6 +354,40 @@
         .hot-lead-info { flex:1; }
         .hot-lead-name { font-size:13px; font-weight:600; }
         .hot-lead-time { font-size:11px; color:var(--text-muted); }
+        /* ─── CONFIRM DIALOG ─── */
+        .confirm-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.55); display:flex; align-items:center; justify-content:center; z-index:9600; backdrop-filter:blur(3px); animation:fadeIn 0.15s ease; }
+        .confirm-box { background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:28px; max-width:400px; width:90%; box-shadow:var(--shadow-lg); animation:scaleIn 0.2s ease; }
+        .confirm-title { font-size:16px; font-weight:700; margin-bottom:8px; }
+        .confirm-msg { font-size:13px; color:var(--text-secondary); margin-bottom:20px; line-height:1.6; }
+        .confirm-actions { display:flex; gap:8px; justify-content:flex-end; }
+        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+        @keyframes scaleIn { from{transform:scale(0.95);opacity:0} to{transform:scale(1);opacity:1} }
+        /* ─── LOADING ─── */
+        .spinner { display:inline-block; width:18px; height:18px; border:2px solid var(--border); border-top-color:var(--primary); border-radius:50%; animation:spin 0.6s linear infinite; }
+        @keyframes spin { to{transform:rotate(360deg)} }
+        .loading-overlay { position:absolute; inset:0; background:var(--bg-card); opacity:0.7; display:flex; align-items:center; justify-content:center; z-index:5; border-radius:14px; }
+        /* ─── FORM VALIDATION ─── */
+        .form-input.invalid { border-color:var(--red); box-shadow:0 0 0 3px var(--red-bg); }
+        .field-error { color:var(--red); font-size:11px; margin-top:4px; display:none; }
+        .field-error.visible { display:block; }
+        /* ─── PAGINATION ─── */
+        .pagination { display:flex; align-items:center; justify-content:space-between; padding:12px 0; font-size:13px; flex-wrap:wrap; gap:8px; }
+        .pagination-info { color:var(--text-muted); }
+        .pagination-controls { display:flex; align-items:center; gap:4px; }
+        .page-btn { background:var(--bg-input); border:1px solid var(--border); color:var(--text-primary); padding:5px 10px; border-radius:6px; cursor:pointer; font-size:12px; font-family:inherit; transition:all var(--transition); }
+        .page-btn:hover { border-color:var(--primary); }
+        .page-btn.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+        .page-btn:disabled { opacity:0.3; cursor:not-allowed; }
+        .per-page-select { background:var(--bg-input); border:1px solid var(--border); color:var(--text-primary); padding:4px 8px; border-radius:6px; font-size:12px; font-family:inherit; cursor:pointer; }
+        /* ─── ENHANCED TRANSITIONS ─── */
+        .modal-overlay { transition:opacity 0.2s ease; }
+        .modal { animation:scaleIn 0.2s ease; }
+        .sidebar { transition:width 0.25s ease,transform 0.25s ease; }
+        .nav-item { transition:all 0.15s ease; }
+        .kpi-card { transition:all 0.2s ease; }
+        .kpi-card:hover { transform:translateY(-2px); box-shadow:var(--shadow-md); }
+        .car-card { transition:all 0.25s ease; }
+        .btn { transition:all 0.15s ease; }
         /* ─── NOTIFICATIONS ─── */
         .notif-item { display:flex; gap:10px; padding:10px 16px; cursor:pointer; transition:background var(--transition); border-bottom:1px solid var(--border); }
         .notif-item:hover { background:var(--bg-card-hover); }
@@ -561,7 +595,8 @@
                     <th onclick="sortLeads('source')">Source <span class="sort-arrow" id="leadSort_source"></span></th>
                     <th onclick="sortLeads('status')">Status <span class="sort-arrow" id="leadSort_status"></span></th>
                     <th>Actions</th>
-                </tr></thead><tbody id="leadsTbody"></tbody></table></div></div>
+                </tr></thead><tbody id="leadsTbody"></tbody></table></div>
+                <div class="pagination" id="leadsPagination"></div></div>
             </div>
 
             <!-- BOOKINGS -->
@@ -596,7 +631,8 @@
                     <th onclick="sortBookings('totalAed')">Total <span class="sort-arrow" id="bookSort_totalAed"></span></th>
                     <th onclick="sortBookings('status')">Status <span class="sort-arrow" id="bookSort_status"></span></th>
                     <th>Actions</th>
-                </tr></thead><tbody id="bookingsTbody"></tbody></table></div></div>
+                </tr></thead><tbody id="bookingsTbody"></tbody></table></div>
+                <div class="pagination" id="bookingsPagination"></div></div>
                 <div class="data-section" id="bookingsCalSection" style="display:none"><div id="calendarContainer"></div></div>
             </div>
 
@@ -697,6 +733,18 @@
     <div class="modal" id="modal">
         <div class="modal-head"><span class="modal-title" id="modalTitle"></span><button class="modal-close" onclick="closeModal()">&times;</button></div>
         <div class="modal-body" id="modalBody"></div>
+    </div>
+</div>
+
+<!-- CONFIRM DIALOG -->
+<div id="confirmOverlay" class="confirm-overlay" style="display:none">
+    <div class="confirm-box">
+        <div class="confirm-title" id="confirmTitle">Confirm</div>
+        <div class="confirm-msg" id="confirmMsg">Are you sure?</div>
+        <div class="confirm-actions">
+            <button class="btn btn-secondary btn-sm" onclick="closeConfirm(false)">Cancel</button>
+            <button class="btn btn-danger btn-sm" id="confirmBtn" onclick="closeConfirm(true)">Delete</button>
+        </div>
     </div>
 </div>
 
@@ -826,9 +874,14 @@ function getFilteredLeads(){
 }
 function sortLeads(field){ if(leadSort.field===field)leadSort.dir=leadSort.dir==='asc'?'desc':'asc'; else{leadSort.field=field;leadSort.dir='asc';} renderLeads(); }
 function renderLeads(){
-    const tb=document.getElementById('leadsTbody'),f=getFilteredLeads(),ed=canEdit();
+    const tb=document.getElementById('leadsTbody'),allFiltered=getFilteredLeads(),ed=canEdit();
     updateSortArrows('leadSort_',leadSort);
-    if(!f.length){tb.innerHTML='<tr><td colspan="9" class="empty-state"><div class="empty-state-icon">&#128101;</div><div class="empty-state-title">No leads found</div></td></tr>';return;}
+    leadsTotalCount=allFiltered.length;
+    leadsTotalPages=Math.ceil(leadsTotalCount/leadsPerPage)||1;
+    if(leadsPage>leadsTotalPages)leadsPage=leadsTotalPages;
+    const f=allFiltered.slice((leadsPage-1)*leadsPerPage, leadsPage*leadsPerPage);
+    renderPagination('leadsPagination',leadsPage,leadsTotalPages,leadsTotalCount,leadsPerPage,'setLeadsPage','setLeadsPerPage');
+    if(!allFiltered.length){tb.innerHTML='<tr><td colspan="9" class="empty-state"><div class="empty-state-icon">&#128101;</div><div class="empty-state-title">No leads found</div><p style="color:var(--text-muted);font-size:12px;margin-top:4px">Try adjusting your filters or search terms</p></td></tr>';document.getElementById('leadsPagination').innerHTML='';return;}
     tb.innerHTML=f.map(l=>{
         const checked=selectedLeads.has(l.id)?'checked':'';
         return `<tr>
@@ -855,10 +908,10 @@ function toggleAllLeads(cb){ const f=getFilteredLeads(); if(cb.checked)f.forEach
 function clearLeadSelection(){ selectedLeads.clear(); renderLeads(); }
 function updateBulkBar(type){ if(type==='leads'){const bar=document.getElementById('leadsBulkBar');document.getElementById('leadsBulkCount').textContent=selectedLeads.size;bar.classList.toggle('active',selectedLeads.size>0);}else{const bar=document.getElementById('bookingsBulkBar');document.getElementById('bookingsBulkCount').textContent=selectedBookings.size;bar.classList.toggle('active',selectedBookings.size>0);} }
 async function bulkLeadStatus(){ const s=document.getElementById('leadsBulkStatus').value; try{await api('POST','/leads/bulk',{ids:[...selectedLeads],action:'status',status:s});selectedLeads.clear();await loadLeads();loadStats();toast(`Leads updated to ${s}`,'success');}catch(e){toast(e.message,'error');} }
-async function bulkLeadDelete(){ if(!confirm(`Delete ${selectedLeads.size} leads?`))return; try{await api('POST','/leads/bulk',{ids:[...selectedLeads],action:'delete'});selectedLeads.clear();await loadLeads();loadStats();toast('Leads deleted','success');}catch(e){toast(e.message,'error');} }
+async function bulkLeadDelete(){ if(!await showConfirm('Delete Leads',`Permanently delete ${selectedLeads.size} selected leads?`))return; try{await api('POST','/leads/bulk',{ids:[...selectedLeads],action:'delete'});selectedLeads.clear();await loadLeads();loadStats();toast('Leads deleted','success');}catch(e){toast(e.message,'error');} }
 async function inlineEditLead(id,field,value){ try{await api('PATCH','/leads/'+id,{[field]:value});}catch(e){toast(e.message,'error');await loadLeads();} }
 async function updateLeadStatus(id,status){ try{await api('PATCH','/leads/'+id,{status});await loadLeads();loadStats();toast('Status updated','success');}catch(e){toast(e.message,'error');} }
-async function deleteLead(id){ if(!confirm('Delete this lead?'))return; try{await api('DELETE','/leads/'+id);await loadLeads();loadStats();toast('Lead deleted','success');}catch(e){toast(e.message,'error');} }
+async function deleteLead(id){ if(!await showConfirm('Delete Lead','This lead will be permanently removed. This action cannot be undone.'))return; try{await api('DELETE','/leads/'+id);await loadLeads();loadStats();toast('Lead deleted','success');}catch(e){toast(e.message,'error');} }
 function exportLeads(){ let c='Date,Name,Phone,WhatsApp,Email,Interest,Source,Status\n'; getFilteredLeads().forEach(l=>{c+=`"${fmtDate(l.createdAt)}","${l.fullName}","${l.phone}","${l.whatsapp||''}","${l.email||''}","${l.interest||''}","${l.source||''}","${l.status}"\n`;}); downloadCSV(c,'leads.csv'); }
 
 function openLeadDetail(id){
@@ -904,9 +957,14 @@ function getFilteredBookings(){
 function sortBookings(field){ if(bookSort.field===field)bookSort.dir=bookSort.dir==='asc'?'desc':'asc'; else{bookSort.field=field;bookSort.dir='asc';} renderBookings(); }
 function setBookingView(mode,btn){ bookingViewMode=mode; btn.parentElement.querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); document.getElementById('bookingsTableSection').style.display=mode==='table'?'':'none'; document.getElementById('bookingsCalSection').style.display=mode==='calendar'?'':'none'; document.getElementById('bookingsFilterBar').style.display=mode==='table'?'':'none'; if(mode==='calendar')renderCalendar(); }
 function renderBookings(){
-    const tb=document.getElementById('bookingsTbody'),f=getFilteredBookings(),ed=canEdit();
+    const tb=document.getElementById('bookingsTbody'),allFiltered=getFilteredBookings(),ed=canEdit();
     updateSortArrows('bookSort_',bookSort);
-    if(!f.length){tb.innerHTML='<tr><td colspan="12" class="empty-state"><div class="empty-state-icon">&#128203;</div><div class="empty-state-title">No bookings found</div></td></tr>';return;}
+    bookingsTotalCount=allFiltered.length;
+    bookingsTotalPages=Math.ceil(bookingsTotalCount/bookingsPerPage)||1;
+    if(bookingsPage>bookingsTotalPages)bookingsPage=bookingsTotalPages;
+    const f=allFiltered.slice((bookingsPage-1)*bookingsPerPage, bookingsPage*bookingsPerPage);
+    renderPagination('bookingsPagination',bookingsPage,bookingsTotalPages,bookingsTotalCount,bookingsPerPage,'setBookingsPage','setBookingsPerPage');
+    if(!allFiltered.length){tb.innerHTML='<tr><td colspan="12" class="empty-state"><div class="empty-state-icon">&#128203;</div><div class="empty-state-title">No bookings found</div><p style="color:var(--text-muted);font-size:12px;margin-top:4px">Try adjusting your filters or search terms</p></td></tr>';document.getElementById('bookingsPagination').innerHTML='';return;}
     tb.innerHTML=f.map(b=>{
         const ck=selectedBookings.has(b.id)?'checked':'';
         return `<tr>
@@ -933,9 +991,9 @@ function toggleBookingSelect(id,checked){ if(checked)selectedBookings.add(id);el
 function toggleAllBookings(cb){ const f=getFilteredBookings(); if(cb.checked)f.forEach(b=>selectedBookings.add(b.id));else selectedBookings.clear(); renderBookings(); }
 function clearBookingSelection(){ selectedBookings.clear(); renderBookings(); }
 async function bulkBookingStatus(){ const s=document.getElementById('bookingsBulkStatus').value; try{await api('POST','/bookings/bulk',{ids:[...selectedBookings],action:'status',status:s});selectedBookings.clear();await loadBookings();loadStats();toast('Bookings updated','success');}catch(e){toast(e.message,'error');} }
-async function bulkBookingDelete(){ if(!confirm(`Delete ${selectedBookings.size} bookings?`))return; try{await api('POST','/bookings/bulk',{ids:[...selectedBookings],action:'delete'});selectedBookings.clear();await loadBookings();loadStats();toast('Bookings deleted','success');}catch(e){toast(e.message,'error');} }
+async function bulkBookingDelete(){ if(!await showConfirm('Delete Bookings',`Permanently delete ${selectedBookings.size} selected bookings?`))return; try{await api('POST','/bookings/bulk',{ids:[...selectedBookings],action:'delete'});selectedBookings.clear();await loadBookings();loadStats();toast('Bookings deleted','success');}catch(e){toast(e.message,'error');} }
 async function updateBookingStatus(id,status){ try{await api('PATCH','/bookings/'+id,{status});await loadBookings();loadStats();toast('Status updated','success');}catch(e){toast(e.message,'error');} }
-async function deleteBooking(id){ if(!confirm('Delete this booking?'))return; try{await api('DELETE','/bookings/'+id);await loadBookings();loadStats();toast('Booking deleted','success');}catch(e){toast(e.message,'error');} }
+async function deleteBooking(id){ if(!await showConfirm('Delete Booking','This booking will be permanently removed. This action cannot be undone.'))return; try{await api('DELETE','/bookings/'+id);await loadBookings();loadStats();toast('Booking deleted','success');}catch(e){toast(e.message,'error');} }
 function exportBookings(){ let c='Ref,Date,Name,Phone,Car,Start,Duration,Location,Total,Status\n'; getFilteredBookings().forEach(b=>{c+=`"${b.ref}","${fmtDate(b.createdAt)}","${b.fullName}","${b.phone}","${b.carName}","${b.startDate||''}","${b.duration}","${b.location||''}","${b.totalAed}","${b.status}"\n`;}); downloadCSV(c,'bookings.csv'); }
 
 function openBookingDetail(id){
@@ -1070,7 +1128,7 @@ async function submitCar(e,editId){
     const body={name:document.getElementById('cfName').value,cat:document.getElementById('cfCat').value,img:document.getElementById('cfImg').value,price:Number(document.getElementById('cfPrice').value),was:Number(document.getElementById('cfWas').value)||null,type:document.getElementById('cfType').value,badge:document.getElementById('cfBadge').value,seats:Number(document.getElementById('cfSeats').value),doors:Number(document.getElementById('cfDoors').value),transmission:document.getElementById('cfTrans').value,bags:Number(document.getElementById('cfBags').value),feats,includes:document.getElementById('cfIncludes').value,spots:Number(document.getElementById('cfSpots').value)};
     try{if(editId){await api('PUT','/cars/'+editId,body);toast('Car updated','success');}else{await api('POST','/cars',body);toast('Car added','success');}closeModal();await loadCars();loadStats();}catch(e){toast(e.message,'error');}
 }
-async function deleteCar(id){ if(!confirm('Delete this car?'))return; try{await api('DELETE','/cars/'+id);await loadCars();loadStats();toast('Car deleted','success');}catch(e){toast(e.message,'error');} }
+async function deleteCar(id){ if(!await showConfirm('Delete Car','This car will be permanently removed from the fleet. This cannot be undone.'))return; try{await api('DELETE','/cars/'+id);await loadCars();loadStats();toast('Car deleted','success');}catch(e){toast(e.message,'error');} }
 async function toggleCarActive(id){ try{await api('PATCH','/cars/'+id+'/toggle');await loadCars();toast('Visibility toggled','success');}catch(e){toast(e.message,'error');} }
 async function duplicateCar(id){ try{await api('POST','/cars/'+id+'/duplicate');await loadCars();toast('Car duplicated','success');}catch(e){toast(e.message,'error');} }
 
@@ -1085,7 +1143,7 @@ function openTeamModal(){ document.getElementById('modal').classList.remove('wid
 function openEditTeamModal(uid){ const u=teamData.find(t=>t.id===uid); if(!u)return; document.getElementById('modal').classList.remove('wide'); document.getElementById('modalTitle').textContent='Edit: '+u.name; document.getElementById('modalBody').innerHTML=`<form onsubmit="submitEditTeam(event,'${u.id}')"><div class="form-group"><label>Name</label><input class="form-input" id="tmName" value="${esc(u.name)}" required></div><div class="form-group"><label>Email</label><input type="email" class="form-input" id="tmEmail" value="${esc(u.email)}" required></div><div class="form-group"><label>New Password (optional)</label><input type="password" class="form-input" id="tmPw"></div><div class="form-group"><label>Role</label><select class="form-input" id="tmRole"><option value="viewer" ${u.role==='viewer'?'selected':''}>Viewer</option><option value="manager" ${u.role==='manager'?'selected':''}>Manager</option><option value="superadmin" ${u.role==='superadmin'?'selected':''}>Super Admin</option></select></div><div class="form-group"><label>Status</label><select class="form-input" id="tmActive"><option value="true" ${u.active?'selected':''}>Active</option><option value="false" ${!u.active?'selected':''}>Deactivated</option></select></div><div style="display:flex;gap:8px;margin-top:16px"><button type="submit" class="btn btn-primary" style="flex:1">Save</button><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button></div></form>`; openModal(); }
 async function submitTeam(e){ e.preventDefault(); try{await api('POST','/team',{name:document.getElementById('tmName').value,email:document.getElementById('tmEmail').value,password:document.getElementById('tmPw').value,role:document.getElementById('tmRole').value});closeModal();await loadTeam();toast('Member added','success');}catch(e){toast(e.message,'error');} }
 async function submitEditTeam(e,id){ e.preventDefault(); const b={name:document.getElementById('tmName').value,email:document.getElementById('tmEmail').value,role:document.getElementById('tmRole').value,active:document.getElementById('tmActive').value==='true'}; const pw=document.getElementById('tmPw').value; if(pw)b.password=pw; try{await api('PUT','/team/'+id,b);closeModal();await loadTeam();toast('Member updated','success');}catch(e){toast(e.message,'error');} }
-async function deleteTeamMember(id){ if(!confirm('Delete this member?'))return; try{await api('DELETE','/team/'+id);await loadTeam();toast('Member removed','success');}catch(e){toast(e.message,'error');} }
+async function deleteTeamMember(id){ if(!await showConfirm('Remove Team Member','This team member will lose access to the dashboard. This cannot be undone.'))return; try{await api('DELETE','/team/'+id);await loadTeam();toast('Member removed','success');}catch(e){toast(e.message,'error');} }
 
 // ═══════ ACTIVITY LOG ═══════
 function renderActivityLog(items){ const el=document.getElementById('activityList'); if(!items.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">&#128203;</div><div class="empty-state-title">No activity yet</div></div>';return;} el.innerHTML=items.map(a=>`<div class="activity-item"><div class="activity-dot"></div><div><div class="activity-text"><strong>${esc(a.userName)}</strong> &mdash; ${esc(a.details)}</div><div class="activity-time">${fmtDateTime(a.timestamp)} &middot; ${esc(a.action)}</div></div></div>`).join(''); }
@@ -1661,7 +1719,7 @@ async function submitAddSection(e) {
 }
 
 async function deleteSection(id) {
-    if (!confirm('Delete this custom section?')) return;
+    if (!await showConfirm('Delete Section','This custom section will be permanently removed.')) return;
     try {
         await api('DELETE', '/config/sections/' + id);
         cmsConfig.sections = cmsConfig.sections.filter(s => s.id !== id);
@@ -1671,7 +1729,7 @@ async function deleteSection(id) {
 }
 
 async function resetSections() {
-    if (!confirm('Reset all sections to default order and visibility?')) return;
+    if (!await showConfirm('Reset Sections','This will restore all sections to their default order and visibility. Custom sections will be removed.')) return;
     try {
         await api('POST', '/config/reset');
         await loadCmsConfig();
@@ -1970,6 +2028,69 @@ function updateExportTimestamp() {
     if (!el) return;
     const last = localStorage.getItem('ft_lastExport');
     el.textContent = last ? 'Last export: ' + fmtDateTime(last) : 'No exports yet';
+}
+
+// ═══════ CONFIRM DIALOG ═══════
+let confirmResolve = null;
+function showConfirm(title, msg, btnText = 'Delete') {
+    document.getElementById('confirmTitle').textContent = title;
+    document.getElementById('confirmMsg').textContent = msg;
+    document.getElementById('confirmBtn').textContent = btnText;
+    document.getElementById('confirmOverlay').style.display = 'flex';
+    return new Promise(resolve => { confirmResolve = resolve; });
+}
+function closeConfirm(result) {
+    document.getElementById('confirmOverlay').style.display = 'none';
+    if (confirmResolve) { confirmResolve(result); confirmResolve = null; }
+}
+
+// ═══════ PAGINATION STATE ═══════
+let leadsPage = 1, leadsPerPage = 25, leadsTotalPages = 1, leadsTotalCount = 0;
+let bookingsPage = 1, bookingsPerPage = 25, bookingsTotalPages = 1, bookingsTotalCount = 0;
+
+function renderPagination(elId, page, totalPages, total, perPage, onPageChange, onPerPageChange) {
+    const el = document.getElementById(elId); if (!el) return;
+    if (total <= perPage && totalPages <= 1) { el.innerHTML = `<div class="pagination-info">${total} results</div><div></div>`; return; }
+    const start = (page - 1) * perPage + 1;
+    const end = Math.min(page * perPage, total);
+    let btns = '';
+    btns += `<button class="page-btn" onclick="${onPageChange}(1)" ${page<=1?'disabled':''}>&#171;</button>`;
+    btns += `<button class="page-btn" onclick="${onPageChange}(${page-1})" ${page<=1?'disabled':''}>&#8249;</button>`;
+    const startP = Math.max(1, page - 2), endP = Math.min(totalPages, page + 2);
+    for (let i = startP; i <= endP; i++) btns += `<button class="page-btn ${i===page?'active':''}" onclick="${onPageChange}(${i})">${i}</button>`;
+    btns += `<button class="page-btn" onclick="${onPageChange}(${page+1})" ${page>=totalPages?'disabled':''}>&#8250;</button>`;
+    btns += `<button class="page-btn" onclick="${onPageChange}(${totalPages})" ${page>=totalPages?'disabled':''}>&#187;</button>`;
+    el.innerHTML = `<div class="pagination-info">Showing ${start}-${end} of ${total}</div><div class="pagination-controls">${btns} <select class="per-page-select" onchange="${onPerPageChange}(Number(this.value))"><option value="25" ${perPage===25?'selected':''}>25</option><option value="50" ${perPage===50?'selected':''}>50</option><option value="100" ${perPage===100?'selected':''}>100</option></select></div>`;
+}
+
+function setLeadsPage(p) { leadsPage = p; renderLeads(); }
+function setLeadsPerPage(n) { leadsPerPage = n; leadsPage = 1; renderLeads(); }
+function setBookingsPage(p) { bookingsPage = p; renderBookings(); }
+function setBookingsPerPage(n) { bookingsPerPage = n; bookingsPage = 1; renderBookings(); }
+
+// ═══════ DEBOUNCED SEARCH ═══════
+let leadsSearchTimer = null, bookingsSearchTimer = null;
+
+// Override oninput handlers for debounced search
+document.addEventListener('DOMContentLoaded', () => {
+    const ls = document.getElementById('leadsSearch');
+    if (ls) { ls.removeAttribute('oninput'); ls.addEventListener('input', () => { clearTimeout(leadsSearchTimer); leadsSearchTimer = setTimeout(() => { leadsPage = 1; renderLeads(); }, 300); }); }
+    const bs = document.getElementById('bookingsSearch');
+    if (bs) { bs.removeAttribute('oninput'); bs.addEventListener('input', () => { clearTimeout(bookingsSearchTimer); bookingsSearchTimer = setTimeout(() => { bookingsPage = 1; renderBookings(); }, 300); }); }
+});
+
+// ═══════ FORM VALIDATION ═══════
+function validateField(id, test, errMsg) {
+    const el = document.getElementById(id); if (!el) return true;
+    const errEl = el.parentElement.querySelector('.field-error');
+    if (!test(el.value)) {
+        el.classList.add('invalid');
+        if (errEl) { errEl.textContent = errMsg; errEl.classList.add('visible'); }
+        return false;
+    }
+    el.classList.remove('invalid');
+    if (errEl) errEl.classList.remove('visible');
+    return true;
 }
 
 // ═══════ INIT ═══════
