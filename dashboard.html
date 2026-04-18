@@ -1974,10 +1974,10 @@ function buildSecEditorHTML(id){
             <button class="btn btn-primary btn-sm" onclick="saveSecContent('reviews')" style="margin-left:8px">Save</button>`;
         case 'guarantee': return `<div class="sec-editor-title">Guarantee Section</div>
             <div class="sec-field"><label>Headline (HTML allowed)</label><input id="sec_guarHeadline" value="${esc(c.guarantee?.headline||'PRICE MATCH <span>GUARANTEE</span>')}"></div>
-            <div class="sec-field"><label>Subtext</label><textarea id="sec_guarSubtext" rows="2">${esc(c.guarantee?.subtext||'Found a cheaper monthly rate? We\\'ll match it + give you extra 5% off.')}</textarea></div>
+            <div class="sec-field"><label>Subtext</label><textarea id="sec_guarSubtext" rows="2">${esc(c.guarantee?.subtext||'Found a cheaper monthly rate? We will match it + give you extra 5% off.')}</textarea></div>
             <button class="btn btn-primary btn-sm" onclick="saveSecContent('guarantee')">Save</button>`;
         case 'finalcta': return `<div class="sec-editor-title">Final CTA</div>
-            <div class="sec-field"><label>Headline (HTML allowed)</label><input id="sec_ctaHeadline" value="${esc(c.finalCta?.headline||'DON\\'T MISS OUT — <span>LOCK YOUR RATE</span>')}"></div>
+            <div class="sec-field"><label>Headline (HTML allowed)</label><input id="sec_ctaHeadline" value="${esc(c.finalCta?.headline||'DONT MISS OUT — <span>LOCK YOUR RATE</span>')}"></div>
             <div class="sec-field"><label>Subtext</label><input id="sec_ctaSubtext" value="${esc(c.finalCta?.subtext||'Prices go up when spots are filled. Secure your deal today.')}"></div>
             <div class="sec-field"><label>Button Text</label><input id="sec_ctaButton" value="${esc(c.finalCta?.buttonText||'View Deals')}"></div>
             <button class="btn btn-primary btn-sm" onclick="saveSecContent('finalcta')">Save</button>`;
@@ -1995,7 +1995,7 @@ function buildSecEditorHTML(id){
             <div class="sec-field"><label>Headline</label><input id="sec_popHeadline" value="${esc(c.leadPopup?.headline||'Exclusive Deal')}"></div>
             <div class="sec-field"><label>Value Text</label><input id="sec_popValue" value="${esc(c.leadPopup?.offerValue||'5% EXTRA OFF')}"></div>
             <div class="sec-field"><label>Description</label><textarea id="sec_popSubtext" rows="2">${esc(c.leadPopup?.subtext||'Drop your details and get an exclusive discount code on WhatsApp')}</textarea></div>
-            <div class="sec-row"><div class="sec-field"><label>Submit Button</label><input id="sec_popButton" value="${esc(c.leadPopup?.buttonText||'Claim My Discount')}"></div><div class="sec-field"><label>Skip Text</label><input id="sec_popSkip" value="${esc(c.leadPopup?.skipText||'No thanks, I\\'ll pay full price')}"></div></div>
+            <div class="sec-row"><div class="sec-field"><label>Submit Button</label><input id="sec_popButton" value="${esc(c.leadPopup?.buttonText||'Claim My Discount')}"></div><div class="sec-field"><label>Skip Text</label><input id="sec_popSkip" value="${esc(c.leadPopup?.skipText||'No thanks, I will pay full price')}"></div></div>
             <button class="btn btn-primary btn-sm" onclick="saveSecContent('leadpopup')">Save</button>`;
         default: return '<div style="color:var(--text-muted);font-size:12px">No editable content for this section.</div>';
     }
