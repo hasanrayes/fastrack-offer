@@ -426,10 +426,33 @@
         .cms-list-item:active { cursor:grabbing; opacity:0.7; }
         .cms-list-item.dragging { opacity:0.4; }
         .cms-list-item .drag-handle { color:var(--text-muted); font-size:16px; cursor:grab; flex-shrink:0; min-width:44px; min-height:44px; display:flex; align-items:center; justify-content:center; }
-        .cms-list-item .item-content { flex:1; min-width:0; }
-        .cms-list-item .item-name { font-size:13px; font-weight:600; }
+        .cms-list-item .item-content { flex:1; min-width:0; cursor:pointer; }
+        .cms-list-item .item-name { font-size:13px; font-weight:600; display:flex; align-items:center; gap:6px; }
+        .cms-list-item .item-name .sec-emoji { font-size:15px; }
         .cms-list-item .item-type { font-size:11px; color:var(--text-muted); }
         .cms-list-item .item-actions { display:flex; gap:4px; align-items:center; }
+        .cms-list-item .item-chev { color:var(--text-muted); font-size:12px; transition:transform 0.25s ease; flex-shrink:0; }
+        .cms-list-item .item-chev.open { transform:rotate(90deg); color:var(--primary); }
+        /* Section builder wrapper with color strip */
+        .sec-wrap { margin-bottom:10px; border-radius:12px; overflow:hidden; border:1px solid var(--border); background:var(--bg-input); }
+        .sec-wrap.dragging { opacity:0.4; }
+        .sec-wrap .cms-list-item { margin-bottom:0; border:none; border-radius:0; border-left:4px solid var(--strip, var(--border)); background:transparent; }
+        .sec-wrap .cms-list-item:hover { background:var(--bg-card-hover); }
+        .sec-editor { max-height:0; overflow:hidden; transition:max-height 0.35s ease; background:var(--bg-card); border-top:0 solid var(--border); }
+        .sec-editor.open { max-height:2000px; border-top:1px solid var(--border); }
+        .sec-editor-inner { padding:16px 18px; }
+        .sec-editor-title { font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:12px; }
+        .sec-field { margin-bottom:12px; }
+        .sec-field label { display:block; font-size:11px; font-weight:600; color:var(--text-secondary); margin-bottom:4px; text-transform:uppercase; letter-spacing:.3px; }
+        .sec-field input,.sec-field textarea,.sec-field select { width:100%; padding:9px 12px; background:var(--bg-input); border:1px solid var(--border); border-radius:8px; font-size:13px; font-family:inherit; color:var(--text-primary); outline:none; transition:border var(--transition); }
+        .sec-field input:focus,.sec-field textarea:focus,.sec-field select:focus { border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-bg); }
+        .sec-field textarea { resize:vertical; min-height:60px; }
+        .sec-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+        .sec-card-editor { background:var(--bg-input); border:1px solid var(--border); border-radius:10px; padding:12px; margin-bottom:10px; }
+        .sec-list-row { display:flex; gap:6px; align-items:center; margin-bottom:6px; }
+        .sec-list-row input { flex:1; }
+        .sec-list-row .sec-list-drag { color:var(--text-muted); font-size:14px; cursor:grab; padding:0 4px; }
+        @media(max-width:600px){.sec-row{grid-template-columns:1fr}}
         .toggle-switch { position:relative; width:48px; height:28px; }
         .toggle-switch input { opacity:0; width:0; height:0; }
         .toggle-slider { position:absolute; cursor:pointer; inset:0; background:var(--border); border-radius:28px; transition:0.2s; }
@@ -704,9 +727,9 @@
 
             <!-- CMS: SECTION BUILDER -->
             <div class="view" id="sectionsView">
-                <div class="view-header"><div><h1 class="view-title">Section Builder</h1><p class="view-subtitle">Reorder, show/hide, and add custom sections</p></div>
-                <div class="view-actions"><button class="btn btn-primary btn-sm" onclick="publishSections()">Save &amp; Publish</button><button class="btn btn-secondary btn-sm" onclick="openAddSectionModal()">+ Add Section</button><button class="btn btn-danger btn-sm" onclick="resetSections()">Reset Default</button></div></div>
-                <div style="padding:0 28px 8px"><div style="padding:10px 14px;background:var(--blue-bg);border-radius:10px;font-size:12px;color:var(--blue);display:flex;align-items:center;gap:8px">&#9432; Toggle switches save instantly. Drag to reorder, then click <strong>Save &amp; Publish</strong> to push changes live.</div></div>
+                <div class="view-header"><div><h1 class="view-title">Section Builder</h1><p class="view-subtitle">Click a section to edit its content. Drag to reorder. Toggle to show/hide.</p></div>
+                <div class="view-actions"><button class="btn btn-secondary btn-sm" id="undoBtn" onclick="undoLastAction()" style="display:none">&#8617; Undo</button><button class="btn btn-primary btn-sm" onclick="publishSections()">Save &amp; Publish</button><button class="btn btn-secondary btn-sm" onclick="openAddSectionModal()">+ Add Section</button><button class="btn btn-danger btn-sm" onclick="resetSections()">Reset Default</button></div></div>
+                <div style="padding:0 28px 8px"><div style="padding:10px 14px;background:var(--blue-bg);border-radius:10px;font-size:12px;color:var(--blue);display:flex;align-items:center;gap:8px">&#9432; Click section name to edit inline. Toggles &amp; drag save instantly. Use <strong>Undo</strong> to revert last change.</div></div>
                 <div class="data-section"><div id="sectionsList"></div></div>
             </div>
 
@@ -1824,19 +1847,328 @@ async function saveCmsContent() {
     } catch(e) { toast(e.message, 'error'); }
 }
 
-// ═══════ SECTION BUILDER ═══════
+// ═══════ SECTION BUILDER (v2 — inline editors + undo + custom edit) ═══════
+const SEC_META = {
+  nav:      { emoji:'&#129525;', strip:'#94A3B8' },
+  countdown:{ emoji:'&#9203;',   strip:'#EF4444' },
+  hero:     { emoji:'&#127919;', strip:'#FF5F00' },
+  ticker:   { emoji:'&#128241;', strip:'#3B82F6' },
+  trust:    { emoji:'&#9989;',   strip:'#10B981' },
+  cars:     { emoji:'&#128663;', strip:'#F59E0B' },
+  why:      { emoji:'&#11088;',  strip:'#8B5CF6' },
+  reviews:  { emoji:'&#128172;', strip:'#06B6D4' },
+  guarantee:{ emoji:'&#127942;', strip:'#EAB308' },
+  finalcta: {emoji:'&#128293;',  strip:'#DC2626' },
+  footer:   { emoji:'&#128228;', strip:'#64748B' },
+  sticky:   { emoji:'&#128204;', strip:'#EC4899' },
+  leadpopup:{ emoji:'&#128293;', strip:'#FF5F00' },
+  text:     { emoji:'&#128209;', strip:'#14B8A6' },
+  image_text:{emoji:'&#128444;', strip:'#14B8A6' },
+  cta_banner:{emoji:'&#128200;', strip:'#14B8A6' }
+};
+let secEditorOpen = null;
+let undoStack = null; // last action snapshot
+
+function secMeta(s){ return SEC_META[s.id] || SEC_META[s.type] || { emoji:'&#128196;', strip:'#94A3B8' }; }
+
 function renderSectionBuilder() {
     if (!cmsConfig) return;
     const el = document.getElementById('sectionsList');
     const sections = (cmsConfig.sections || []).sort((a, b) => a.order - b.order);
-    el.innerHTML = sections.map(s => `<div class="cms-list-item" draggable="true" ondragstart="secDrag(event,'${s.id}')" ondragover="event.preventDefault()" ondrop="secDrop(event,'${s.id}')">
-        <span class="drag-handle">&#9776;</span>
-        <div class="item-content"><div class="item-name">${esc(s.name)}</div><div class="item-type">${s.type === 'builtin' ? 'Built-in section' : 'Custom: ' + s.type}</div></div>
-        <div class="item-actions">
-            <label class="toggle-switch"><input type="checkbox" ${s.visible ? 'checked' : ''} onchange="toggleSectionVisibility('${s.id}',this.checked)"><span class="toggle-slider"></span></label>
-            ${s.type !== 'builtin' ? `<button class="btn btn-danger btn-xs" onclick="deleteSection('${s.id}')">&#128465;</button>` : ''}
-        </div>
+    el.innerHTML = sections.map(s => {
+        const m = secMeta(s);
+        return `<div class="sec-wrap" id="secwrap-${s.id}" style="--strip:${m.strip}">
+          <div class="cms-list-item" draggable="true" ondragstart="secDrag(event,'${s.id}')" ondragover="event.preventDefault()" ondrop="secDrop(event,'${s.id}')">
+            <span class="drag-handle">&#9776;</span>
+            <div class="item-content" onclick="toggleSecEditor('${s.id}')">
+              <div class="item-name"><span class="sec-emoji">${m.emoji}</span> ${esc(s.name)}</div>
+              <div class="item-type">${s.type === 'builtin' ? 'Built-in section' : 'Custom: ' + s.type}</div>
+            </div>
+            <div class="item-actions">
+              <span class="item-chev" id="chev-${s.id}">&#9656;</span>
+              <label class="toggle-switch" onclick="event.stopPropagation()"><input type="checkbox" ${s.visible ? 'checked' : ''} onchange="toggleSectionVisibility('${s.id}',this.checked)"><span class="toggle-slider"></span></label>
+              ${s.type !== 'builtin' ? `<button class="btn btn-secondary btn-xs" onclick="event.stopPropagation();duplicateSection('${s.id}')" title="Duplicate">&#128203;</button><button class="btn btn-danger btn-xs" onclick="event.stopPropagation();deleteSection('${s.id}')" title="Delete">&#128465;</button>` : ''}
+            </div>
+          </div>
+          <div class="sec-editor" id="editor-${s.id}"><div class="sec-editor-inner" id="editor-inner-${s.id}"></div></div>
+        </div>`;
+    }).join('');
+}
+
+function toggleSecEditor(id){
+    if(secEditorOpen===id){ closeSecEditor(id); return; }
+    if(secEditorOpen) closeSecEditor(secEditorOpen);
+    const wrap=document.getElementById('editor-'+id);
+    const inner=document.getElementById('editor-inner-'+id);
+    const chev=document.getElementById('chev-'+id);
+    if(!wrap||!inner)return;
+    inner.innerHTML=buildSecEditorHTML(id);
+    wrap.classList.add('open');
+    if(chev)chev.classList.add('open');
+    secEditorOpen=id;
+    // Populate ticker/trust/whyUs/reviews lists after HTML insertion
+    if(id==='ticker')renderSecTickerList();
+    else if(id==='trust')renderSecTrustList();
+    else if(id==='whyUs'||id==='why')renderSecWhyList();
+    else if(id==='reviews')renderSecReviewsList();
+}
+function closeSecEditor(id){
+    const wrap=document.getElementById('editor-'+id);
+    const chev=document.getElementById('chev-'+id);
+    if(wrap)wrap.classList.remove('open');
+    if(chev)chev.classList.remove('open');
+    if(secEditorOpen===id)secEditorOpen=null;
+}
+
+function buildSecEditorHTML(id){
+    const c = cmsConfig.content || {};
+    const sec = cmsConfig.sections.find(s=>s.id===id);
+    if(sec && sec.type!=='builtin'){
+        const cc = sec.content || {};
+        return `<div class="sec-editor-title">Custom Section — ${esc(sec.type)}</div>
+          <div class="sec-field"><label>Name</label><input id="sec_cusName" value="${esc(sec.name||'')}"></div>
+          <div class="sec-field"><label>Type</label><select id="sec_cusType"><option value="text" ${sec.type==='text'?'selected':''}>Text Block</option><option value="image_text" ${sec.type==='image_text'?'selected':''}>Image + Text</option><option value="cta_banner" ${sec.type==='cta_banner'?'selected':''}>CTA Banner</option></select></div>
+          <div class="sec-field"><label>Heading</label><input id="sec_cusHeading" value="${esc(cc.heading||'')}"></div>
+          <div class="sec-field"><label>Body</label><textarea id="sec_cusBody" rows="3">${esc(cc.body||'')}</textarea></div>
+          <div class="sec-field"><label>Image URL</label><input id="sec_cusImg" value="${esc(cc.imageUrl||'')}"></div>
+          <div class="sec-row"><div class="sec-field"><label>Button Text</label><input id="sec_cusBtn" value="${esc(cc.buttonText||'')}"></div><div class="sec-field"><label>Button URL</label><input id="sec_cusBtnUrl" value="${esc(cc.buttonUrl||'')}"></div></div>
+          <button class="btn btn-primary btn-sm" onclick="saveCustomSection('${sec.id}')">Save</button>`;
+    }
+    switch(id){
+        case 'nav': return `<div class="sec-editor-title">Navigation</div>
+            <div class="sec-field"><label>Logo Text</label><input id="sec_logo" value="${esc(c.logo||'FASTRACK')}"></div>
+            <div class="sec-field"><label>CTA Button Text</label><input id="sec_navCta" value="${esc(c.nav?.ctaText||'View Offers')}"></div>
+            <button class="btn btn-primary btn-sm" onclick="saveSecContent('nav')">Save</button>`;
+        case 'hero': return `<div class="sec-editor-title">Hero Section</div>
+            <div class="sec-field"><label>Urgency Badge</label><input id="sec_heroBadge" value="${esc(c.hero?.urgencyBadge||'Offer Ends Soon — Limited Spots')}"></div>
+            <div class="sec-field"><label>Headline (HTML allowed)</label><input id="sec_heroHeadline" value="${esc(c.hero?.headline||'SAVE UP TO <strong>40%</strong> ON MONTHLY CAR RENTAL')}"></div>
+            <div class="sec-field"><label>Subtext</label><textarea id="sec_heroSubtext" rows="2">${esc(c.hero?.subtext||'Premium cars from AED 999/month. Full insurance, free UAE delivery, zero hidden fees.')}</textarea></div>
+            <div class="sec-row"><div class="sec-field"><label>Proof Stat 1</label><input id="sec_heroProof1" value="${esc(c.hero?.proof1||'4.9/5 from 2,500+ customers')}"></div><div class="sec-field"><label>Proof Stat 2</label><input id="sec_heroProof2" value="${esc(c.hero?.proof2||'143 booked this week')}"></div></div>
+            <div class="sec-row"><div class="sec-field"><label>Primary CTA</label><input id="sec_heroCta1" value="${esc(c.hero?.ctaPrimary||'Claim Your Deal')}"></div><div class="sec-field"><label>Secondary CTA</label><input id="sec_heroCta2" value="${esc(c.hero?.ctaSecondary||'WhatsApp Us')}"></div></div>
+            <button class="btn btn-primary btn-sm" onclick="saveSecContent('hero')">Save</button>`;
+        case 'countdown': return `<div class="sec-editor-title">Countdown Timer</div>
+            <div class="sec-field"><label><input type="checkbox" id="sec_cdEnabled" ${c.countdown?.enabled!==false?'checked':''} style="width:auto;margin-right:6px"> Enable Countdown Timer</label></div>
+            <div class="sec-field"><label>Urgency Text</label><input id="sec_cdText" value="${esc(c.countdown?.urgencyText||'DEAL EXPIRES IN:')}"></div>
+            <div class="sec-field"><label>End Date/Time (leave empty for auto 3 days)</label><input type="datetime-local" id="sec_cdEnd" value="${esc(c.countdown?.endDate||'')}"></div>
+            <button class="btn btn-primary btn-sm" onclick="saveSecContent('countdown')">Save</button>`;
+        case 'ticker': return `<div class="sec-editor-title">Social Proof Ticker</div>
+            <div id="sec_tickerList"></div>
+            <button class="btn btn-secondary btn-sm" onclick="addSecTicker()" style="margin-top:6px">+ Add Message</button>
+            <button class="btn btn-primary btn-sm" onclick="saveSecContent('ticker')" style="margin-left:8px">Save</button>`;
+        case 'trust': return `<div class="sec-editor-title">Trust Bar (5 items)</div>
+            <div id="sec_trustList"></div>
+            <button class="btn btn-primary btn-sm" onclick="saveSecContent('trust')" style="margin-top:6px">Save</button>`;
+        case 'cars': return `<div class="sec-editor-title">Cars Section Header</div>
+            <div class="sec-field"><label>Tag Text</label><input id="sec_carsTag" value="${esc(c.carsSection?.tag||'Limited Spots Available')}"></div>
+            <div class="sec-field"><label>Headline</label><input id="sec_carsHeadline" value="${esc(c.carsSection?.headline||'CHOOSE YOUR <strong>DEAL</strong>')}"></div>
+            <div class="sec-field"><label>Subtext</label><input id="sec_carsSubtext" value="${esc(c.carsSection?.subtext||'Lock in your discounted monthly rate before it\\'s gone.')}"></div>
+            <button class="btn btn-primary btn-sm" onclick="saveSecContent('cars')">Save</button>`;
+        case 'why': return `<div class="sec-editor-title">Why Us Section</div>
+            <div class="sec-row"><div class="sec-field"><label>Section Label</label><input id="sec_whyLabel" value="${esc(c.whyUs?.label||'Why 2,500+ Customers Trust Us')}"></div><div class="sec-field"><label>Section Title</label><input id="sec_whyTitle" value="${esc(c.whyUs?.title||'THE FASTRACK DIFFERENCE')}"></div></div>
+            <div id="sec_whyList"></div>
+            <button class="btn btn-primary btn-sm" onclick="saveSecContent('why')" style="margin-top:6px">Save</button>`;
+        case 'reviews': return `<div class="sec-editor-title">Customer Reviews</div>
+            <div class="sec-row"><div class="sec-field"><label>Section Label</label><input id="sec_revLabel" value="${esc(c.reviews?.label||'Real Reviews')}"></div><div class="sec-field"><label>Section Title</label><input id="sec_revTitle" value="${esc(c.reviews?.title||'WHAT OUR CUSTOMERS SAY')}"></div></div>
+            <div id="sec_reviewsList"></div>
+            <button class="btn btn-secondary btn-sm" onclick="addSecReview()" style="margin-top:6px">+ Add Review</button>
+            <button class="btn btn-primary btn-sm" onclick="saveSecContent('reviews')" style="margin-left:8px">Save</button>`;
+        case 'guarantee': return `<div class="sec-editor-title">Guarantee Section</div>
+            <div class="sec-field"><label>Headline (HTML allowed)</label><input id="sec_guarHeadline" value="${esc(c.guarantee?.headline||'PRICE MATCH <span>GUARANTEE</span>')}"></div>
+            <div class="sec-field"><label>Subtext</label><textarea id="sec_guarSubtext" rows="2">${esc(c.guarantee?.subtext||'Found a cheaper monthly rate? We\\'ll match it + give you extra 5% off.')}</textarea></div>
+            <button class="btn btn-primary btn-sm" onclick="saveSecContent('guarantee')">Save</button>`;
+        case 'finalcta': return `<div class="sec-editor-title">Final CTA</div>
+            <div class="sec-field"><label>Headline (HTML allowed)</label><input id="sec_ctaHeadline" value="${esc(c.finalCta?.headline||'DON\\'T MISS OUT — <span>LOCK YOUR RATE</span>')}"></div>
+            <div class="sec-field"><label>Subtext</label><input id="sec_ctaSubtext" value="${esc(c.finalCta?.subtext||'Prices go up when spots are filled. Secure your deal today.')}"></div>
+            <div class="sec-field"><label>Button Text</label><input id="sec_ctaButton" value="${esc(c.finalCta?.buttonText||'View Deals')}"></div>
+            <button class="btn btn-primary btn-sm" onclick="saveSecContent('finalcta')">Save</button>`;
+        case 'footer': return `<div class="sec-editor-title">Footer</div>
+            <div class="sec-field"><label>Copyright</label><input id="sec_footCopy" value="${esc(c.footer?.copyright||'© 2024 Fastrack Rent a Car • Dubai, UAE')}"></div>
+            <div class="sec-row"><div class="sec-field"><label>Phone</label><input id="sec_footPhone" value="${esc(c.footer?.phone||'+971 58 596 9960')}"></div><div class="sec-field"><label>WhatsApp Text</label><input id="sec_footWa" value="${esc(c.footer?.whatsappText||'WhatsApp')}"></div></div>
+            <div class="sec-field"><label>Email</label><input id="sec_footEmail" value="${esc(c.footer?.email||'info@fasttrackrac.com')}"></div>
+            <button class="btn btn-primary btn-sm" onclick="saveSecContent('footer')">Save</button>`;
+        case 'sticky': return `<div class="sec-editor-title">Sticky Bottom Bar</div>
+            <div class="sec-row"><div class="sec-field"><label>Prefix</label><input id="sec_stickyPrefix" value="${esc(c.stickyBar?.prefix||'From')}"></div><div class="sec-field"><label>Was Price</label><input id="sec_stickyWas" value="${esc(c.stickyBar?.wasPrice||'AED 1,399')}"></div></div>
+            <div class="sec-row"><div class="sec-field"><label>Current Price</label><input id="sec_stickyCurrent" value="${esc(c.stickyBar?.currentPrice||'AED 999/mo')}"></div><div class="sec-field"><label>Button Text</label><input id="sec_stickyBtn" value="${esc(c.stickyBar?.buttonText||'Claim Deal')}"></div></div>
+            <button class="btn btn-primary btn-sm" onclick="saveSecContent('sticky')">Save</button>`;
+        case 'leadpopup': return `<div class="sec-editor-title">Lead Capture Popup</div>
+            <div class="sec-field"><label>Offer Tag</label><input id="sec_popTag" value="${esc(c.leadPopup?.offerTag||'Limited Time Offer')}"></div>
+            <div class="sec-field"><label>Headline</label><input id="sec_popHeadline" value="${esc(c.leadPopup?.headline||'Exclusive Deal')}"></div>
+            <div class="sec-field"><label>Value Text</label><input id="sec_popValue" value="${esc(c.leadPopup?.offerValue||'5% EXTRA OFF')}"></div>
+            <div class="sec-field"><label>Description</label><textarea id="sec_popSubtext" rows="2">${esc(c.leadPopup?.subtext||'Drop your details and get an exclusive discount code on WhatsApp')}</textarea></div>
+            <div class="sec-row"><div class="sec-field"><label>Submit Button</label><input id="sec_popButton" value="${esc(c.leadPopup?.buttonText||'Claim My Discount')}"></div><div class="sec-field"><label>Skip Text</label><input id="sec_popSkip" value="${esc(c.leadPopup?.skipText||'No thanks, I\\'ll pay full price')}"></div></div>
+            <button class="btn btn-primary btn-sm" onclick="saveSecContent('leadpopup')">Save</button>`;
+        default: return '<div style="color:var(--text-muted);font-size:12px">No editable content for this section.</div>';
+    }
+}
+
+function renderSecTickerList(){
+    const el=document.getElementById('sec_tickerList'); if(!el)return;
+    const msgs=(cmsConfig.content.ticker?.messages||[]).slice();
+    el.innerHTML=msgs.map((m,i)=>`<div class="sec-list-row"><span class="sec-list-drag" draggable="true" ondragstart="secTickerDrag(event,${i})" ondragover="event.preventDefault()" ondrop="secTickerDrop(event,${i})">&#9776;</span><input value="${esc(m)}" data-i="${i}" oninput="cmsConfig.content.ticker.messages[${i}]=this.value"><button class="btn btn-danger btn-xs" onclick="cmsConfig.content.ticker.messages.splice(${i},1);renderSecTickerList()">&times;</button></div>`).join('');
+}
+function addSecTicker(){if(!cmsConfig.content.ticker)cmsConfig.content.ticker={messages:[]};cmsConfig.content.ticker.messages.push('New message');renderSecTickerList();}
+let tickerDragIdx=null;
+function secTickerDrag(e,i){tickerDragIdx=i;e.dataTransfer.effectAllowed='move';}
+function secTickerDrop(e,target){e.preventDefault();if(tickerDragIdx===null||tickerDragIdx===target)return;const arr=cmsConfig.content.ticker.messages;const it=arr.splice(tickerDragIdx,1)[0];arr.splice(target,0,it);tickerDragIdx=null;renderSecTickerList();}
+
+function renderSecTrustList(){
+    const el=document.getElementById('sec_trustList'); if(!el)return;
+    if(!cmsConfig.content.trust)cmsConfig.content.trust={items:['Full Insurance','Free Delivery','24/7 Assist','No Hidden Fees','Cancel Anytime']};
+    const items=cmsConfig.content.trust.items;
+    while(items.length<5)items.push('');
+    el.innerHTML=items.map((t,i)=>`<div class="sec-field"><label>Item ${i+1}</label><input value="${esc(t)}" oninput="cmsConfig.content.trust.items[${i}]=this.value"></div>`).join('');
+}
+
+function renderSecWhyList(){
+    const el=document.getElementById('sec_whyList'); if(!el)return;
+    const cards=(cmsConfig.content.whyUs?.cards||[]);
+    el.innerHTML=cards.map((card,i)=>`<div class="sec-card-editor"><div style="font-size:12px;font-weight:700;margin-bottom:6px">Card ${i+1}</div>
+        <div class="sec-row"><div class="sec-field"><label>Icon (emoji)</label><input value="${esc(card.icon||'')}" oninput="cmsConfig.content.whyUs.cards[${i}].icon=this.value"></div><div class="sec-field"><label>Title</label><input value="${esc(card.title||'')}" oninput="cmsConfig.content.whyUs.cards[${i}].title=this.value"></div></div>
+        <div class="sec-field"><label>Description</label><textarea rows="2" oninput="cmsConfig.content.whyUs.cards[${i}].text=this.value">${esc(card.text||'')}</textarea></div>
     </div>`).join('');
+}
+
+function renderSecReviewsList(){
+    const el=document.getElementById('sec_reviewsList'); if(!el)return;
+    const items=(cmsConfig.content.reviews?.items||[]);
+    el.innerHTML=items.map((r,i)=>`<div class="sec-card-editor"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><strong style="font-size:12px">Review ${i+1}</strong><button class="btn btn-danger btn-xs" onclick="cmsConfig.content.reviews.items.splice(${i},1);renderSecReviewsList()">&times;</button></div>
+        <div class="sec-field"><label>Text</label><textarea rows="2" oninput="cmsConfig.content.reviews.items[${i}].text=this.value">${esc(r.text||'')}</textarea></div>
+        <div class="sec-row"><div class="sec-field"><label>Name</label><input value="${esc(r.name||'')}" oninput="cmsConfig.content.reviews.items[${i}].name=this.value"></div><div class="sec-field"><label>Role / Location</label><input value="${esc(r.role||'')}" oninput="cmsConfig.content.reviews.items[${i}].role=this.value"></div></div>
+    </div>`).join('');
+}
+function addSecReview(){if(!cmsConfig.content.reviews)cmsConfig.content.reviews={items:[]};cmsConfig.content.reviews.items.push({stars:5,text:'',name:'',role:''});renderSecReviewsList();}
+
+async function saveSecContent(id){
+    if(!cmsConfig||!cmsConfig.content)return;
+    const snapshot = JSON.parse(JSON.stringify(cmsConfig.content));
+    const c=cmsConfig.content;
+    try{
+        switch(id){
+            case 'nav':
+                c.logo=document.getElementById('sec_logo').value;
+                c.nav=c.nav||{}; c.nav.ctaText=document.getElementById('sec_navCta').value; break;
+            case 'hero':
+                c.hero=c.hero||{};
+                c.hero.urgencyBadge=document.getElementById('sec_heroBadge').value;
+                c.hero.headline=document.getElementById('sec_heroHeadline').value;
+                c.hero.subtext=document.getElementById('sec_heroSubtext').value;
+                c.hero.proof1=document.getElementById('sec_heroProof1').value;
+                c.hero.proof2=document.getElementById('sec_heroProof2').value;
+                c.hero.ctaPrimary=document.getElementById('sec_heroCta1').value;
+                c.hero.ctaSecondary=document.getElementById('sec_heroCta2').value; break;
+            case 'countdown':
+                c.countdown=c.countdown||{};
+                c.countdown.enabled=document.getElementById('sec_cdEnabled').checked;
+                c.countdown.urgencyText=document.getElementById('sec_cdText').value;
+                c.countdown.endDate=document.getElementById('sec_cdEnd').value; break;
+            case 'ticker':
+                /* already bound via oninput */ break;
+            case 'trust':
+                /* already bound via oninput */ break;
+            case 'cars':
+                c.carsSection=c.carsSection||{};
+                c.carsSection.tag=document.getElementById('sec_carsTag').value;
+                c.carsSection.headline=document.getElementById('sec_carsHeadline').value;
+                c.carsSection.subtext=document.getElementById('sec_carsSubtext').value; break;
+            case 'why':
+                c.whyUs=c.whyUs||{cards:[]};
+                c.whyUs.label=document.getElementById('sec_whyLabel').value;
+                c.whyUs.title=document.getElementById('sec_whyTitle').value; break;
+            case 'reviews':
+                c.reviews=c.reviews||{items:[]};
+                c.reviews.label=document.getElementById('sec_revLabel').value;
+                c.reviews.title=document.getElementById('sec_revTitle').value; break;
+            case 'guarantee':
+                c.guarantee=c.guarantee||{};
+                c.guarantee.headline=document.getElementById('sec_guarHeadline').value;
+                c.guarantee.subtext=document.getElementById('sec_guarSubtext').value; break;
+            case 'finalcta':
+                c.finalCta=c.finalCta||{};
+                c.finalCta.headline=document.getElementById('sec_ctaHeadline').value;
+                c.finalCta.subtext=document.getElementById('sec_ctaSubtext').value;
+                c.finalCta.buttonText=document.getElementById('sec_ctaButton').value; break;
+            case 'footer':
+                c.footer=c.footer||{};
+                c.footer.copyright=document.getElementById('sec_footCopy').value;
+                c.footer.phone=document.getElementById('sec_footPhone').value;
+                c.footer.whatsappText=document.getElementById('sec_footWa').value;
+                c.footer.email=document.getElementById('sec_footEmail').value; break;
+            case 'sticky':
+                c.stickyBar=c.stickyBar||{};
+                c.stickyBar.prefix=document.getElementById('sec_stickyPrefix').value;
+                c.stickyBar.wasPrice=document.getElementById('sec_stickyWas').value;
+                c.stickyBar.currentPrice=document.getElementById('sec_stickyCurrent').value;
+                c.stickyBar.buttonText=document.getElementById('sec_stickyBtn').value; break;
+            case 'leadpopup':
+                c.leadPopup=c.leadPopup||{};
+                c.leadPopup.offerTag=document.getElementById('sec_popTag').value;
+                c.leadPopup.headline=document.getElementById('sec_popHeadline').value;
+                c.leadPopup.offerValue=document.getElementById('sec_popValue').value;
+                c.leadPopup.subtext=document.getElementById('sec_popSubtext').value;
+                c.leadPopup.buttonText=document.getElementById('sec_popButton').value;
+                c.leadPopup.skipText=document.getElementById('sec_popSkip').value; break;
+        }
+        await api('PUT','/config',{content:c});
+        setUndo({type:'content',snapshot});
+        toast('Section saved! Changes are live.','success');
+        const f=document.getElementById('previewFrame'); if(f)f.src='/?t='+Date.now();
+    }catch(e){cmsConfig.content=snapshot;toast(e.message,'error');}
+}
+
+async function saveCustomSection(id){
+    const sec=cmsConfig.sections.find(s=>s.id===id); if(!sec)return;
+    const snapshot=JSON.parse(JSON.stringify(sec));
+    const body={
+        name:document.getElementById('sec_cusName').value,
+        type:document.getElementById('sec_cusType').value,
+        content:{
+            heading:document.getElementById('sec_cusHeading').value,
+            body:document.getElementById('sec_cusBody').value,
+            imageUrl:document.getElementById('sec_cusImg').value,
+            buttonText:document.getElementById('sec_cusBtn').value,
+            buttonUrl:document.getElementById('sec_cusBtnUrl').value
+        }
+    };
+    try{
+        const updated=await api('PATCH','/config/sections/'+id,body);
+        Object.assign(sec,updated);
+        setUndo({type:'section',sectionId:id,snapshot});
+        renderSectionBuilder();
+        toast('Custom section saved','success');
+        const f=document.getElementById('previewFrame'); if(f)f.src='/?t='+Date.now();
+    }catch(e){toast(e.message,'error');}
+}
+
+// Undo system
+function setUndo(action){undoStack=action;const btn=document.getElementById('undoBtn');if(btn)btn.style.display='';}
+function clearUndo(){undoStack=null;const btn=document.getElementById('undoBtn');if(btn)btn.style.display='none';}
+async function undoLastAction(){
+    if(!undoStack){toast('Nothing to undo','info');return;}
+    const a=undoStack;
+    try{
+        if(a.type==='content'){
+            cmsConfig.content=a.snapshot;
+            await api('PUT','/config',{content:a.snapshot});
+            toast('Reverted last edit','success');
+        } else if(a.type==='section'){
+            await api('PATCH','/config/sections/'+a.sectionId,{name:a.snapshot.name,type:a.snapshot.type,content:a.snapshot.content});
+            const sec=cmsConfig.sections.find(s=>s.id===a.sectionId); if(sec)Object.assign(sec,a.snapshot);
+            renderSectionBuilder();
+            toast('Reverted custom section','success');
+        } else if(a.type==='visibility'){
+            await api('PATCH','/config/sections/'+a.sectionId,{visible:a.previousVisible});
+            const sec=cmsConfig.sections.find(s=>s.id===a.sectionId); if(sec)sec.visible=a.previousVisible;
+            renderSectionBuilder();
+            toast('Reverted visibility','success');
+        } else if(a.type==='reorder'){
+            const data=await api('PUT','/config/sections/reorder',{order:a.previousOrder});
+            cmsConfig.sections=data.sections||cmsConfig.sections;
+            renderSectionBuilder();
+            toast('Reverted reorder','success');
+        }
+        const f=document.getElementById('previewFrame'); if(f)f.src='/?t='+Date.now();
+    }catch(e){toast(e.message,'error');}
+    clearUndo();
 }
 
 let secDragId = null;
@@ -1844,7 +2176,8 @@ function secDrag(e, id) { secDragId = id; e.dataTransfer.effectAllowed = 'move';
 async function secDrop(e, targetId) {
     e.preventDefault();
     if (!secDragId || secDragId === targetId) return;
-    const ids = cmsConfig.sections.sort((a, b) => a.order - b.order).map(s => s.id);
+    const previousOrder = cmsConfig.sections.slice().sort((a,b)=>a.order-b.order).map(s=>s.id);
+    const ids = previousOrder.slice();
     const fromIdx = ids.indexOf(secDragId), toIdx = ids.indexOf(targetId);
     if (fromIdx === -1 || toIdx === -1) return;
     ids.splice(fromIdx, 1);
@@ -1853,18 +2186,20 @@ async function secDrop(e, targetId) {
     try {
         const data = await api('PUT', '/config/sections/reorder', { order: ids });
         cmsConfig.sections = data.sections || cmsConfig.sections;
+        setUndo({type:'reorder', previousOrder});
         renderSectionBuilder();
         toast('Sections reordered', 'success');
     } catch(e) { toast(e.message, 'error'); }
 }
 
 async function toggleSectionVisibility(id, visible) {
+    const sec = cmsConfig.sections.find(s => s.id === id);
+    const previousVisible = sec ? sec.visible : true;
     try {
         await api('PATCH', '/config/sections/' + id, { visible });
-        const sec = cmsConfig.sections.find(s => s.id === id);
         if (sec) sec.visible = visible;
+        setUndo({type:'visibility', sectionId:id, previousVisible});
         toast(visible ? 'Section shown' : 'Section hidden', 'success');
-        // Auto-refresh preview
         const f = document.getElementById('previewFrame');
         if (f) f.src = '/?t=' + Date.now();
     } catch(e) { toast(e.message, 'error'); }
@@ -1872,7 +2207,6 @@ async function toggleSectionVisibility(id, visible) {
 
 async function publishSections() {
     toast('Sections published! Changes are live.', 'success');
-    // Refresh preview iframe
     const f = document.getElementById('previewFrame');
     if (f) f.src = '/?t=' + Date.now();
 }
@@ -1889,7 +2223,7 @@ function openAddSectionModal() {
             <div class="form-group"><label>Heading</label><input class="form-input" id="newSecHeading"></div>
             <div class="form-group"><label>Body Content</label><textarea class="form-input" id="newSecBody" rows="3"></textarea></div>
             <div class="form-group"><label>Image URL (optional)</label><input class="form-input" id="newSecImg"></div>
-            <div class="form-group"><label>Button Text (optional)</label><input class="form-input" id="newSecBtn"></div>
+            <div class="form-row"><div class="form-group"><label>Button Text (optional)</label><input class="form-input" id="newSecBtn"></div><div class="form-group"><label>Button URL</label><input class="form-input" id="newSecBtnUrl"></div></div>
             <div style="display:flex;gap:8px;margin-top:16px"><button type="submit" class="btn btn-primary" style="flex:1">Add Section</button><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button></div>
         </form>`;
     openModal();
@@ -1906,7 +2240,7 @@ async function submitAddSection(e) {
                 body: document.getElementById('newSecBody').value,
                 imageUrl: document.getElementById('newSecImg').value,
                 buttonText: document.getElementById('newSecBtn').value,
-                buttonUrl: ''
+                buttonUrl: document.getElementById('newSecBtnUrl')?.value || ''
             }
         });
         cmsConfig.sections.push(sec);
@@ -1914,6 +2248,16 @@ async function submitAddSection(e) {
         renderSectionBuilder();
         toast('Section added', 'success');
     } catch(e) { toast(e.message, 'error'); }
+}
+
+async function duplicateSection(id){
+    const sec = cmsConfig.sections.find(s=>s.id===id); if(!sec||sec.type==='builtin')return;
+    try{
+        const copy=await api('POST','/config/sections',{name:'Copy of '+sec.name,type:sec.type,content:JSON.parse(JSON.stringify(sec.content||{}))});
+        cmsConfig.sections.push(copy);
+        renderSectionBuilder();
+        toast('Section duplicated','success');
+    }catch(e){toast(e.message,'error');}
 }
 
 async function deleteSection(id) {
@@ -1931,6 +2275,7 @@ async function resetSections() {
     try {
         await api('POST', '/config/reset');
         await loadCmsConfig();
+        clearUndo();
         toast('Sections reset to defaults', 'success');
     } catch(e) { toast(e.message, 'error'); }
 }

@@ -1095,6 +1095,10 @@ app.patch('/api/config/sections/:id', auth, requireRole('superadmin', 'manager')
   if (!sec) return res.status(404).json({ error: 'Section not found' });
   if (req.body.visible !== undefined) sec.visible = req.body.visible;
   if (req.body.name) sec.name = req.body.name;
+  if (sec.type !== 'builtin') {
+    if (req.body.type && ['text', 'image_text', 'cta_banner'].includes(req.body.type)) sec.type = req.body.type;
+    if (req.body.content && typeof req.body.content === 'object') sec.content = { ...(sec.content || {}), ...req.body.content };
+  }
   logActivity(req.user.id, 'section_updated', `Updated section: ${sec.name}`);
   res.json(sec);
 });
