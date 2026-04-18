@@ -17,46 +17,72 @@
             --yellow: #F59E0B; --yellow-bg: rgba(245,158,11,0.1);
             --blue: #3B82F6; --blue-bg: rgba(59,130,246,0.1);
             --purple: #8B5CF6; --purple-bg: rgba(139,92,246,0.1);
-            --bg-primary: #0A0A0A; --bg-secondary: #111111; --bg-card: #1A1A1A;
-            --bg-card-hover: #222222; --bg-input: #0A0A0A;
-            --border: #2A2A2A; --border-hover: #3A3A3A;
-            --text-primary: #FFFFFF; --text-secondary: #A0A0A0; --text-muted: #666666;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.3); --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
-            --shadow-lg: 0 12px 40px rgba(0,0,0,0.5);
+            /* GLASSMORPHISM OVERRIDES */
+            --bg-primary: #0f0f23;
+            --bg-secondary: #0a0a1a;
+            --bg-card: rgba(255,255,255,0.04);
+            --bg-card-hover: rgba(255,255,255,0.07);
+            --bg-input: rgba(255,255,255,0.04);
+            --glass: rgba(255,255,255,0.04);
+            --glass-border: rgba(255,255,255,0.08);
+            --glass-hover: rgba(255,255,255,0.07);
+            --border: rgba(255,255,255,0.08);
+            --border-hover: rgba(255,255,255,0.15);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255,255,255,0.5);
+            --text-muted: rgba(255,255,255,0.3);
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.3);
+            --shadow-lg: 0 12px 40px rgba(0,0,0,0.4);
+            --blur: blur(16px);
             --sidebar-width: 260px; --sidebar-collapsed-width: 72px;
             --header-height: 64px; --transition: 0.2s ease;
         }
         .light-mode {
-            --bg-primary: #F5F5F7; --bg-secondary: #FFFFFF; --bg-card: #FFFFFF;
-            --bg-card-hover: #F9F9F9; --bg-input: #F5F5F7;
-            --border: #E5E5E7; --border-hover: #D1D1D3;
-            --text-primary: #111111; --text-secondary: #666666; --text-muted: #999999;
+            --bg-primary: #f0f0f8;
+            --bg-secondary: rgba(255,255,255,0.8);
+            --bg-card: rgba(255,255,255,0.6);
+            --bg-card-hover: rgba(255,255,255,0.8);
+            --bg-input: rgba(255,255,255,0.7);
+            --glass: rgba(255,255,255,0.6);
+            --glass-border: rgba(0,0,0,0.06);
+            --glass-hover: rgba(255,255,255,0.8);
+            --border: rgba(0,0,0,0.06);
+            --border-hover: rgba(0,0,0,0.12);
+            --text-primary: #111111;
+            --text-secondary: #666666;
+            --text-muted: #999999;
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.06); --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
             --shadow-lg: 0 12px 40px rgba(0,0,0,0.12);
         }
         html { height: 100%; }
-        body { font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif; background:var(--bg-primary); color:var(--text-primary); line-height:1.5; height:100%; overflow:hidden; transition:background var(--transition),color var(--transition); }
+        body { font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif; background:linear-gradient(135deg, #0f0f23 0%, #1a0a2e 40%, #0a1628 100%); background-attachment:fixed; color:var(--text-primary); line-height:1.5; height:100%; overflow:hidden; transition:background var(--transition),color var(--transition); }
+        .light-mode body { background:linear-gradient(135deg, #f0f0f8 0%, #e8e0f0 40%, #e0e8f0 100%); background-attachment:fixed; }
         ::-webkit-scrollbar { width:6px; height:6px; }
         ::-webkit-scrollbar-track { background:transparent; }
         ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
         ::-webkit-scrollbar-thumb:hover { background:var(--border-hover); }
 
         /* ─── LOGIN ─── */
-        .login-screen { position:fixed; inset:0; background:var(--bg-primary); display:flex; align-items:center; justify-content:center; z-index:9999; }
+        .login-screen { position:fixed; inset:0; background:linear-gradient(135deg, #0f0f23 0%, #1a0a2e 40%, #0a1628 100%); display:flex; align-items:center; justify-content:center; z-index:9999; }
+        .light-mode .login-screen { background:linear-gradient(135deg, #f0f0f8 0%, #e8e0f0 40%, #e0e8f0 100%); }
         .login-screen.hidden { display:none; }
         .login-wrapper { width:100%; max-width:420px; padding:20px; }
         .login-brand { text-align:center; margin-bottom:40px; }
         .login-brand h1 { font-size:36px; font-weight:800; letter-spacing:-1.5px; background:linear-gradient(135deg,var(--primary),var(--primary-light)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
         .login-brand p { color:var(--text-secondary); font-size:14px; margin-top:8px; font-weight:500; }
-        .login-card { background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:36px; box-shadow:var(--shadow-lg); }
+        .login-card { background:rgba(255,255,255,0.05); backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px); border:1px solid rgba(255,255,255,0.1); border-radius:20px; padding:36px; box-shadow:var(--shadow-lg); }
+        .light-mode .login-card { background:rgba(255,255,255,0.8); border-color:rgba(0,0,0,0.08); }
         .login-card h2 { font-size:22px; font-weight:700; margin-bottom:8px; }
         .login-card .subtitle { color:var(--text-secondary); font-size:14px; margin-bottom:28px; }
 
         /* ─── FORMS ─── */
         .form-group { margin-bottom:16px; }
         .form-group label { display:block; font-size:13px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; }
-        .form-input { width:100%; background:var(--bg-input); border:1px solid var(--border); border-radius:10px; padding:10px 14px; color:var(--text-primary); font-size:14px; font-family:inherit; transition:border var(--transition),box-shadow var(--transition); outline:none; }
-        .form-input:focus { border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-bg); }
+        .form-input { width:100%; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:10px 14px; color:var(--text-primary); font-size:14px; font-family:inherit; transition:border var(--transition),box-shadow var(--transition),background var(--transition); outline:none; }
+        .light-mode .form-input { background:rgba(255,255,255,0.7); border-color:rgba(0,0,0,0.08); }
+        .form-input:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(255,95,0,0.15); background:rgba(255,255,255,0.06); }
+        .light-mode .form-input:focus { background:#fff; }
         .form-input::placeholder { color:var(--text-muted); }
         textarea.form-input { resize:vertical; min-height:60px; }
         .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
@@ -67,8 +93,8 @@
         /* ─── BUTTONS ─── */
         .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:9px 16px; border-radius:10px; border:none; font-size:13px; font-weight:600; font-family:inherit; cursor:pointer; transition:all var(--transition); text-decoration:none; white-space:nowrap; }
         .btn:disabled { opacity:0.5; cursor:not-allowed; }
-        .btn-primary { background:var(--primary); color:#fff; }
-        .btn-primary:hover:not(:disabled) { background:var(--primary-dark); }
+        .btn-primary { background:var(--primary); color:#fff; box-shadow:0 0 20px rgba(255,95,0,0.2); }
+        .btn-primary:hover:not(:disabled) { background:var(--primary-light); box-shadow:0 0 30px rgba(255,95,0,0.3); }
         .btn-secondary { background:transparent; color:var(--text-primary); border:1px solid var(--border); }
         .btn-secondary:hover:not(:disabled) { border-color:var(--border-hover); background:var(--bg-card-hover); }
         .btn-danger { background:var(--red-bg); color:var(--red); border:1px solid var(--red); }
@@ -88,7 +114,8 @@
         /* ─── APP LAYOUT ─── */
         .app { display:flex; height:100vh; overflow:hidden; }
         .app.hidden { display:none; }
-        .sidebar { width:var(--sidebar-width); background:var(--bg-secondary); border-right:1px solid var(--border); display:flex; flex-direction:column; transition:width var(--transition); position:fixed; top:0; left:0; bottom:0; z-index:100; overflow:hidden; }
+        .sidebar { width:var(--sidebar-width); background:rgba(255,255,255,0.03); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-right:1px solid rgba(255,255,255,0.06); display:flex; flex-direction:column; transition:width var(--transition); position:fixed; top:0; left:0; bottom:0; z-index:100; overflow:hidden; }
+        .light-mode .sidebar { background:rgba(255,255,255,0.7); border-right-color:rgba(0,0,0,0.06); }
         .sidebar.collapsed { width:var(--sidebar-collapsed-width); }
         .sidebar.collapsed .nav-label,.sidebar.collapsed .sidebar-brand-text,.sidebar.collapsed .nav-badge,.sidebar.collapsed .sidebar-footer-text { display:none; }
         .sidebar.collapsed .sidebar-brand { justify-content:center; padding:20px 0; }
@@ -114,10 +141,11 @@
 
         .main-area { flex:1; margin-left:var(--sidebar-width); display:flex; flex-direction:column; height:100vh; overflow:hidden; transition:margin-left var(--transition); }
         .sidebar.collapsed ~ .main-area { margin-left:var(--sidebar-collapsed-width); }
-        .top-header { height:var(--header-height); min-height:var(--header-height); background:var(--bg-secondary); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:16px; padding:0 24px; }
+        .top-header { height:var(--header-height); min-height:var(--header-height); background:rgba(255,255,255,0.03); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-bottom:1px solid rgba(255,255,255,0.06); display:flex; align-items:center; gap:16px; padding:0 24px; }
+        .light-mode .top-header { background:rgba(255,255,255,0.7); border-bottom-color:rgba(0,0,0,0.06); }
         .header-left { display:flex; align-items:center; gap:12px; }
-        .hamburger-btn { display:none; background:transparent; border:none; color:var(--text-secondary); cursor:pointer; padding:8px; border-radius:8px; font-size:20px; }
-        .hamburger-btn:hover { background:var(--bg-card); color:var(--text-primary); }
+        .hamburger-btn { display:none; background:var(--glass); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); border:1px solid var(--glass-border); color:var(--text-primary); cursor:pointer; padding:8px; border-radius:10px; font-size:20px; min-width:40px; min-height:40px; align-items:center; justify-content:center; }
+        .hamburger-btn:hover { background:var(--glass-hover); color:var(--text-primary); }
         .collapse-btn { background:transparent; border:none; color:var(--text-muted); cursor:pointer; padding:6px; border-radius:8px; font-size:18px; transition:all var(--transition); }
         .collapse-btn:hover { color:var(--text-primary); background:var(--bg-card); }
         .breadcrumbs { display:flex; align-items:center; gap:6px; font-size:13px; }
@@ -146,7 +174,8 @@
 
         /* ─── KPI ─── */
         .kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; padding:0 28px 24px; }
-        .kpi-card { background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:20px; transition:all var(--transition); }
+        .kpi-card { background:var(--glass); backdrop-filter:var(--blur); -webkit-backdrop-filter:var(--blur); border:1px solid var(--glass-border); border-radius:16px; padding:20px; transition:all var(--transition); position:relative; overflow:hidden; }
+        .kpi-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg, var(--primary), var(--primary-light)); border-radius:16px 16px 0 0; }
         .kpi-card:hover { border-color:var(--border-hover); }
         .kpi-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; }
         .kpi-icon-box { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:16px; }
@@ -160,9 +189,12 @@
         .filter-select:focus,.search-input:focus { border-color:var(--primary); }
         .search-input { min-width:180px; }
         .search-input::placeholder { color:var(--text-muted); }
-        .table-wrap { background:var(--bg-card); border:1px solid var(--border); border-radius:14px; overflow:hidden; overflow-x:auto; }
+        .table-wrap { background:var(--glass); backdrop-filter:var(--blur); -webkit-backdrop-filter:var(--blur); border:1px solid var(--glass-border); border-radius:14px; overflow:hidden; overflow-x:auto; }
         table { width:100%; border-collapse:collapse; }
-        thead { background:var(--bg-input); }
+        thead { background:rgba(255,255,255,0.03); }
+        .light-mode thead { background:rgba(0,0,0,0.03); }
+        tbody tr:hover { background:rgba(255,255,255,0.03); }
+        .light-mode tbody tr:hover { background:rgba(0,0,0,0.03); }
         th { padding:10px 14px; text-align:left; font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.3px; border-bottom:1px solid var(--border); cursor:pointer; white-space:nowrap; user-select:none; }
         th:hover { color:var(--text-secondary); }
         th .sort-arrow { font-size:10px; margin-left:4px; }
@@ -176,7 +208,7 @@
         .inline-edit:hover { border-color:var(--border); }
         .inline-edit:focus { border-color:var(--primary); background:var(--bg-input); box-shadow:0 0 0 2px var(--primary-bg); }
 
-        .badge { display:inline-flex; align-items:center; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; white-space:nowrap; }
+        .badge { display:inline-flex; align-items:center; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; white-space:nowrap; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
         .badge-new { background:var(--blue-bg); color:var(--blue); }
         .badge-contacted { background:var(--yellow-bg); color:var(--yellow); }
         .badge-qualified { background:var(--green-bg); color:var(--green); }
@@ -232,7 +264,8 @@
         /* ─── MODAL ─── */
         .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center; z-index:9000; padding:20px; backdrop-filter:blur(4px); }
         .modal-overlay.active { display:flex; }
-        .modal { background:var(--bg-card); border:1px solid var(--border); border-radius:16px; width:100%; max-width:600px; max-height:90vh; overflow-y:auto; box-shadow:var(--shadow-lg); }
+        .modal { background:rgba(15,15,35,0.95); backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px); border:1px solid rgba(255,255,255,0.1); border-radius:20px; width:100%; max-width:600px; max-height:90vh; overflow-y:auto; box-shadow:var(--shadow-lg); }
+        .light-mode .modal { background:rgba(248,248,252,0.98); border-color:rgba(0,0,0,0.08); }
         .modal.wide { max-width:800px; }
         .modal-head { display:flex; justify-content:space-between; align-items:center; padding:18px 24px; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--bg-card); z-index:1; border-radius:16px 16px 0 0; }
         .modal-title { font-size:17px; font-weight:700; }
@@ -461,6 +494,61 @@
         .toggle-switch input:checked + .toggle-slider:before { transform:translateX(20px); }
         .color-input-wrap { display:flex; align-items:center; gap:8px; }
         .color-input-wrap input[type="color"] { width:36px; height:36px; border:1px solid var(--border); border-radius:8px; padding:2px; cursor:pointer; background:var(--bg-input); }
+
+        /* ─── ELEMENTOR-STYLE SECTION BUILDER ─── */
+        .elem-block { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:10px; margin-bottom:6px; transition:all 0.15s ease; }
+        .light-mode .elem-block { background:rgba(0,0,0,0.02); border-color:rgba(0,0,0,0.06); }
+        .elem-block:hover { border-color:rgba(255,255,255,0.12); background:rgba(255,255,255,0.05); }
+        .light-mode .elem-block:hover { border-color:rgba(0,0,0,0.1); background:rgba(0,0,0,0.04); }
+        .elem-block.expanded { border-color:var(--primary); background:rgba(255,95,0,0.04); }
+        .elem-header { display:flex; justify-content:space-between; align-items:center; padding:8px 12px; cursor:pointer; gap:8px; }
+        .elem-type { font-size:12px; font-weight:600; color:var(--text-secondary); display:flex; align-items:center; gap:6px; flex-shrink:0; }
+        .elem-actions { display:flex; gap:4px; opacity:0; transition:opacity 0.15s; flex-shrink:0; }
+        .elem-block:hover .elem-actions,.elem-block.expanded .elem-actions { opacity:1; }
+        .elem-preview { padding:0 12px 8px; font-size:12px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .elem-editing { padding:8px 12px 12px; border-top:1px solid rgba(255,255,255,0.06); display:none; }
+        .light-mode .elem-editing { border-top-color:rgba(0,0,0,0.06); }
+        .elem-block.expanded .elem-editing { display:block; }
+        .add-elem-btn { width:100%; margin-top:6px; border-style:dashed !important; justify-content:center; border:1px dashed rgba(255,255,255,0.2) !important; background:transparent !important; color:var(--text-secondary) !important; }
+        .light-mode .add-elem-btn { border-color:rgba(0,0,0,0.15) !important; }
+        .add-elem-btn:hover { border-color:var(--primary) !important; color:var(--primary) !important; background:rgba(255,95,0,0.04) !important; }
+        .elem-btn-preview { display:inline-block; padding:4px 12px; border-radius:6px; font-size:12px; font-weight:600; }
+        /* Section Type Thumbnails in Add modal */
+        .sec-type-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin:8px 0 16px; }
+        .sec-type-card { padding:14px 12px; border:2px solid var(--glass-border); border-radius:10px; background:var(--glass); cursor:pointer; text-align:center; transition:all 0.15s; }
+        .sec-type-card:hover { border-color:var(--primary); background:rgba(255,95,0,0.06); }
+        .sec-type-card.selected { border-color:var(--primary); background:rgba(255,95,0,0.1); box-shadow:0 0 0 3px rgba(255,95,0,0.15); }
+        .sec-type-icon { font-size:24px; margin-bottom:6px; display:block; }
+        .sec-type-name { font-size:12px; font-weight:700; }
+        .sec-type-desc { font-size:10px; color:var(--text-muted); margin-top:2px; }
+
+        /* ─── MOBILE RESPONSIVE ─── */
+        .mobile-menu-btn { display:none; align-items:center; justify-content:center; width:40px; height:40px; border-radius:10px; background:var(--glass); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); border:1px solid var(--glass-border); color:var(--text-primary); font-size:20px; cursor:pointer; flex-shrink:0; }
+        .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+        .sidebar-overlay.active { display:block; }
+        @media (max-width:768px) {
+            .sidebar { position:fixed; left:-280px; top:0; bottom:0; width:280px; z-index:1000; transition:left 0.3s ease; transform:none !important; }
+            .sidebar.mobile-open { left:0; box-shadow:0 0 40px rgba(0,0,0,0.5); }
+            .main-area { margin-left:0 !important; width:100% !important; }
+            .top-header { padding:8px 12px; height:auto; min-height:50px; flex-wrap:wrap; gap:8px; }
+            .mobile-menu-btn { display:flex; }
+            .collapse-btn { display:none; }
+            .header-search { flex:1; min-width:0; max-width:none; }
+            .header-search input { width:100%; }
+            .kpi-grid { grid-template-columns:1fr 1fr !important; gap:10px !important; padding:0 16px 20px; }
+            .kpi-card { padding:14px !important; }
+            .kpi-value { font-size:20px !important; }
+            .table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+            table { min-width:600px; }
+            .btn { min-height:44px; padding:10px 16px; }
+            .login-wrapper { padding:16px; }
+            .login-card { padding:24px; border-radius:16px; }
+            .header-title { font-size:20px !important; }
+            #notifPanel { right:0 !important; left:0 !important; width:100% !important; max-width:100% !important; position:fixed !important; top:56px !important; }
+        }
+        @media (max-width:480px) {
+            .kpi-grid { grid-template-columns:1fr !important; }
+        }
     </style>
 </head>
 <body>
@@ -1408,9 +1496,12 @@ function destroyChart(id) { if (chartInstances[id]) { chartInstances[id].destroy
 function getChartColors() {
     const isDark = (localStorage.getItem('ft_theme') || 'dark') === 'dark';
     return {
-        grid: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
-        text: isDark ? '#999' : '#666',
-        primary: '#FF5F00', blue: '#3B82F6', green: '#10B981', red: '#EF4444',
+        grid: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.06)',
+        text: isDark ? 'rgba(255,255,255,0.4)' : '#666',
+        tooltipBg: isDark ? 'rgba(15,15,35,0.95)' : 'rgba(255,255,255,0.98)',
+        tooltipBorder: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
+        primary: '#FF5F00', primaryFill: 'rgba(255,95,0,0.3)',
+        blue: '#3B82F6', green: '#10B981', red: '#EF4444',
         yellow: '#F59E0B', purple: '#8B5CF6', colors: ['#FF5F00','#3B82F6','#10B981','#F59E0B','#8B5CF6','#EF4444','#06B6D4','#EC4899']
     };
 }
@@ -1548,7 +1639,10 @@ async function loadCharts() {
 function chartOpts(cc) {
     return {
         responsive: true,
-        plugins: { legend: { display: false } },
+        plugins: {
+            legend: { display: false },
+            tooltip: { backgroundColor: cc.tooltipBg, borderColor: cc.tooltipBorder, borderWidth: 1, titleColor: '#fff', bodyColor: cc.text, padding: 10, cornerRadius: 10 }
+        },
         scales: {
             x: { grid: { color: cc.grid }, ticks: { color: cc.text, font: { size: 10 } } },
             y: { grid: { color: cc.grid }, ticks: { color: cc.text, font: { size: 10 } }, beginAtZero: true }
@@ -1920,83 +2014,150 @@ function closeSecEditor(id){
     if(secEditorOpen===id)secEditorOpen=null;
 }
 
+// Element-block helpers (Elementor-style UI for Section Builder)
+function elemTextBlock(icon, label, fieldId, inputType, defaultVal, currentVal, hint){
+    const val = currentVal !== undefined && currentVal !== null ? currentVal : '';
+    const preview = (String(val).trim() || defaultVal || '(empty)');
+    const editField = inputType === 'textarea'
+        ? `<textarea id="${fieldId}" rows="3">${esc(val || defaultVal || '')}</textarea>`
+        : `<input type="${inputType||'text'}" id="${fieldId}" value="${esc(val || defaultVal || '')}">`;
+    return `<div class="elem-block">
+      <div class="elem-header" onclick="toggleElem(this)">
+        <span class="elem-type">${icon} ${esc(label)}</span>
+        <div class="elem-actions">
+          <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();toggleElem(this.closest('.elem-header'))" title="Edit">&#9998;</button>
+          <button class="btn btn-danger btn-xs" onclick="event.stopPropagation();clearElemField('${fieldId}')" title="Clear">&#128465;</button>
+        </div>
+      </div>
+      <div class="elem-preview">${esc(preview).substring(0, 120)}${String(preview).length > 120 ? '...' : ''}</div>
+      <div class="elem-editing"><div class="sec-field">${hint?`<label>${esc(hint)}</label>`:''}${editField}</div></div>
+    </div>`;
+}
+function elemButtonBlock(label, textFieldId, urlFieldId, colorFieldId, styleFieldId, currentText, currentUrl, currentColor, currentStyle){
+    const txt = currentText || '';
+    const url = currentUrl || '';
+    const col = currentColor || '#FF5F00';
+    const styleOpts = ['filled','outline','ghost'];
+    const sty = styleOpts.includes(currentStyle) ? currentStyle : 'filled';
+    return `<div class="elem-block elem-button">
+      <div class="elem-header" onclick="toggleElem(this)">
+        <span class="elem-type">&#128222; ${esc(label)}</span>
+        <div class="elem-actions">
+          <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();toggleElem(this.closest('.elem-header'))" title="Edit">&#9998;</button>
+          <button class="btn btn-danger btn-xs" onclick="event.stopPropagation();clearElemField('${textFieldId}');clearElemField('${urlFieldId}')" title="Clear">&#128465;</button>
+        </div>
+      </div>
+      <div class="elem-preview"><span class="elem-btn-preview" style="background:${esc(col)};color:#fff">${esc(txt || 'Button')}</span></div>
+      <div class="elem-editing">
+        <div class="sec-field"><label>Button Text</label><input id="${textFieldId}" value="${esc(txt)}"></div>
+        <div class="sec-row">
+          <div class="sec-field"><label>URL / Action</label><input id="${urlFieldId}" value="${esc(url)}" placeholder="#offers or https://..."></div>
+          <div class="sec-field"><label>Color</label><input type="color" id="${colorFieldId}" value="${esc(col)}" style="width:100%;height:36px;padding:2px;cursor:pointer"></div>
+        </div>
+        <div class="sec-field"><label>Style</label><select id="${styleFieldId}">${styleOpts.map(s=>`<option value="${s}" ${sty===s?'selected':''}>${s.charAt(0).toUpperCase()+s.slice(1)}</option>`).join('')}</select></div>
+      </div>
+    </div>`;
+}
+function toggleElem(headerEl){
+    const block = headerEl.closest('.elem-block');
+    if (!block) return;
+    // Collapse siblings to act like accordion
+    const siblings = block.parentElement ? block.parentElement.querySelectorAll('.elem-block.expanded') : [];
+    siblings.forEach(s => { if (s !== block) s.classList.remove('expanded'); });
+    block.classList.toggle('expanded');
+}
+function clearElemField(fieldId){
+    const el = document.getElementById(fieldId);
+    if (el) { el.value = ''; el.dispatchEvent(new Event('input',{bubbles:true})); }
+    toast('Field cleared','info');
+}
+
 function buildSecEditorHTML(id){
     const c = cmsConfig.content || {};
     const sec = cmsConfig.sections.find(s=>s.id===id);
     if(sec && sec.type!=='builtin'){
         const cc = sec.content || {};
         return `<div class="sec-editor-title">Custom Section — ${esc(sec.type)}</div>
-          <div class="sec-field"><label>Name</label><input id="sec_cusName" value="${esc(sec.name||'')}"></div>
+          ${elemTextBlock('&#128221;','Name','sec_cusName','text','','',sec.name||'')}
           <div class="sec-field"><label>Type</label><select id="sec_cusType"><option value="text" ${sec.type==='text'?'selected':''}>Text Block</option><option value="image_text" ${sec.type==='image_text'?'selected':''}>Image + Text</option><option value="cta_banner" ${sec.type==='cta_banner'?'selected':''}>CTA Banner</option></select></div>
-          <div class="sec-field"><label>Heading</label><input id="sec_cusHeading" value="${esc(cc.heading||'')}"></div>
-          <div class="sec-field"><label>Body</label><textarea id="sec_cusBody" rows="3">${esc(cc.body||'')}</textarea></div>
-          <div class="sec-field"><label>Image URL</label><input id="sec_cusImg" value="${esc(cc.imageUrl||'')}"></div>
-          <div class="sec-row"><div class="sec-field"><label>Button Text</label><input id="sec_cusBtn" value="${esc(cc.buttonText||'')}"></div><div class="sec-field"><label>Button URL</label><input id="sec_cusBtnUrl" value="${esc(cc.buttonUrl||'')}"></div></div>
-          <button class="btn btn-primary btn-sm" onclick="saveCustomSection('${sec.id}')">Save</button>`;
+          ${elemTextBlock('&#128221;','Heading','sec_cusHeading','text','',cc.heading||'')}
+          ${elemTextBlock('&#128221;','Body','sec_cusBody','textarea','',cc.body||'')}
+          ${elemTextBlock('&#128247;','Image URL','sec_cusImg','text','',cc.imageUrl||'')}
+          ${elemButtonBlock('Button','sec_cusBtn','sec_cusBtnUrl','sec_cusBtnColor','sec_cusBtnStyle',cc.buttonText||'',cc.buttonUrl||'',cc.buttonColor||'#FF5F00',cc.buttonStyle||'filled')}
+          <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="saveCustomSection('${sec.id}')">Save &amp; Publish</button>`;
     }
     switch(id){
         case 'nav': return `<div class="sec-editor-title">Navigation</div>
-            <div class="sec-field"><label>Logo Text</label><input id="sec_logo" value="${esc(c.logo||'FASTRACK')}"></div>
-            <div class="sec-field"><label>CTA Button Text</label><input id="sec_navCta" value="${esc(c.nav?.ctaText||'View Offers')}"></div>
-            <button class="btn btn-primary btn-sm" onclick="saveSecContent('nav')">Save</button>`;
+            ${elemTextBlock('&#128225;','Logo Text','sec_logo','text','FASTRACK',c.logo||'')}
+            ${elemTextBlock('&#128221;','Nav CTA Text','sec_navCta','text','View Offers',c.nav?.ctaText||'')}
+            <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="saveSecContent('nav')">Save &amp; Publish</button>`;
         case 'hero': return `<div class="sec-editor-title">Hero Section</div>
-            <div class="sec-field"><label>Urgency Badge</label><input id="sec_heroBadge" value="${esc(c.hero?.urgencyBadge||'Offer Ends Soon — Limited Spots')}"></div>
-            <div class="sec-field"><label>Headline (HTML allowed)</label><input id="sec_heroHeadline" value="${esc(c.hero?.headline||'SAVE UP TO <strong>40%</strong> ON MONTHLY CAR RENTAL')}"></div>
-            <div class="sec-field"><label>Subtext</label><textarea id="sec_heroSubtext" rows="2">${esc(c.hero?.subtext||'Premium cars from AED 999/month. Full insurance, free UAE delivery, zero hidden fees.')}</textarea></div>
-            <div class="sec-row"><div class="sec-field"><label>Proof Stat 1</label><input id="sec_heroProof1" value="${esc(c.hero?.proof1||'4.9/5 from 2,500+ customers')}"></div><div class="sec-field"><label>Proof Stat 2</label><input id="sec_heroProof2" value="${esc(c.hero?.proof2||'143 booked this week')}"></div></div>
-            <div class="sec-row"><div class="sec-field"><label>Primary CTA</label><input id="sec_heroCta1" value="${esc(c.hero?.ctaPrimary||'Claim Your Deal')}"></div><div class="sec-field"><label>Secondary CTA</label><input id="sec_heroCta2" value="${esc(c.hero?.ctaSecondary||'WhatsApp Us')}"></div></div>
-            <button class="btn btn-primary btn-sm" onclick="saveSecContent('hero')">Save</button>`;
+            ${elemTextBlock('&#128293;','Badge Text','sec_heroBadge','text','Offer Ends Soon — Limited Spots',c.hero?.urgencyBadge||'')}
+            ${elemTextBlock('&#128221;','Headline (HTML allowed)','sec_heroHeadline','text','SAVE UP TO <strong>40%</strong> ON MONTHLY CAR RENTAL',c.hero?.headline||'','<strong>, <span>, <em> tags allowed')}
+            ${elemTextBlock('&#128221;','Subtext','sec_heroSubtext','textarea','Premium cars from AED 999/month. Full insurance, free UAE delivery, zero hidden fees.',c.hero?.subtext||'')}
+            ${elemTextBlock('&#11088;','Proof Stat 1','sec_heroProof1','text','4.9/5 from 2,500+ customers',c.hero?.proof1||'')}
+            ${elemTextBlock('&#9989;','Proof Stat 2','sec_heroProof2','text','143 booked this week',c.hero?.proof2||'')}
+            ${elemButtonBlock('Primary Button','sec_heroCta1','sec_heroCta1Url','sec_heroCta1Color','sec_heroCta1Style',c.hero?.ctaPrimary||'Claim Your Deal',c.hero?.ctaPrimaryUrl||'#offers',c.hero?.ctaPrimaryColor||'#FF5F00',c.hero?.ctaPrimaryStyle||'filled')}
+            ${elemButtonBlock('Secondary Button','sec_heroCta2','sec_heroCta2Url','sec_heroCta2Color','sec_heroCta2Style',c.hero?.ctaSecondary||'WhatsApp Us',c.hero?.ctaSecondaryUrl||'https://wa.me/971585969960',c.hero?.ctaSecondaryColor||'#25D366',c.hero?.ctaSecondaryStyle||'outline')}
+            <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="saveSecContent('hero')">Save &amp; Publish</button>`;
         case 'countdown': return `<div class="sec-editor-title">Countdown Timer</div>
-            <div class="sec-field"><label><input type="checkbox" id="sec_cdEnabled" ${c.countdown?.enabled!==false?'checked':''} style="width:auto;margin-right:6px"> Enable Countdown Timer</label></div>
-            <div class="sec-field"><label>Urgency Text</label><input id="sec_cdText" value="${esc(c.countdown?.urgencyText||'DEAL EXPIRES IN:')}"></div>
-            <div class="sec-field"><label>End Date/Time (leave empty for auto 3 days)</label><input type="datetime-local" id="sec_cdEnd" value="${esc(c.countdown?.endDate||'')}"></div>
-            <button class="btn btn-primary btn-sm" onclick="saveSecContent('countdown')">Save</button>`;
-        case 'ticker': return `<div class="sec-editor-title">Social Proof Ticker</div>
+            <div class="elem-block"><div class="elem-header" onclick="toggleElem(this)"><span class="elem-type">&#9202; Enable Timer</span><div class="elem-actions"><button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();toggleElem(this.closest('.elem-header'))" title="Edit">&#9998;</button></div></div><div class="elem-preview">${c.countdown?.enabled!==false?'Enabled':'Disabled'}</div><div class="elem-editing"><div class="sec-field"><label><input type="checkbox" id="sec_cdEnabled" ${c.countdown?.enabled!==false?'checked':''} style="width:auto;margin-right:6px"> Show countdown timer on landing page</label></div></div></div>
+            ${elemTextBlock('&#128221;','Urgency Text','sec_cdText','text','DEAL EXPIRES IN:',c.countdown?.urgencyText||'')}
+            <div class="elem-block"><div class="elem-header" onclick="toggleElem(this)"><span class="elem-type">&#128197; End Date/Time</span><div class="elem-actions"><button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();toggleElem(this.closest('.elem-header'))" title="Edit">&#9998;</button><button class="btn btn-danger btn-xs" onclick="event.stopPropagation();clearElemField('sec_cdEnd')" title="Clear">&#128465;</button></div></div><div class="elem-preview">${esc(c.countdown?.endDate||'Auto — 3 days from now')}</div><div class="elem-editing"><div class="sec-field"><label>End Date (leave empty for auto 3 days)</label><input type="datetime-local" id="sec_cdEnd" value="${esc(c.countdown?.endDate||'')}"></div></div></div>
+            <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="saveSecContent('countdown')">Save &amp; Publish</button>`;
+        case 'ticker': return `<div class="sec-editor-title">Social Proof Ticker — Drag messages to reorder</div>
             <div id="sec_tickerList"></div>
-            <button class="btn btn-secondary btn-sm" onclick="addSecTicker()" style="margin-top:6px">+ Add Message</button>
-            <button class="btn btn-primary btn-sm" onclick="saveSecContent('ticker')" style="margin-left:8px">Save</button>`;
+            <button class="btn btn-secondary btn-xs add-elem-btn" onclick="addSecTicker()">+ Add Ticker Message</button>
+            <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="saveSecContent('ticker')">Save &amp; Publish</button>`;
         case 'trust': return `<div class="sec-editor-title">Trust Bar (5 items)</div>
             <div id="sec_trustList"></div>
-            <button class="btn btn-primary btn-sm" onclick="saveSecContent('trust')" style="margin-top:6px">Save</button>`;
+            <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="saveSecContent('trust')">Save &amp; Publish</button>`;
         case 'cars': return `<div class="sec-editor-title">Cars Section Header</div>
-            <div class="sec-field"><label>Tag Text</label><input id="sec_carsTag" value="${esc(c.carsSection?.tag||'Limited Spots Available')}"></div>
-            <div class="sec-field"><label>Headline</label><input id="sec_carsHeadline" value="${esc(c.carsSection?.headline||'CHOOSE YOUR <strong>DEAL</strong>')}"></div>
-            <div class="sec-field"><label>Subtext</label><input id="sec_carsSubtext" value="${esc(c.carsSection?.subtext||'Lock in your discounted monthly rate before it\x27s gone.')}"></div>
-            <button class="btn btn-primary btn-sm" onclick="saveSecContent('cars')">Save</button>`;
+            ${elemTextBlock('&#128293;','Tag Text','sec_carsTag','text','Limited Spots Available',c.carsSection?.tag||'')}
+            ${elemTextBlock('&#128221;','Headline (HTML allowed)','sec_carsHeadline','text','CHOOSE YOUR <strong>DEAL</strong>',c.carsSection?.headline||'')}
+            ${elemTextBlock('&#128221;','Subtext','sec_carsSubtext','text','Lock in your discounted monthly rate before it\x27s gone.',c.carsSection?.subtext||'')}
+            <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="saveSecContent('cars')">Save &amp; Publish</button>`;
         case 'why': return `<div class="sec-editor-title">Why Us Section</div>
-            <div class="sec-row"><div class="sec-field"><label>Section Label</label><input id="sec_whyLabel" value="${esc(c.whyUs?.label||'Why 2,500+ Customers Trust Us')}"></div><div class="sec-field"><label>Section Title</label><input id="sec_whyTitle" value="${esc(c.whyUs?.title||'THE FASTRACK DIFFERENCE')}"></div></div>
+            ${elemTextBlock('&#128221;','Section Label','sec_whyLabel','text','Why 2,500+ Customers Trust Us',c.whyUs?.label||'')}
+            ${elemTextBlock('&#128221;','Section Title','sec_whyTitle','text','THE FASTRACK DIFFERENCE',c.whyUs?.title||'')}
             <div id="sec_whyList"></div>
-            <button class="btn btn-primary btn-sm" onclick="saveSecContent('why')" style="margin-top:6px">Save</button>`;
+            <button class="btn btn-secondary btn-xs add-elem-btn" onclick="addWhyUsCard();renderSecWhyList()">+ Add Card</button>
+            <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="saveSecContent('why')">Save &amp; Publish</button>`;
         case 'reviews': return `<div class="sec-editor-title">Customer Reviews</div>
-            <div class="sec-row"><div class="sec-field"><label>Section Label</label><input id="sec_revLabel" value="${esc(c.reviews?.label||'Real Reviews')}"></div><div class="sec-field"><label>Section Title</label><input id="sec_revTitle" value="${esc(c.reviews?.title||'WHAT OUR CUSTOMERS SAY')}"></div></div>
+            ${elemTextBlock('&#128221;','Section Label','sec_revLabel','text','Real Reviews',c.reviews?.label||'')}
+            ${elemTextBlock('&#128221;','Section Title','sec_revTitle','text','WHAT OUR CUSTOMERS SAY',c.reviews?.title||'')}
             <div id="sec_reviewsList"></div>
-            <button class="btn btn-secondary btn-sm" onclick="addSecReview()" style="margin-top:6px">+ Add Review</button>
-            <button class="btn btn-primary btn-sm" onclick="saveSecContent('reviews')" style="margin-left:8px">Save</button>`;
+            <button class="btn btn-secondary btn-xs add-elem-btn" onclick="addSecReview()">+ Add Review</button>
+            <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="saveSecContent('reviews')">Save &amp; Publish</button>`;
         case 'guarantee': return `<div class="sec-editor-title">Guarantee Section</div>
-            <div class="sec-field"><label>Headline (HTML allowed)</label><input id="sec_guarHeadline" value="${esc(c.guarantee?.headline||'PRICE MATCH <span>GUARANTEE</span>')}"></div>
-            <div class="sec-field"><label>Subtext</label><textarea id="sec_guarSubtext" rows="2">${esc(c.guarantee?.subtext||'Found a cheaper monthly rate? We\x27ll match it + give you extra 5% off.')}</textarea></div>
-            <button class="btn btn-primary btn-sm" onclick="saveSecContent('guarantee')">Save</button>`;
+            ${elemTextBlock('&#128221;','Headline (HTML allowed)','sec_guarHeadline','text','PRICE MATCH <span>GUARANTEE</span>',c.guarantee?.headline||'')}
+            ${elemTextBlock('&#128221;','Subtext','sec_guarSubtext','textarea','Found a cheaper monthly rate? We\x27ll match it + give you extra 5% off.',c.guarantee?.subtext||'')}
+            <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="saveSecContent('guarantee')">Save &amp; Publish</button>`;
         case 'finalcta': return `<div class="sec-editor-title">Final CTA</div>
-            <div class="sec-field"><label>Headline (HTML allowed)</label><input id="sec_ctaHeadline" value="${esc(c.finalCta?.headline||'DON\x27T MISS OUT — <span>LOCK YOUR RATE</span>')}"></div>
-            <div class="sec-field"><label>Subtext</label><input id="sec_ctaSubtext" value="${esc(c.finalCta?.subtext||'Prices go up when spots are filled. Secure your deal today.')}"></div>
-            <div class="sec-field"><label>Button Text</label><input id="sec_ctaButton" value="${esc(c.finalCta?.buttonText||'View Deals')}"></div>
-            <button class="btn btn-primary btn-sm" onclick="saveSecContent('finalcta')">Save</button>`;
+            ${elemTextBlock('&#128221;','Headline (HTML allowed)','sec_ctaHeadline','text','DON\x27T MISS OUT — <span>LOCK YOUR RATE</span>',c.finalCta?.headline||'')}
+            ${elemTextBlock('&#128221;','Subtext','sec_ctaSubtext','text','Prices go up when spots are filled. Secure your deal today.',c.finalCta?.subtext||'')}
+            ${elemButtonBlock('Button','sec_ctaButton','sec_ctaButtonUrl','sec_ctaButtonColor','sec_ctaButtonStyle',c.finalCta?.buttonText||'View Deals',c.finalCta?.buttonUrl||'#offers',c.finalCta?.buttonColor||'#FF5F00',c.finalCta?.buttonStyle||'filled')}
+            <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="saveSecContent('finalcta')">Save &amp; Publish</button>`;
         case 'footer': return `<div class="sec-editor-title">Footer</div>
-            <div class="sec-field"><label>Copyright</label><input id="sec_footCopy" value="${esc(c.footer?.copyright||'© 2024 Fastrack Rent a Car • Dubai, UAE')}"></div>
-            <div class="sec-row"><div class="sec-field"><label>Phone</label><input id="sec_footPhone" value="${esc(c.footer?.phone||'+971 58 596 9960')}"></div><div class="sec-field"><label>WhatsApp Text</label><input id="sec_footWa" value="${esc(c.footer?.whatsappText||'WhatsApp')}"></div></div>
-            <div class="sec-field"><label>Email</label><input id="sec_footEmail" value="${esc(c.footer?.email||'info@fasttrackrac.com')}"></div>
-            <button class="btn btn-primary btn-sm" onclick="saveSecContent('footer')">Save</button>`;
+            ${elemTextBlock('&#169;','Copyright','sec_footCopy','text','© 2024 Fastrack Rent a Car • Dubai, UAE',c.footer?.copyright||'')}
+            ${elemTextBlock('&#128222;','Phone','sec_footPhone','text','+971 58 596 9960',c.footer?.phone||'')}
+            ${elemTextBlock('&#128172;','WhatsApp Link Text','sec_footWa','text','WhatsApp',c.footer?.whatsappText||'')}
+            ${elemTextBlock('&#128231;','Email','sec_footEmail','email','info@fasttrackrac.com',c.footer?.email||'')}
+            <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="saveSecContent('footer')">Save &amp; Publish</button>`;
         case 'sticky': return `<div class="sec-editor-title">Sticky Bottom Bar</div>
-            <div class="sec-row"><div class="sec-field"><label>Prefix</label><input id="sec_stickyPrefix" value="${esc(c.stickyBar?.prefix||'From')}"></div><div class="sec-field"><label>Was Price</label><input id="sec_stickyWas" value="${esc(c.stickyBar?.wasPrice||'AED 1,399')}"></div></div>
-            <div class="sec-row"><div class="sec-field"><label>Current Price</label><input id="sec_stickyCurrent" value="${esc(c.stickyBar?.currentPrice||'AED 999/mo')}"></div><div class="sec-field"><label>Button Text</label><input id="sec_stickyBtn" value="${esc(c.stickyBar?.buttonText||'Claim Deal')}"></div></div>
-            <button class="btn btn-primary btn-sm" onclick="saveSecContent('sticky')">Save</button>`;
+            ${elemTextBlock('&#128221;','Prefix','sec_stickyPrefix','text','From',c.stickyBar?.prefix||'')}
+            ${elemTextBlock('&#128181;','Was Price','sec_stickyWas','text','AED 1,399',c.stickyBar?.wasPrice||'')}
+            ${elemTextBlock('&#128181;','Current Price','sec_stickyCurrent','text','AED 999/mo',c.stickyBar?.currentPrice||'')}
+            ${elemButtonBlock('Button','sec_stickyBtn','sec_stickyBtnUrl','sec_stickyBtnColor','sec_stickyBtnStyle',c.stickyBar?.buttonText||'Claim Deal',c.stickyBar?.buttonUrl||'#offers',c.stickyBar?.buttonColor||'#FF5F00',c.stickyBar?.buttonStyle||'filled')}
+            <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="saveSecContent('sticky')">Save &amp; Publish</button>`;
         case 'leadpopup': return `<div class="sec-editor-title">Lead Capture Popup</div>
-            <div class="sec-field"><label>Offer Tag</label><input id="sec_popTag" value="${esc(c.leadPopup?.offerTag||'Limited Time Offer')}"></div>
-            <div class="sec-field"><label>Headline</label><input id="sec_popHeadline" value="${esc(c.leadPopup?.headline||'Exclusive Deal')}"></div>
-            <div class="sec-field"><label>Value Text</label><input id="sec_popValue" value="${esc(c.leadPopup?.offerValue||'5% EXTRA OFF')}"></div>
-            <div class="sec-field"><label>Description</label><textarea id="sec_popSubtext" rows="2">${esc(c.leadPopup?.subtext||'Drop your details and get an exclusive discount code on WhatsApp')}</textarea></div>
-            <div class="sec-row"><div class="sec-field"><label>Submit Button</label><input id="sec_popButton" value="${esc(c.leadPopup?.buttonText||'Claim My Discount')}"></div><div class="sec-field"><label>Skip Text</label><input id="sec_popSkip" value="${esc(c.leadPopup?.skipText||'No thanks, I\x27ll pay full price')}"></div></div>
-            <button class="btn btn-primary btn-sm" onclick="saveSecContent('leadpopup')">Save</button>`;
+            ${elemTextBlock('&#128293;','Offer Tag','sec_popTag','text','Limited Time Offer',c.leadPopup?.offerTag||'')}
+            ${elemTextBlock('&#128221;','Headline','sec_popHeadline','text','Exclusive Deal',c.leadPopup?.headline||'')}
+            ${elemTextBlock('&#128184;','Value Text','sec_popValue','text','5% EXTRA OFF',c.leadPopup?.offerValue||'')}
+            ${elemTextBlock('&#128221;','Description','sec_popSubtext','textarea','Drop your details and get an exclusive discount code on WhatsApp',c.leadPopup?.subtext||'')}
+            ${elemButtonBlock('Submit Button','sec_popButton','sec_popButtonUrl','sec_popButtonColor','sec_popButtonStyle',c.leadPopup?.buttonText||'Claim My Discount',c.leadPopup?.buttonUrl||'',c.leadPopup?.buttonColor||'#FF5F00',c.leadPopup?.buttonStyle||'filled')}
+            ${elemTextBlock('&#128221;','Skip Text','sec_popSkip','text','No thanks, I\x27ll pay full price',c.leadPopup?.skipText||'')}
+            <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="saveSecContent('leadpopup')">Save &amp; Publish</button>`;
         default: return '<div style="color:var(--text-muted);font-size:12px">No editable content for this section.</div>';
     }
 }
@@ -2055,7 +2216,14 @@ async function saveSecContent(id){
                 c.hero.proof1=document.getElementById('sec_heroProof1').value;
                 c.hero.proof2=document.getElementById('sec_heroProof2').value;
                 c.hero.ctaPrimary=document.getElementById('sec_heroCta1').value;
-                c.hero.ctaSecondary=document.getElementById('sec_heroCta2').value; break;
+                c.hero.ctaPrimaryUrl=document.getElementById('sec_heroCta1Url')?.value||'';
+                c.hero.ctaPrimaryColor=document.getElementById('sec_heroCta1Color')?.value||'#FF5F00';
+                c.hero.ctaPrimaryStyle=document.getElementById('sec_heroCta1Style')?.value||'filled';
+                c.hero.ctaSecondary=document.getElementById('sec_heroCta2').value;
+                c.hero.ctaSecondaryUrl=document.getElementById('sec_heroCta2Url')?.value||'';
+                c.hero.ctaSecondaryColor=document.getElementById('sec_heroCta2Color')?.value||'#25D366';
+                c.hero.ctaSecondaryStyle=document.getElementById('sec_heroCta2Style')?.value||'outline';
+                break;
             case 'countdown':
                 c.countdown=c.countdown||{};
                 c.countdown.enabled=document.getElementById('sec_cdEnabled').checked;
@@ -2086,7 +2254,11 @@ async function saveSecContent(id){
                 c.finalCta=c.finalCta||{};
                 c.finalCta.headline=document.getElementById('sec_ctaHeadline').value;
                 c.finalCta.subtext=document.getElementById('sec_ctaSubtext').value;
-                c.finalCta.buttonText=document.getElementById('sec_ctaButton').value; break;
+                c.finalCta.buttonText=document.getElementById('sec_ctaButton').value;
+                c.finalCta.buttonUrl=document.getElementById('sec_ctaButtonUrl')?.value||'';
+                c.finalCta.buttonColor=document.getElementById('sec_ctaButtonColor')?.value||'#FF5F00';
+                c.finalCta.buttonStyle=document.getElementById('sec_ctaButtonStyle')?.value||'filled';
+                break;
             case 'footer':
                 c.footer=c.footer||{};
                 c.footer.copyright=document.getElementById('sec_footCopy').value;
@@ -2098,7 +2270,11 @@ async function saveSecContent(id){
                 c.stickyBar.prefix=document.getElementById('sec_stickyPrefix').value;
                 c.stickyBar.wasPrice=document.getElementById('sec_stickyWas').value;
                 c.stickyBar.currentPrice=document.getElementById('sec_stickyCurrent').value;
-                c.stickyBar.buttonText=document.getElementById('sec_stickyBtn').value; break;
+                c.stickyBar.buttonText=document.getElementById('sec_stickyBtn').value;
+                c.stickyBar.buttonUrl=document.getElementById('sec_stickyBtnUrl')?.value||'';
+                c.stickyBar.buttonColor=document.getElementById('sec_stickyBtnColor')?.value||'#FF5F00';
+                c.stickyBar.buttonStyle=document.getElementById('sec_stickyBtnStyle')?.value||'filled';
+                break;
             case 'leadpopup':
                 c.leadPopup=c.leadPopup||{};
                 c.leadPopup.offerTag=document.getElementById('sec_popTag').value;
@@ -2106,6 +2282,9 @@ async function saveSecContent(id){
                 c.leadPopup.offerValue=document.getElementById('sec_popValue').value;
                 c.leadPopup.subtext=document.getElementById('sec_popSubtext').value;
                 c.leadPopup.buttonText=document.getElementById('sec_popButton').value;
+                c.leadPopup.buttonUrl=document.getElementById('sec_popButtonUrl')?.value||'';
+                c.leadPopup.buttonColor=document.getElementById('sec_popButtonColor')?.value||'#FF5F00';
+                c.leadPopup.buttonStyle=document.getElementById('sec_popButtonStyle')?.value||'filled';
                 c.leadPopup.skipText=document.getElementById('sec_popSkip').value; break;
         }
         await api('PUT','/config',{content:c});
@@ -2126,7 +2305,9 @@ async function saveCustomSection(id){
             body:document.getElementById('sec_cusBody').value,
             imageUrl:document.getElementById('sec_cusImg').value,
             buttonText:document.getElementById('sec_cusBtn').value,
-            buttonUrl:document.getElementById('sec_cusBtnUrl').value
+            buttonUrl:document.getElementById('sec_cusBtnUrl').value,
+            buttonColor:document.getElementById('sec_cusBtnColor')?.value||'#FF5F00',
+            buttonStyle:document.getElementById('sec_cusBtnStyle')?.value||'filled'
         }
     };
     try{
@@ -2214,12 +2395,21 @@ async function publishSections() {
 function openAddSectionModal() {
     document.getElementById('modal').classList.remove('wide');
     document.getElementById('modalTitle').textContent = 'Add Custom Section';
+    const types = [
+        {id:'text', icon:'&#128221;', name:'Text Block', desc:'Heading + body text'},
+        {id:'image_text', icon:'&#128444;', name:'Image + Text', desc:'Image with text beside'},
+        {id:'cta_banner', icon:'&#128227;', name:'CTA Banner', desc:'Full-width CTA'}
+    ];
     document.getElementById('modalBody').innerHTML = `
         <form onsubmit="submitAddSection(event)">
-            <div class="form-group"><label>Section Name</label><input class="form-input" id="newSecName" required></div>
-            <div class="form-group"><label>Type</label><select class="form-input" id="newSecType">
-                <option value="text">Text Block</option><option value="image_text">Image + Text</option><option value="cta_banner">CTA Banner</option>
-            </select></div>
+            <div class="form-group"><label>Section Name</label><input class="form-input" id="newSecName" required placeholder="e.g. Features Highlight"></div>
+            <div class="form-group"><label>Section Type</label><div class="sec-type-grid">
+                ${types.map((t,i)=>`<div class="sec-type-card ${i===0?'selected':''}" data-type="${t.id}" onclick="document.querySelectorAll('.sec-type-card').forEach(c=>c.classList.remove('selected'));this.classList.add('selected');document.getElementById('newSecType').value='${t.id}';">
+                    <span class="sec-type-icon">${t.icon}</span>
+                    <div class="sec-type-name">${t.name}</div>
+                    <div class="sec-type-desc">${t.desc}</div>
+                </div>`).join('')}
+            </div><input type="hidden" id="newSecType" value="text"></div>
             <div class="form-group"><label>Heading</label><input class="form-input" id="newSecHeading"></div>
             <div class="form-group"><label>Body Content</label><textarea class="form-input" id="newSecBody" rows="3"></textarea></div>
             <div class="form-group"><label>Image URL (optional)</label><input class="form-input" id="newSecImg"></div>
