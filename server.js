@@ -74,7 +74,7 @@ setInterval(() => {
 // ── Input sanitizer (deep recursive) ──
 function sanitize(str) {
   if (typeof str !== 'string') return str;
-  return str.replace(/[<>]/g, '').replace(/javascript:/gi, '').replace(/on\w+\s*=/gi, '').trim();
+  return str.replace(/<(?!\/?(?:strong|span|em|b|i|u|br|sub|sup)\b)[^>]*>/gi, '').replace(/javascript:/gi, '').replace(/on\w+\s*=/gi, '').trim();
 }
 function deepSanitize(obj) {
   if (typeof obj === 'string') return sanitize(obj);
