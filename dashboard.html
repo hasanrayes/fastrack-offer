@@ -1961,7 +1961,7 @@ function buildSecEditorHTML(id){
         case 'cars': return `<div class="sec-editor-title">Cars Section Header</div>
             <div class="sec-field"><label>Tag Text</label><input id="sec_carsTag" value="${esc(c.carsSection?.tag||'Limited Spots Available')}"></div>
             <div class="sec-field"><label>Headline</label><input id="sec_carsHeadline" value="${esc(c.carsSection?.headline||'CHOOSE YOUR <strong>DEAL</strong>')}"></div>
-            <div class="sec-field"><label>Subtext</label><input id="sec_carsSubtext" value="${esc(c.carsSection?.subtext||'Lock in your discounted monthly rate before it\\'s gone.')}"></div>
+            <div class="sec-field"><label>Subtext</label><input id="sec_carsSubtext" value="${esc(c.carsSection?.subtext||'Lock in your discounted monthly rate before its gone.')}"></div>
             <button class="btn btn-primary btn-sm" onclick="saveSecContent('cars')">Save</button>`;
         case 'why': return `<div class="sec-editor-title">Why Us Section</div>
             <div class="sec-row"><div class="sec-field"><label>Section Label</label><input id="sec_whyLabel" value="${esc(c.whyUs?.label||'Why 2,500+ Customers Trust Us')}"></div><div class="sec-field"><label>Section Title</label><input id="sec_whyTitle" value="${esc(c.whyUs?.title||'THE FASTRACK DIFFERENCE')}"></div></div>
