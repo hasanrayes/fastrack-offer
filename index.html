@@ -290,8 +290,9 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--dark);color:var(-
   .why-grid{grid-template-columns:1fr}
   .rev-card{min-width:240px}
   .footer-inner{flex-direction:column;text-align:center}
-  .sticky-inner{flex-direction:column;text-align:center;gap:6px}
-  .sticky-text{font-size:12px}
+  .sticky-inner{flex-direction:row;text-align:left;gap:8px;align-items:center;justify-content:space-between}
+  .sticky-text{font-size:11px}
+  .sticky-btn{padding:10px 16px;font-size:12px}
   .carousel-nav{display:none}
   .carousel-dots{display:flex}
   .swipe-hint{display:flex}
@@ -791,14 +792,19 @@ document.addEventListener('mouseout',function(e){if(!exitS&&!localStorage.getIte
       sec.sort(function(a,b){return(a.order||0)-(b.order||0);});
       // 1) Apply visibility
       sec.forEach(function(section){var sel2=sectionMap[section.id];if(!sel2)return;var el=document.querySelector(sel2);if(!el)return;el.style.display=section.visible===false?'none':'';});
-      // 2) Reorder built-in sections in DOM to match config order (only sections that share a common parent — body)
+      // 2) Reorder built-in content sections in DOM to match config order.
+      //    Insert BEFORE footer so overlays (booking, lead popup, toasts, WA FAB, sticky bar) stay at the end of body.
+      //    Never move: nav, footer, sticky-bottom, bk-overlay, lead-ov, toast-c, notif, wa.
       var reorderable=['hero','ticker','trust','cars','why','reviews','guarantee','finalcta'];
-      sec.forEach(function(section){
-        if(section.type==='builtin'&&reorderable.indexOf(section.id)!==-1&&section.visible!==false){
-          var sel2=sectionMap[section.id];var el=document.querySelector(sel2);
-          if(el&&el.parentElement===document.body){document.body.appendChild(el);}
-        }
-      });
+      var footerForOrder=document.querySelector('.footer');
+      if(footerForOrder&&footerForOrder.parentElement===document.body){
+        sec.forEach(function(section){
+          if(section.type==='builtin'&&reorderable.indexOf(section.id)!==-1&&section.visible!==false){
+            var sel2=sectionMap[section.id];var el=document.querySelector(sel2);
+            if(el&&el.parentElement===document.body){document.body.insertBefore(el,footerForOrder);}
+          }
+        });
+      }
       // 3) Render custom sections (non-builtin) before footer
       var footerEl=document.querySelector('.footer');
       sec.forEach(function(section){
