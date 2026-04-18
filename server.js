@@ -147,6 +147,19 @@ let nextBookingId = 1;
 let leads = [];
 let nextLeadId = 1;
 
+// New stores for v3 features
+let promos = [];
+let customerMeta = new Map(); // phone -> { notes, tags[] }
+let nextInvoiceNumber = 1;
+let templates = [
+  { id: 'tpl_welcome', name: 'Welcome Message', category: 'welcome', body: 'Hi {{name}}! Welcome to Fastrack Rent a Car. We received your inquiry about {{car}}. One of our agents will contact you shortly.', createdAt: new Date().toISOString() },
+  { id: 'tpl_confirmation', name: 'Booking Confirmation', category: 'booking', body: 'Hi {{name}}, your booking {{ref}} for {{car}} starting {{date}} is confirmed. Total: AED {{price}}. We will be in touch to finalize delivery.', createdAt: new Date().toISOString() },
+  { id: 'tpl_payment', name: 'Payment Reminder', category: 'payment', body: 'Hi {{name}}, friendly reminder about your pending payment for booking {{ref}}. Total due: AED {{price}}. Please let us know how you would like to proceed.', createdAt: new Date().toISOString() },
+  { id: 'tpl_delivery', name: 'Delivery Scheduled', category: 'delivery', body: 'Hi {{name}}, your {{car}} delivery is scheduled for {{date}}. Our driver will contact you 30 minutes before arrival. Ref: {{ref}}', createdAt: new Date().toISOString() },
+  { id: 'tpl_return', name: 'Return Reminder', category: 'return', body: 'Hi {{name}}, this is a reminder that your rental ({{car}}, ref {{ref}}) ends on {{date}}. Please let us know if you would like to extend.', createdAt: new Date().toISOString() },
+  { id: 'tpl_followup', name: 'Follow Up', category: 'followup', body: 'Hi {{name}}, following up on your interest in renting with Fastrack. Is there anything I can help clarify? We have great monthly offers available!', createdAt: new Date().toISOString() }
+];
+
 // ── Activity Logger ──
 function logActivity(userId, action, details) {
   const user = users.find(u => u.id === userId);
@@ -240,7 +253,7 @@ app.post('/api/leads', (req, res) => {
 });
 
 app.post('/api/bookings', (req, res) => {
-  const { carId, carName, startDate, endDate, duration, location, fullName, phone, email, whatsapp, totalAed, savedAed } = req.body;
+  const { carId, carName, startDate, endDate, duration, location, fullName, phone, email, whatsapp, totalAed, savedAed, promoCode, promoDiscount } = req.body;
   if (!carName || !fullName || !phone) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
@@ -260,11 +273,23 @@ app.post('/api/bookings', (req, res) => {
     whatsapp: whatsapp || '',
     totalAed: totalAed || 0,
     savedAed: savedAed || 0,
+    promoCode: promoCode || '',
+    promoDiscount: promoDiscount || 0,
+    paymentStatus: 'unpaid',
+    amountPaid: 0,
+    paymentMethod: '',
+    paymentNotes: '',
+    paymentHistory: [],
+    invoiceNumber: '',
     status: 'pending',
     notes: [],
     type: 'booking',
     createdAt: new Date().toISOString()
   };
+  if (promoCode) {
+    const p = promos.find(pp => pp.code.toUpperCase() === promoCode.toUpperCase() && pp.active);
+    if (p) { p.usageCount = (p.usageCount || 0) + 1; }
+  }
   bookings.unshift(booking);
   const matchLead = leads.find(l => l.phone === phone && !l.convertedToBooking);
   if (matchLead) matchLead.convertedToBooking = true;
@@ -651,7 +676,7 @@ app.get('/api/cars/admin', auth, (req, res) => {
 });
 
 app.post('/api/cars', auth, requireRole('superadmin', 'manager'), (req, res) => {
-  const { name, cat, img, imgCard, imgBooking, price, was, type, seats, doors, transmission, bags, badge, feats, includes, spots, description, year, color, mileage, fuelType } = req.body;
+  const { name, cat, img, imgCard, imgBooking, price, was, type, seats, doors, transmission, bags, badge, feats, includes, spots, description, year, color, mileage, fuelType, insuranceExpiry, registrationExpiry, lastServiceDate, nextServiceDue } = req.body;
   if (!name || !price) return res.status(400).json({ error: 'Name and price required' });
   const car = {
     id: nextCarId++,
@@ -660,6 +685,8 @@ app.post('/api/cars', auth, requireRole('superadmin', 'manager'), (req, res) => 
     type: type || '', seats: seats || 5, doors: doors || 4, transmission: transmission || 'Automatic', bags: bags || 2,
     badge: badge || '', feats: feats || [], includes: includes || '',
     description: description || '', year: year || '', color: color || '', mileage: mileage || '', fuelType: fuelType || 'Petrol',
+    insuranceExpiry: insuranceExpiry || '', registrationExpiry: registrationExpiry || '',
+    lastServiceDate: lastServiceDate || '', nextServiceDue: nextServiceDue || '',
     spots: spots || 5, viewers: Math.floor(Math.random() * 15) + 5,
     active: true, order: cars.length
   };
@@ -1190,6 +1217,276 @@ app.delete('/api/data', auth, requireRole('superadmin'), (req, res) => {
   logActivity(req.user.id, 'data_cleared', `Cleared all data (${prevCounts.leads} leads, ${prevCounts.bookings} bookings)`);
   addNotification('system', 'Data Cleared', 'All leads and bookings have been cleared');
   res.json({ success: true });
+});
+
+// ══════════════════════════════
+// PAYMENT TRACKING API (Feature 1)
+// ══════════════════════════════
+const VALID_PAYMENT_STATUSES = ['unpaid', 'partial', 'paid'];
+const VALID_PAYMENT_METHODS = ['', 'cash', 'card', 'transfer', 'cheque'];
+
+app.patch('/api/bookings/:id/payment', auth, requireRole('superadmin', 'manager'), (req, res) => {
+  const b = bookings.find(x => x.id === parseInt(req.params.id));
+  if (!b) return res.status(404).json({ error: 'Not found' });
+  const { paymentStatus, amountPaid, paymentMethod, paymentNotes, addPayment } = req.body;
+  if (paymentStatus && !VALID_PAYMENT_STATUSES.includes(paymentStatus)) return res.status(400).json({ error: 'Invalid payment status' });
+  if (paymentMethod && !VALID_PAYMENT_METHODS.includes(paymentMethod)) return res.status(400).json({ error: 'Invalid payment method' });
+  if (!b.paymentHistory) b.paymentHistory = [];
+  if (addPayment && Number(addPayment.amount) > 0) {
+    b.paymentHistory.unshift({
+      id: generateId('pmt'), amount: Number(addPayment.amount),
+      method: addPayment.method || b.paymentMethod || '',
+      notes: addPayment.notes || '',
+      recordedBy: req.user.name,
+      recordedAt: new Date().toISOString()
+    });
+    b.amountPaid = (b.paymentHistory || []).reduce((s, p) => s + Number(p.amount || 0), 0);
+  }
+  if (paymentStatus) b.paymentStatus = paymentStatus;
+  if (amountPaid !== undefined) b.amountPaid = Number(amountPaid);
+  if (paymentMethod !== undefined) b.paymentMethod = paymentMethod;
+  if (paymentNotes !== undefined) b.paymentNotes = paymentNotes;
+  // Auto-update status based on amount
+  const total = Number(b.totalAed) || 0;
+  if (b.amountPaid >= total && total > 0) b.paymentStatus = 'paid';
+  else if (b.amountPaid > 0) b.paymentStatus = 'partial';
+  else if (!paymentStatus) b.paymentStatus = b.paymentStatus || 'unpaid';
+  logActivity(req.user.id, 'payment_updated', `Payment updated for ${b.ref}: ${b.paymentStatus} (AED ${b.amountPaid}/${total})`);
+  res.json(b);
+});
+
+// ══════════════════════════════
+// INVOICE API (Feature 2)
+// ══════════════════════════════
+app.post('/api/bookings/:id/invoice', auth, requireRole('superadmin', 'manager'), (req, res) => {
+  const b = bookings.find(x => x.id === parseInt(req.params.id));
+  if (!b) return res.status(404).json({ error: 'Not found' });
+  if (!b.invoiceNumber) {
+    b.invoiceNumber = 'FT-INV-' + String(nextInvoiceNumber++).padStart(4, '0');
+    b.invoiceGeneratedAt = new Date().toISOString();
+  }
+  logActivity(req.user.id, 'invoice_generated', `Generated invoice ${b.invoiceNumber} for booking ${b.ref}`);
+  res.json({ success: true, invoiceNumber: b.invoiceNumber, booking: b });
+});
+
+// ══════════════════════════════
+// CUSTOMERS API (Feature 3)
+// ══════════════════════════════
+function buildCustomers() {
+  const byPhone = new Map();
+  function norm(p) { return (p || '').replace(/[^0-9]/g, ''); }
+  bookings.forEach(b => {
+    const key = norm(b.phone);
+    if (!key) return;
+    let c = byPhone.get(key);
+    if (!c) {
+      c = { id: key, phone: b.phone, fullName: b.fullName, email: b.email || '', whatsapp: b.whatsapp || '', address: '', bookings: [], leads: [], totalSpent: 0, customerSince: b.createdAt };
+      byPhone.set(key, c);
+    }
+    c.bookings.push({ id: b.id, ref: b.ref, carName: b.carName, totalAed: b.totalAed, status: b.status, paymentStatus: b.paymentStatus || 'unpaid', createdAt: b.createdAt });
+    c.totalSpent += Number(b.totalAed) || 0;
+    if (b.email && !c.email) c.email = b.email;
+    if (b.whatsapp && !c.whatsapp) c.whatsapp = b.whatsapp;
+    if (new Date(b.createdAt) < new Date(c.customerSince)) c.customerSince = b.createdAt;
+  });
+  leads.forEach(l => {
+    const key = norm(l.phone);
+    if (!key) return;
+    let c = byPhone.get(key);
+    if (!c) {
+      c = { id: key, phone: l.phone, fullName: l.fullName, email: l.email || '', whatsapp: l.whatsapp || '', address: l.address || '', bookings: [], leads: [], totalSpent: 0, customerSince: l.createdAt };
+      byPhone.set(key, c);
+    }
+    c.leads.push({ id: l.id, interest: l.interest, source: l.source, status: l.status, createdAt: l.createdAt });
+    if (l.email && !c.email) c.email = l.email;
+    if (l.address && !c.address) c.address = l.address;
+    if (new Date(l.createdAt) < new Date(c.customerSince)) c.customerSince = l.createdAt;
+  });
+  const list = Array.from(byPhone.values()).map(c => {
+    const meta = customerMeta.get(c.id) || { notes: '', tags: [] };
+    const autoTags = [];
+    if (c.bookings.length >= 3) autoTags.push('Repeat');
+    if (c.totalSpent >= 10000) autoTags.push('VIP');
+    if (c.bookings.length === 0 && c.leads.length > 0) autoTags.push('Lead');
+    if (c.bookings.length === 1) autoTags.push('New');
+    const tags = Array.from(new Set([...(meta.tags || []), ...autoTags]));
+    const lastBooking = c.bookings.length ? c.bookings.map(b => b.createdAt).sort().reverse()[0] : null;
+    return { ...c, notes: meta.notes || '', tags, bookingCount: c.bookings.length, leadCount: c.leads.length, lastBooking };
+  });
+  list.sort((a, b) => b.totalSpent - a.totalSpent);
+  return list;
+}
+
+app.get('/api/customers', auth, (req, res) => {
+  const all = buildCustomers();
+  const q = (req.query.search || '').toLowerCase();
+  const tagFilter = req.query.tag || '';
+  let result = all;
+  if (q) result = result.filter(c => `${c.fullName} ${c.phone} ${c.email}`.toLowerCase().includes(q));
+  if (tagFilter) result = result.filter(c => c.tags.includes(tagFilter));
+  res.json(result);
+});
+
+app.get('/api/customers/:id', auth, (req, res) => {
+  const all = buildCustomers();
+  const c = all.find(x => x.id === req.params.id);
+  if (!c) return res.status(404).json({ error: 'Customer not found' });
+  res.json(c);
+});
+
+app.patch('/api/customers/:id', auth, requireRole('superadmin', 'manager'), (req, res) => {
+  const { notes, tags } = req.body;
+  const existing = customerMeta.get(req.params.id) || { notes: '', tags: [] };
+  if (notes !== undefined) existing.notes = notes;
+  if (Array.isArray(tags)) existing.tags = tags;
+  customerMeta.set(req.params.id, existing);
+  logActivity(req.user.id, 'customer_updated', `Updated customer meta for ${req.params.id}`);
+  res.json({ success: true, meta: existing });
+});
+
+// ══════════════════════════════
+// PROMO CODES API (Feature 4)
+// ══════════════════════════════
+app.get('/api/promos', auth, (req, res) => {
+  res.json(promos.map(p => ({ ...p, usageCount: p.usageCount || 0 })));
+});
+
+app.post('/api/promos', auth, requireRole('superadmin', 'manager'), (req, res) => {
+  const { code, discountType, value, minDuration, maxUses, expiryDate, active } = req.body;
+  if (!code || !value) return res.status(400).json({ error: 'Code and value required' });
+  if (promos.find(p => p.code.toUpperCase() === code.toUpperCase())) return res.status(400).json({ error: 'Promo code already exists' });
+  if (discountType && !['percentage', 'fixed'].includes(discountType)) return res.status(400).json({ error: 'Invalid discount type' });
+  const promo = {
+    id: generateId('promo'),
+    code: code.toUpperCase(),
+    discountType: discountType || 'percentage',
+    value: Number(value),
+    minDuration: Number(minDuration) || 0,
+    maxUses: Number(maxUses) || 0,
+    usageCount: 0,
+    expiryDate: expiryDate || '',
+    active: active !== false,
+    createdAt: new Date().toISOString()
+  };
+  promos.push(promo);
+  logActivity(req.user.id, 'promo_created', `Created promo ${promo.code}`);
+  res.json(promo);
+});
+
+app.put('/api/promos/:id', auth, requireRole('superadmin', 'manager'), (req, res) => {
+  const p = promos.find(x => x.id === req.params.id);
+  if (!p) return res.status(404).json({ error: 'Not found' });
+  const { code, discountType, value, minDuration, maxUses, expiryDate, active } = req.body;
+  if (code) p.code = code.toUpperCase();
+  if (discountType && ['percentage', 'fixed'].includes(discountType)) p.discountType = discountType;
+  if (value !== undefined) p.value = Number(value);
+  if (minDuration !== undefined) p.minDuration = Number(minDuration);
+  if (maxUses !== undefined) p.maxUses = Number(maxUses);
+  if (expiryDate !== undefined) p.expiryDate = expiryDate;
+  if (active !== undefined) p.active = active;
+  logActivity(req.user.id, 'promo_updated', `Updated promo ${p.code}`);
+  res.json(p);
+});
+
+app.delete('/api/promos/:id', auth, requireRole('superadmin', 'manager'), (req, res) => {
+  const idx = promos.findIndex(x => x.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: 'Not found' });
+  const deleted = promos.splice(idx, 1)[0];
+  logActivity(req.user.id, 'promo_deleted', `Deleted promo ${deleted.code}`);
+  res.json({ success: true });
+});
+
+// Public promo validation
+app.post('/api/promos/validate', (req, res) => {
+  const { code, duration, subtotal } = req.body;
+  if (!code) return res.status(400).json({ error: 'Promo code required' });
+  const p = promos.find(pp => pp.code.toUpperCase() === code.toUpperCase());
+  if (!p) return res.status(404).json({ valid: false, error: 'Invalid promo code' });
+  if (!p.active) return res.status(400).json({ valid: false, error: 'Promo code is inactive' });
+  if (p.expiryDate && new Date(p.expiryDate) < new Date()) return res.status(400).json({ valid: false, error: 'Promo code has expired' });
+  if (p.maxUses && (p.usageCount || 0) >= p.maxUses) return res.status(400).json({ valid: false, error: 'Promo code usage limit reached' });
+  if (p.minDuration && Number(duration) < p.minDuration) return res.status(400).json({ valid: false, error: `Minimum ${p.minDuration} months required` });
+  const sub = Number(subtotal) || 0;
+  let discount = 0;
+  if (p.discountType === 'percentage') discount = Math.round(sub * p.value / 100);
+  else discount = Math.min(p.value, sub);
+  res.json({ valid: true, code: p.code, discountType: p.discountType, value: p.value, discount, finalTotal: Math.max(0, sub - discount) });
+});
+
+// ══════════════════════════════
+// CAR DOCUMENT ALERTS API (Feature 6)
+// ══════════════════════════════
+app.get('/api/cars/alerts', auth, (req, res) => {
+  const now = Date.now();
+  const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+  const alerts = [];
+  cars.forEach(c => {
+    ['insuranceExpiry', 'registrationExpiry', 'nextServiceDue'].forEach(field => {
+      if (!c[field]) return;
+      const d = new Date(c[field]).getTime();
+      if (isNaN(d)) return;
+      const diff = d - now;
+      let severity = null;
+      if (diff < 0) severity = 'expired';
+      else if (diff < thirtyDays) severity = 'warning';
+      if (severity) {
+        alerts.push({
+          carId: c.id, carName: c.name, field,
+          fieldLabel: field === 'insuranceExpiry' ? 'Insurance' : field === 'registrationExpiry' ? 'Registration' : 'Service Due',
+          date: c[field], severity, daysRemaining: Math.ceil(diff / (24 * 60 * 60 * 1000))
+        });
+      }
+    });
+  });
+  res.json(alerts);
+});
+
+// ══════════════════════════════
+// WHATSAPP TEMPLATES API (Feature 7)
+// ══════════════════════════════
+app.get('/api/templates', auth, (req, res) => {
+  res.json(templates);
+});
+
+app.post('/api/templates', auth, requireRole('superadmin', 'manager'), (req, res) => {
+  const { name, category, body } = req.body;
+  if (!name || !body) return res.status(400).json({ error: 'Name and body required' });
+  const tpl = { id: generateId('tpl'), name, category: category || 'custom', body, createdAt: new Date().toISOString() };
+  templates.push(tpl);
+  logActivity(req.user.id, 'template_created', `Created template: ${name}`);
+  res.json(tpl);
+});
+
+app.put('/api/templates/:id', auth, requireRole('superadmin', 'manager'), (req, res) => {
+  const t = templates.find(x => x.id === req.params.id);
+  if (!t) return res.status(404).json({ error: 'Not found' });
+  if (req.body.name) t.name = req.body.name;
+  if (req.body.category) t.category = req.body.category;
+  if (req.body.body) t.body = req.body.body;
+  logActivity(req.user.id, 'template_updated', `Updated template: ${t.name}`);
+  res.json(t);
+});
+
+app.delete('/api/templates/:id', auth, requireRole('superadmin', 'manager'), (req, res) => {
+  const idx = templates.findIndex(x => x.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: 'Not found' });
+  const deleted = templates.splice(idx, 1)[0];
+  logActivity(req.user.id, 'template_deleted', `Deleted template: ${deleted.name}`);
+  res.json({ success: true });
+});
+
+// ══════════════════════════════
+// OUTSTANDING PAYMENTS (extend /api/stats)
+// ══════════════════════════════
+app.get('/api/stats/outstanding', auth, (req, res) => {
+  let outstanding = 0, count = 0;
+  bookings.forEach(b => {
+    if (b.status === 'cancelled') return;
+    const total = Number(b.totalAed) || 0;
+    const paid = Number(b.amountPaid) || 0;
+    if (paid < total) { outstanding += (total - paid); count++; }
+  });
+  res.json({ outstandingAmount: outstanding, unpaidCount: count });
 });
 
 app.get('/dashboard', (req, res) => {

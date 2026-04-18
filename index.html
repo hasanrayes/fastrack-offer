@@ -630,7 +630,8 @@ function renderBkStep(){
       '<div class="bk-section-title">Pickup</div>'+
       '<div class="bk-fg"><label class="bk-fl" for="bkL">Location</label><select class="bk-fs" id="bkL"><option value="">Select area</option>'+['Dubai Marina','Downtown Dubai','Business Bay','JBR','Deira','Dubai Airport','Abu Dhabi','Sharjah','Other'].map(function(loc){return '<option'+(window._bkLc===loc?' selected':'')+'>'+loc+'</option>';}).join('')+'</select></div>'+
       '<div class="bk-fg"><label class="bk-fl" for="bkD">Start Date</label><input class="bk-fi" type="date" id="bkD" min="'+td+'" value="'+(window._bkDt||'')+'"></div>'+
-      '<div class="bk-fg"><label class="bk-fl" for="bkDu">Duration</label><select class="bk-fs" id="bkDu" onchange="updateBkPrice()">'+[['1','1 Month'],['3','3 Months (Best Value)'],['6','6 Months'],['12','12 Months']].map(function(o){var sel2=(window._bkDu||'3')===o[0]?' selected':'';return '<option value="'+o[0]+'"'+sel2+'>'+o[1]+'</option>';}).join('')+'</select></div>';
+      '<div class="bk-fg"><label class="bk-fl" for="bkDu">Duration</label><select class="bk-fs" id="bkDu" onchange="updateBkPrice()">'+[['1','1 Month'],['3','3 Months (Best Value)'],['6','6 Months'],['12','12 Months']].map(function(o){var sel2=(window._bkDu||'3')===o[0]?' selected':'';return '<option value="'+o[0]+'"'+sel2+'>'+o[1]+'</option>';}).join('')+'</select></div>'+
+      '<div class="bk-fg"><label class="bk-fl" for="bkPromo">Promo Code (optional)</label><div style="display:flex;gap:6px"><input class="bk-fi" type="text" id="bkPromo" placeholder="Enter code" value="'+(window._bkPromo||'').replace(/"/g,'&quot;')+'" style="flex:1;text-transform:uppercase"><button type="button" class="bk-next" style="padding:10px 16px;font-size:13px" onclick="applyPromoCode()">Apply</button></div><div id="bkPromoMsg" style="font-size:11px;margin-top:4px;min-height:14px">'+(window._bkPromoMsg||'')+'</div></div>';
     document.getElementById('bkNextBtn').textContent='Next';
   } else if(bkStep===2){
     b.innerHTML=
@@ -644,7 +645,7 @@ function renderBkStep(){
       '<div class="bk-fg"><label class="bk-fl" for="bkE">Email (optional)</label><input class="bk-fi" type="email" id="bkE" placeholder="you@email.com" value="'+(window._bkEm||'').replace(/"/g,'&quot;')+'"></div>';
     document.getElementById('bkNextBtn').textContent='Review Booking';
   } else {
-    var du=window._bkDu||'3',tot=sel.price*parseInt(du),was=sel.was*parseInt(du),sv=was-tot;
+    var du=window._bkDu||'3',base=sel.price*parseInt(du),disc=Number(window._bkPromoDiscount||0),tot=Math.max(0,base-disc),was=sel.was*parseInt(du),sv=was-tot;
     b.innerHTML=
       '<button type="button" class="bk-back-inline" onclick="bkPrev()">&larr; Back</button>'+
       '<div class="bk-section-title">Review & Confirm</div>'+
@@ -654,6 +655,7 @@ function renderBkStep(){
       '<div class="bk-rr"><span class="k">Location</span><span class="v">'+(window._bkLc||'-')+'</span></div>'+
       '<div class="bk-rr"><span class="k">Name</span><span class="v">'+(window._bkNm||'-')+'</span></div>'+
       '<div class="bk-rr"><span class="k">Phone</span><span class="v">'+(window._bkPh||'-')+'</span></div>'+
+      (disc>0?'<div class="bk-rr"><span class="k">Promo ('+window._bkPromo+')</span><span class="v" style="color:var(--green)">−AED '+disc.toLocaleString()+'</span></div>':'')+
       '<div class="bk-save">&#127881; You\'re saving AED '+sv.toLocaleString()+'!</div>'+
       '<div class="bk-total">AED '+tot.toLocaleString()+'</div>';
     document.getElementById('bkNextBtn').textContent='Confirm Booking';
@@ -667,8 +669,33 @@ function updateBkPrice(){
   var duEl=document.getElementById('bkDu');
   var du=duEl?parseInt(duEl.value):3;
   var tot=sel.price*du;
+  var disc=Number(window._bkPromoDiscount||0);
+  if(disc>0)tot=Math.max(0,tot-disc);
   document.getElementById('bkPriceAmt').textContent='AED '+tot.toLocaleString();
-  document.getElementById('bkPriceDetail').textContent=du+' month'+(du>1?'s':'');
+  document.getElementById('bkPriceDetail').textContent=du+' month'+(du>1?'s':'')+(disc>0?' (promo −AED '+disc.toLocaleString()+')':'');
+}
+
+async function applyPromoCode(){
+  var codeEl=document.getElementById('bkPromo'),msgEl=document.getElementById('bkPromoMsg');
+  var code=(codeEl?.value||'').trim().toUpperCase();
+  if(!code){msgEl.textContent='';msgEl.style.color='';window._bkPromo='';window._bkPromoDiscount=0;window._bkPromoMsg='';updateBkPrice();return;}
+  var du=parseInt(document.getElementById('bkDu').value)||3;
+  var sub=sel.price*du;
+  try{
+    var r=await fetch(API+'/api/promos/validate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:code,duration:du,subtotal:sub})});
+    var d=await r.json();
+    if(d.valid){
+      window._bkPromo=d.code;window._bkPromoDiscount=d.discount;
+      msgEl.textContent='✓ '+d.code+' applied — you save AED '+d.discount.toLocaleString();
+      msgEl.style.color='var(--green)';
+      window._bkPromoMsg=msgEl.textContent;
+      updateBkPrice();toast('Promo applied! Save AED '+d.discount.toLocaleString(),'');
+    } else {
+      window._bkPromo='';window._bkPromoDiscount=0;
+      msgEl.textContent=d.error||'Invalid code';msgEl.style.color='var(--red)';window._bkPromoMsg='';
+      updateBkPrice();toast(d.error||'Invalid code','err');
+    }
+  }catch(e){msgEl.textContent='Could not validate code';msgEl.style.color='var(--red)';}
 }
 
 function bkNext(){
@@ -677,6 +704,7 @@ function bkNext(){
     if(!lc){toast('Please select a delivery location.','err');document.getElementById('bkL').focus();return;}
     if(!dt){toast('Please select a start date.','err');document.getElementById('bkD').focus();return;}
     window._bkDt=dt;window._bkDu=document.getElementById('bkDu').value;window._bkLc=lc;
+    var promoEl=document.getElementById('bkPromo');if(promoEl)window._bkPromo=(promoEl.value||'').trim().toUpperCase();
   } else if(bkStep===2){
     var n=document.getElementById('bkN').value.trim(),p=document.getElementById('bkP').value.trim();
     if(!n||!p){toast('Please fill in name and phone.','err');return;}
@@ -702,8 +730,8 @@ function bkPrev(){
 }
 
 async function submitBooking(){
-  var du=window._bkDu||'3',tot=sel.price*parseInt(du),sv=sel.was*parseInt(du)-tot;
-  var pl={carId:sel.id,carName:sel.name,startDate:window._bkDt,duration:du,location:window._bkLc,fullName:window._bkNm,phone:window._bkPh,email:window._bkEm||'',whatsapp:window._bkWa||'',totalAed:tot,savedAed:sv};
+  var du=window._bkDu||'3',base=sel.price*parseInt(du),disc=Number(window._bkPromoDiscount||0),tot=Math.max(0,base-disc),sv=sel.was*parseInt(du)-tot;
+  var pl={carId:sel.id,carName:sel.name,startDate:window._bkDt,duration:du,location:window._bkLc,fullName:window._bkNm,phone:window._bkPh,email:window._bkEm||'',whatsapp:window._bkWa||'',totalAed:tot,savedAed:sv,promoCode:window._bkPromo||'',promoDiscount:disc};
   try{var r=await fetch(API+'/api/bookings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(pl)});var d=await r.json();
     if(d.success){showBkOK(d.ref);toast('Booking confirmed! Ref: '+d.ref);}else toast(d.error||'Failed','err');
   }catch(e){showBkOK('FT-OFFLINE');toast('Booking saved! We\'ll confirm via WhatsApp.');}

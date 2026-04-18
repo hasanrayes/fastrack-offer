@@ -6,6 +6,7 @@
     <title>Fastrack Admin Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
@@ -495,8 +496,10 @@
             <div class="nav-section">Main</div>
             <div class="nav-item active" data-view="dashboard" onclick="switchView('dashboard',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div><span class="nav-label">Dashboard</span></div>
             <div class="nav-item" data-view="leads" onclick="switchView('leads',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><span class="nav-label">Leads</span><span class="nav-badge" id="leadsNavBadge" style="display:none"></span></div>
-            <div class="nav-item" data-view="bookings" onclick="switchView('bookings',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><span class="nav-label">Bookings</span><span class="nav-badge" id="bookingsNavBadge" style="display:none"></span></div>
-            <div class="nav-item" data-view="cars" onclick="switchView('cars',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div><span class="nav-label">Cars</span></div>
+            <div class="nav-item" data-view="bookings" onclick="switchView('bookings',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><span class="nav-label" data-i18n="nav_bookings">Bookings</span><span class="nav-badge" id="bookingsNavBadge" style="display:none"></span></div>
+            <div class="nav-item" data-view="customers" onclick="switchView('customers',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><span class="nav-label" data-i18n="nav_customers">Customers</span></div>
+            <div class="nav-item" data-view="cars" onclick="switchView('cars',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div><span class="nav-label" data-i18n="nav_cars">Cars</span></div>
+            <div class="nav-item" data-view="promos" data-roles="superadmin,manager" onclick="switchView('promos',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></div><span class="nav-label" data-i18n="nav_promos">Promos</span></div>
             <div class="nav-section">CMS</div>
             <div class="nav-item" data-view="cms" data-roles="superadmin,manager" onclick="switchView('cms',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div><span class="nav-label">Content Editor</span></div>
             <div class="nav-item" data-view="sections" data-roles="superadmin,manager" onclick="switchView('sections',this)"><div class="nav-icon"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div><span class="nav-label">Section Builder</span></div>
@@ -521,6 +524,7 @@
             <div class="header-right">
                 <div class="header-search"><span class="header-search-icon">&#128269;</span><input type="text" placeholder="Search..." id="globalSearch" onkeydown="handleGlobalSearch(event)"><span class="kbd">&#8984;K</span></div>
                 <div style="position:relative"><button class="notif-btn" onclick="toggleNotifPanel()">&#128276;<span class="notif-dot" id="notifDot" style="display:none"></span></button><div id="notifPanel" style="display:none;position:absolute;right:0;top:44px;width:360px;max-height:420px;overflow-y:auto;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-lg);z-index:500"><div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border)"><span style="font-size:14px;font-weight:700">Notifications</span><button class="btn btn-ghost btn-xs" onclick="markAllNotifsRead()">Mark all read</button></div><div id="notifList" style="padding:4px 0"></div></div></div>
+                <button class="theme-btn" onclick="toggleLang()" id="langBtn" title="Language" style="font-size:11px;font-weight:700;letter-spacing:.5px">EN</button>
                 <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">&#9790;</button>
             </div>
         </header>
@@ -539,7 +543,10 @@
                     <div class="kpi-card"><div class="kpi-top"><div class="kpi-icon-box" style="background:var(--purple-bg);color:var(--purple);">&#128200;</div></div><div class="kpi-value" id="kpiConversion">0%</div><div class="kpi-label">Conversion Rate</div></div>
                     <div class="kpi-card"><div class="kpi-top"><div class="kpi-icon-box" style="background:var(--yellow-bg);color:var(--yellow);">&#9888;</div></div><div class="kpi-value" id="kpiNewLeads">0</div><div class="kpi-label">New Leads</div></div>
                     <div class="kpi-card"><div class="kpi-top"><div class="kpi-icon-box" style="background:var(--green-bg);color:var(--green);">&#128663;</div></div><div class="kpi-value" id="kpiCars">0</div><div class="kpi-label">Active Cars</div></div>
+                    <div class="kpi-card"><div class="kpi-top"><div class="kpi-icon-box" style="background:var(--red-bg);color:var(--red);">&#128276;</div></div><div class="kpi-value" id="kpiOutstanding">AED 0</div><div class="kpi-label" data-i18n="kpi_outstanding">Outstanding Payments</div><div style="font-size:11px;color:var(--text-muted);margin-top:4px"><span id="kpiUnpaidCount">0</span> unpaid bookings</div></div>
                 </div>
+                <!-- Alerts Widget (Feature 6) -->
+                <div class="data-section" id="alertsWidget" style="display:none"><div style="font-size:15px;font-weight:700;margin-bottom:12px">&#9888; Car Document Alerts</div><div id="alertsList" class="table-wrap" style="padding:14px"></div></div>
 
                 <!-- Charts Row 1 -->
                 <div style="padding:0 28px 16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
@@ -582,8 +589,8 @@
 
             <!-- LEADS -->
             <div class="view" id="leadsView">
-                <div class="view-header"><div><h1 class="view-title">Leads</h1><p class="view-subtitle" id="leadsCount">0 leads</p></div>
-                <div class="view-actions"><button class="btn btn-secondary btn-sm" onclick="exportLeads()">Export CSV</button></div></div>
+                <div class="view-header"><div><h1 class="view-title" data-i18n="title_leads">Leads</h1><p class="view-subtitle" id="leadsCount">0 leads</p></div>
+                <div class="view-actions"><div class="toggle-group"><button class="toggle-btn active" id="leadsViewTable" onclick="setLeadsView('table')">Table</button><button class="toggle-btn" id="leadsViewKanban" onclick="setLeadsView('kanban')">Kanban</button></div><button class="btn btn-secondary btn-sm" onclick="exportLeads()">Export CSV</button></div></div>
                 <div class="bulk-bar" id="leadsBulkBar"><span class="bulk-count" id="leadsBulkCount">0</span> selected &nbsp;
                     <select class="filter-select" id="leadsBulkStatus"><option value="new">New</option><option value="contacted">Contacted</option><option value="qualified">Qualified</option><option value="converted">Converted</option><option value="lost">Lost</option></select>
                     <button class="btn btn-primary btn-xs" onclick="bulkLeadStatus()">Set Status</button>
@@ -610,6 +617,7 @@
                     <th>Actions</th>
                 </tr></thead><tbody id="leadsTbody"></tbody></table></div>
                 <div class="pagination" id="leadsPagination"></div></div>
+                <div class="data-section" id="leadsKanbanSection" style="display:none"><div id="leadsKanban"></div></div>
             </div>
 
             <!-- BOOKINGS -->
@@ -628,6 +636,7 @@
                 <div class="filter-bar" id="bookingsFilterBar">
                     <input type="text" class="search-input" id="bookingsSearch" placeholder="Search bookings..." oninput="renderBookings()">
                     <select class="filter-select" id="bookingsStatusFilter" onchange="renderBookings()"><option value="">All statuses</option><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="active">Active</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select>
+                    <select class="filter-select" id="bookingsPaymentFilter" onchange="renderBookings()"><option value="">All payments</option><option value="unpaid">Unpaid</option><option value="partial">Partial</option><option value="paid">Paid</option></select>
                     <input type="date" class="filter-select" id="bookingsDateFrom" onchange="renderBookings()" title="From date">
                     <input type="date" class="filter-select" id="bookingsDateTo" onchange="renderBookings()" title="To date">
                 </div>
@@ -643,6 +652,7 @@
                     <th>Location</th>
                     <th onclick="sortBookings('totalAed')">Total <span class="sort-arrow" id="bookSort_totalAed"></span></th>
                     <th onclick="sortBookings('status')">Status <span class="sort-arrow" id="bookSort_status"></span></th>
+                    <th>Payment</th>
                     <th>Actions</th>
                 </tr></thead><tbody id="bookingsTbody"></tbody></table></div>
                 <div class="pagination" id="bookingsPagination"></div></div>
@@ -728,6 +738,25 @@
                 </div>
             </div>
 
+            <!-- CUSTOMERS (Feature 3) -->
+            <div class="view" id="customersView">
+                <div class="view-header"><div><h1 class="view-title" data-i18n="title_customers">Customers</h1><p class="view-subtitle" id="customersCount">0 customers</p></div></div>
+                <div class="filter-bar">
+                    <input type="text" class="search-input" id="customersSearch" placeholder="Search by name, phone, email..." oninput="renderCustomers()">
+                    <select class="filter-select" id="customersTagFilter" onchange="renderCustomers()">
+                        <option value="">All tags</option><option value="VIP">VIP</option><option value="Repeat">Repeat</option><option value="New">New</option><option value="Lead">Lead only</option>
+                    </select>
+                </div>
+                <div class="data-section"><div class="table-wrap"><table><thead><tr><th>Name</th><th>Phone</th><th>Email</th><th>Bookings</th><th>Total Spent</th><th>Last Booking</th><th>Tags</th><th>Actions</th></tr></thead><tbody id="customersTbody"></tbody></table></div></div>
+            </div>
+
+            <!-- PROMOS (Feature 4) -->
+            <div class="view" id="promosView">
+                <div class="view-header"><div><h1 class="view-title" data-i18n="title_promos">Promo Codes</h1><p class="view-subtitle" id="promosCount">0 promos</p></div>
+                <div class="view-actions"><button class="btn btn-primary btn-sm" onclick="openPromoModal()">+ Add Promo</button></div></div>
+                <div class="data-section"><div class="table-wrap"><table><thead><tr><th>Code</th><th>Discount</th><th>Usage / Max</th><th>Min Duration</th><th>Expiry</th><th>Status</th><th>Actions</th></tr></thead><tbody id="promosTbody"></tbody></table></div></div>
+            </div>
+
             <!-- SETTINGS -->
             <div class="view" id="settingsView">
                 <div class="view-header"><div><h1 class="view-title">Settings</h1><p class="view-subtitle">Dashboard preferences</p></div></div>
@@ -736,6 +765,11 @@
                     <div class="settings-card"><div class="settings-card-title">Account</div><div class="settings-card-desc">Manage session</div><p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px">Signed in as <strong id="settingsEmail"></strong></p><p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px">Role: <span class="badge" id="settingsRole"></span></p><button class="btn btn-danger btn-sm" onclick="handleLogout()">Sign Out</button></div>
                     <div class="settings-card"><div class="settings-card-title">Live Site</div><div class="settings-card-desc">Open landing page</div><button class="btn btn-secondary btn-sm" onclick="window.open('/','_blank')">View Live Site</button></div>
                     <div class="settings-card"><div class="settings-card-title">About</div><div class="settings-card-desc">Fastrack Admin v2.0</div><p style="font-size:11px;color:var(--text-muted)">Professional car rental management for Fastrack Rent a Car, Dubai.</p></div>
+                </div>
+                <!-- WhatsApp Templates (Feature 7) -->
+                <div style="padding:16px 28px 28px">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div><h3 style="font-size:16px;font-weight:700" data-i18n="title_templates">WhatsApp Templates</h3><p style="font-size:12px;color:var(--text-muted)">Variables: {{name}}, {{car}}, {{date}}, {{price}}, {{ref}}, {{phone}}</p></div><button class="btn btn-primary btn-sm" onclick="openTemplateModal()">+ Add Template</button></div>
+                    <div id="templatesList" class="data-section" style="padding:0"></div>
                 </div>
             </div>
         </div>
@@ -855,7 +889,7 @@ function canEdit(){ return currentUser&&(currentUser.role==='superadmin'||curren
 function isSuperAdmin(){ return currentUser&&currentUser.role==='superadmin'; }
 
 // ═══════ DATA LOAD ═══════
-function loadAllData(){ loadStats(); loadLeads(); loadBookings(); loadCars(); if(currentView==='dashboard')loadCharts(); if(currentView==='team'&&isSuperAdmin())loadTeam(); if(currentView==='activity')loadActivity(); }
+function loadAllData(){ loadStats(); loadLeads(); loadBookings(); loadCars(); loadOutstanding(); loadAlerts(); if(currentView==='dashboard')loadCharts(); if(currentView==='team'&&isSuperAdmin())loadTeam(); if(currentView==='activity')loadActivity(); if(currentView==='customers')loadCustomers(); if(currentView==='promos')loadPromos(); if(currentView==='settings')loadTemplates(); }
 async function loadStats(){ try{ statsData=await api('GET','/stats'); document.getElementById('kpiLeads').textContent=statsData.totalLeads||0; document.getElementById('kpiBookings').textContent=statsData.totalBookings||0; document.getElementById('kpiRevenue').textContent='AED '+(statsData.totalRevenue||0).toLocaleString(); document.getElementById('kpiConversion').textContent=(statsData.conversionRate||0)+'%'; document.getElementById('kpiNewLeads').textContent=statsData.newLeads||0; document.getElementById('kpiCars').textContent=statsData.totalCars||0; const lb=document.getElementById('leadsNavBadge'); if(statsData.newLeads>0){lb.textContent=statsData.newLeads;lb.style.display='';}else lb.style.display='none'; const bb=document.getElementById('bookingsNavBadge'); if(statsData.newBookings>0){bb.textContent=statsData.newBookings;bb.style.display='';}else bb.style.display='none'; }catch(e){} }
 async function loadLeads(){ try{ leadsData=await api('GET','/leads'); if(!Array.isArray(leadsData))leadsData=[]; document.getElementById('leadsCount').textContent=leadsData.length+' leads'; renderLeads(); renderRecentActivity(); }catch(e){} }
 async function loadBookings(){ try{ bookingsData=await api('GET','/bookings'); if(!Array.isArray(bookingsData))bookingsData=[]; document.getElementById('bookingsCount').textContent=bookingsData.length+' bookings'; renderBookings(); renderRecentActivity(); if(bookingViewMode==='calendar')renderCalendar(); }catch(e){} }
@@ -918,6 +952,7 @@ function renderLeads(){
             <button class="btn btn-ghost btn-xs" onclick="openLeadDetail(${l.id})" title="Details">&#128269;</button>
             <a href="tel:${esc(l.phone)}" class="btn btn-ghost btn-xs" title="Call">&#128222;</a>
             <a href="https://wa.me/${(l.whatsapp||l.phone).replace(/[^0-9]/g,'')}" target="_blank" class="btn btn-ghost btn-xs" title="WhatsApp">&#128172;</a>
+            ${ed?`<button class="btn btn-ghost btn-xs" onclick="openTemplatePicker('lead',${l.id})" title="WhatsApp Template">&#128196;</button>`:''}
             ${l.email?`<a href="mailto:${esc(l.email)}" class="btn btn-ghost btn-xs" title="Email">&#9993;</a>`:''}
             ${ed?`<button class="btn btn-danger btn-xs" onclick="deleteLead(${l.id})">&#128465;</button>`:''}
         </div></td></tr>`;
@@ -964,11 +999,13 @@ async function addLeadNote(id){ const t=document.getElementById('leadNoteInput')
 function getFilteredBookings(){
     const s=(document.getElementById('bookingsSearch').value||'').toLowerCase();
     const sf=document.getElementById('bookingsStatusFilter').value;
+    const pf=document.getElementById('bookingsPaymentFilter')?.value||'';
     const df=document.getElementById('bookingsDateFrom').value;
     const dt=document.getElementById('bookingsDateTo').value;
     let f=bookingsData.filter(b=>{
         if(s&&!`${b.fullName} ${b.phone} ${b.ref} ${b.carName} ${b.email||''} ${b.location||''}`.toLowerCase().includes(s))return false;
         if(sf&&b.status!==sf)return false;
+        if(pf&&(b.paymentStatus||'unpaid')!==pf)return false;
         if(df&&new Date(b.createdAt)<new Date(df))return false;
         if(dt&&new Date(b.createdAt)>new Date(dt+'T23:59:59'))return false;
         return true;
@@ -986,7 +1023,7 @@ function renderBookings(){
     if(bookingsPage>bookingsTotalPages)bookingsPage=bookingsTotalPages;
     const f=allFiltered.slice((bookingsPage-1)*bookingsPerPage, bookingsPage*bookingsPerPage);
     renderPagination('bookingsPagination',bookingsPage,bookingsTotalPages,bookingsTotalCount,bookingsPerPage,'setBookingsPage','setBookingsPerPage');
-    if(!allFiltered.length){tb.innerHTML='<tr><td colspan="12" class="empty-state"><div class="empty-state-icon">&#128203;</div><div class="empty-state-title">No bookings found</div><p style="color:var(--text-muted);font-size:12px;margin-top:4px">Try adjusting your filters or search terms</p></td></tr>';document.getElementById('bookingsPagination').innerHTML='';return;}
+    if(!allFiltered.length){tb.innerHTML='<tr><td colspan="13" class="empty-state"><div class="empty-state-icon">&#128203;</div><div class="empty-state-title">No bookings found</div><p style="color:var(--text-muted);font-size:12px;margin-top:4px">Try adjusting your filters or search terms</p></td></tr>';document.getElementById('bookingsPagination').innerHTML='';return;}
     tb.innerHTML=f.map(b=>{
         const ck=selectedBookings.has(b.id)?'checked':'';
         return `<tr>
@@ -1001,9 +1038,11 @@ function renderBookings(){
         <td>${esc(b.location||'—')}</td>
         <td>AED ${(Number(b.totalAed)||0).toLocaleString()}</td>
         <td>${ed?`<select class="status-select" onchange="updateBookingStatus(${b.id},this.value)"><option value="pending" ${b.status==='pending'?'selected':''}>Pending</option><option value="confirmed" ${b.status==='confirmed'?'selected':''}>Confirmed</option><option value="active" ${b.status==='active'?'selected':''}>Active</option><option value="completed" ${b.status==='completed'?'selected':''}>Completed</option><option value="cancelled" ${b.status==='cancelled'?'selected':''}>Cancelled</option></select>`:`<span class="badge badge-${b.status}">${cap(b.status)}</span>`}</td>
+        <td>${paymentBadge(b)}</td>
         <td><div style="display:flex;gap:3px">
             <button class="btn btn-ghost btn-xs" onclick="openBookingDetail(${b.id})" title="Details">&#128269;</button>
             <a href="https://wa.me/${(b.whatsapp||b.phone).replace(/[^0-9]/g,'')}" target="_blank" class="btn btn-ghost btn-xs" title="WhatsApp">&#128172;</a>
+            ${ed&&(b.paymentStatus||'unpaid')!=='paid'?`<button class="btn btn-ghost btn-xs" onclick="markBookingPaid(${b.id})" title="Mark as Paid" style="color:var(--green)">&#128176;</button>`:''}
             ${ed?`<button class="btn btn-danger btn-xs" onclick="deleteBooking(${b.id})">&#128465;</button>`:''}
         </div></td></tr>`;
     }).join('');
@@ -1024,7 +1063,7 @@ function openBookingDetail(id){
     document.getElementById('modal').classList.add('wide');
     document.getElementById('modalTitle').textContent='Booking: '+b.ref;
     document.getElementById('modalBody').innerHTML=`
-    <div class="detail-tabs"><div class="detail-tab active" onclick="switchDetailTab(this,'bk-info')">Info</div><div class="detail-tab" onclick="switchDetailTab(this,'bk-edit')">Edit</div><div class="detail-tab" onclick="switchDetailTab(this,'bk-notes')">Notes (${(b.notes||[]).length})</div></div>
+    <div class="detail-tabs"><div class="detail-tab active" onclick="switchDetailTab(this,'bk-info')">Info</div><div class="detail-tab" onclick="switchDetailTab(this,'bk-payment')">Payment</div><div class="detail-tab" onclick="switchDetailTab(this,'bk-edit')">Edit</div><div class="detail-tab" onclick="switchDetailTab(this,'bk-notes')">Notes (${(b.notes||[]).length})</div></div>
     <div class="detail-panel active" id="bk-info">
         <div class="detail-row"><span class="detail-label">Reference</span><span class="detail-value" style="color:var(--primary)">${esc(b.ref)}</span></div>
         <div class="detail-row"><span class="detail-label">Customer</span><span class="detail-value">${esc(b.fullName)}</span></div>
@@ -1043,7 +1082,38 @@ function openBookingDetail(id){
             ${ed&&b.status!=='cancelled'?`<button class="btn btn-danger btn-sm" onclick="quickBookingAction(${b.id},'cancelled')">Cancel</button>`:``}
             <a href="https://wa.me/${(b.whatsapp||b.phone).replace(/[^0-9]/g,'')}" target="_blank" class="btn btn-secondary btn-sm">WhatsApp</a>
             <a href="tel:${esc(b.phone)}" class="btn btn-secondary btn-sm">Call</a>
+            ${ed?`<button class="btn btn-secondary btn-sm" onclick="openTemplatePicker('booking',${b.id})">&#128172; Template</button>`:''}
+            ${ed?`<button class="btn btn-primary btn-sm" onclick="generateInvoice(${b.id})">&#128196; Invoice</button>`:''}
         </div>
+    </div>
+    <div class="detail-panel" id="bk-payment">
+        ${(function(){
+          const total=Number(b.totalAed)||0, paid=Number(b.amountPaid)||0, rem=Math.max(0,total-paid), st=b.paymentStatus||'unpaid';
+          let html='';
+          html+='<div class="detail-row"><span class="detail-label">Status</span><span class="detail-value">'+paymentBadge(b)+'</span></div>';
+          html+='<div class="detail-row"><span class="detail-label">Total</span><span class="detail-value">AED '+total.toLocaleString()+'</span></div>';
+          html+='<div class="detail-row"><span class="detail-label">Paid</span><span class="detail-value" style="color:var(--green)">AED '+paid.toLocaleString()+'</span></div>';
+          html+='<div class="detail-row"><span class="detail-label">Remaining</span><span class="detail-value" style="color:var(--red)">AED '+rem.toLocaleString()+'</span></div>';
+          html+='<div class="detail-row"><span class="detail-label">Method</span><span class="detail-value">'+esc(b.paymentMethod||'—')+'</span></div>';
+          if(b.paymentNotes)html+='<div class="detail-row"><span class="detail-label">Notes</span><span class="detail-value" style="text-align:right;max-width:60%">'+esc(b.paymentNotes)+'</span></div>';
+          if(b.invoiceNumber)html+='<div class="detail-row"><span class="detail-label">Invoice</span><span class="detail-value" style="color:var(--primary)">'+esc(b.invoiceNumber)+'</span></div>';
+          if(ed){
+            html+='<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Record Payment</div>'+
+              '<div class="form-row"><div class="form-group"><label>Amount (AED)</label><input type="number" class="form-input" id="pmtAmount" placeholder="0"></div><div class="form-group"><label>Method</label><select class="form-input" id="pmtMethod"><option value="cash">Cash</option><option value="card">Card</option><option value="transfer">Transfer</option><option value="cheque">Cheque</option></select></div></div>'+
+              '<div class="form-group"><label>Notes</label><input class="form-input" id="pmtNotes" placeholder="Optional note..."></div>'+
+              '<div style="display:flex;gap:8px"><button class="btn btn-success btn-sm" onclick="recordPayment('+b.id+')">Add Payment</button>'+
+              '<button class="btn btn-secondary btn-sm" onclick="setPaymentStatus('+b.id+',\'paid\')">Mark Fully Paid</button>'+
+              '<button class="btn btn-secondary btn-sm" onclick="setPaymentStatus('+b.id+',\'unpaid\')">Mark Unpaid</button></div></div>';
+          }
+          if((b.paymentHistory||[]).length){
+            html+='<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Payment History</div>';
+            b.paymentHistory.forEach(function(p){
+              html+='<div class="note-item"><div class="note-meta">'+esc(p.recordedBy||'—')+' &middot; '+fmtDateTime(p.recordedAt)+' &middot; '+esc(p.method||'—')+'</div><div class="note-text"><strong>AED '+Number(p.amount).toLocaleString()+'</strong>'+(p.notes?' — '+esc(p.notes):'')+'</div></div>';
+            });
+            html+='</div>';
+          }
+          return html;
+        })()}
     </div>
     <div class="detail-panel" id="bk-edit">
         ${ed?`<form onsubmit="submitBookingEdit(event,${b.id})">
@@ -1168,6 +1238,10 @@ function openCarModal(editId){
         <div class="form-row"><div class="form-group"><label>Year</label><input class="form-input" id="cfYear" value="${esc(c?.year||'')}" placeholder="2024"></div><div class="form-group"><label>Color</label><input class="form-input" id="cfColor" value="${esc(c?.color||'')}" placeholder="White, Black..."></div></div>
         <div class="form-row"><div class="form-group"><label>Fuel Type</label><select class="form-input" id="cfFuel"><option value="Petrol" ${(c?.fuelType||'Petrol')==='Petrol'?'selected':''}>Petrol</option><option value="Diesel" ${c?.fuelType==='Diesel'?'selected':''}>Diesel</option><option value="Hybrid" ${c?.fuelType==='Hybrid'?'selected':''}>Hybrid</option><option value="Electric" ${c?.fuelType==='Electric'?'selected':''}>Electric</option></select></div><div class="form-group"><label>Mileage</label><input class="form-input" id="cfMileage" value="${esc(c?.mileage||'')}" placeholder="Unlimited, 3000km/mo..."></div></div>
 
+        <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin:18px 0 10px;padding-top:14px;border-top:1px solid var(--border)">Documents & Service</div>
+        <div class="form-row"><div class="form-group"><label>Insurance Expiry</label><input type="date" class="form-input" id="cfInsExp" value="${esc(c?.insuranceExpiry||'')}"></div><div class="form-group"><label>Registration Expiry</label><input type="date" class="form-input" id="cfRegExp" value="${esc(c?.registrationExpiry||'')}"></div></div>
+        <div class="form-row"><div class="form-group"><label>Last Service Date</label><input type="date" class="form-input" id="cfLastSvc" value="${esc(c?.lastServiceDate||'')}"></div><div class="form-group"><label>Next Service Due</label><input type="date" class="form-input" id="cfNextSvc" value="${esc(c?.nextServiceDue||'')}"></div></div>
+
         <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin:18px 0 10px;padding-top:14px;border-top:1px solid var(--border)">Features & Availability</div>
         <div class="form-group"><label>Features (comma-separated)</label><input class="form-input" id="cfFeats" value="${esc(Array.isArray(c?.feats)?c.feats.join(', '):(c?.feats||''))}" placeholder="A/C, Bluetooth, Reverse Camera..."></div>
         <div class="form-group"><label>Includes</label><input class="form-input" id="cfIncludes" value="${esc(c?.includes||'')}" placeholder="Insurance + UAE delivery included"></div>
@@ -1229,6 +1303,10 @@ async function submitCar(e,editId){
         color:document.getElementById('cfColor').value,
         fuelType:document.getElementById('cfFuel').value,
         mileage:document.getElementById('cfMileage').value,
+        insuranceExpiry:document.getElementById('cfInsExp')?.value||'',
+        registrationExpiry:document.getElementById('cfRegExp')?.value||'',
+        lastServiceDate:document.getElementById('cfLastSvc')?.value||'',
+        nextServiceDue:document.getElementById('cfNextSvc')?.value||'',
         feats,
         includes:document.getElementById('cfIncludes').value,
         spots:Number(document.getElementById('cfSpots').value)
@@ -1269,6 +1347,9 @@ function switchView(name,navEl){
     if((name==='cms'||name==='sections'||name==='pagesettings')&&!cmsConfig)loadCmsConfig();
     if(name==='preview'){const f=document.getElementById('previewFrame');if(f)f.src='/?t='+Date.now();}
     if(name==='databackup')updateExportTimestamp();
+    if(name==='customers')loadCustomers();
+    if(name==='promos')loadPromos();
+    if(name==='settings')loadTemplates();
     closeMobileSidebar();
 }
 
@@ -2212,8 +2293,306 @@ function validateField(id, test, errMsg) {
     return true;
 }
 
+// ═══════ V3 STATE ═══════
+let customersData=[], promosData=[], templatesData=[], alertsData=[];
+let leadsViewMode='table';
+let currentLang=localStorage.getItem('ft_lang')||'en';
+
+// ═══════ PAYMENT (Feature 1) ═══════
+function paymentBadge(b){
+  const st=b.paymentStatus||'unpaid';
+  const total=Number(b.totalAed)||0;
+  const paid=Number(b.amountPaid)||0;
+  const cls=st==='paid'?'badge-active':st==='partial'?'badge-pending':'badge-cancelled';
+  const label=st==='paid'?'Paid':st==='partial'?'Partial':'Unpaid';
+  const detail=st==='partial'?` <span style="font-size:10px;color:var(--text-muted)">AED ${paid.toLocaleString()}/${total.toLocaleString()}</span>`:'';
+  return `<span class="badge ${cls}">${label}</span>${detail}`;
+}
+async function markBookingPaid(id){
+  const b=bookingsData.find(x=>x.id===id); if(!b)return;
+  const total=Number(b.totalAed)||0;
+  if(!await showConfirm('Mark as Paid',`Mark booking ${b.ref} as fully paid (AED ${total.toLocaleString()})?`,'Mark Paid'))return;
+  try{await api('PATCH','/bookings/'+id+'/payment',{paymentStatus:'paid',amountPaid:total,addPayment:{amount:Math.max(0,total-(Number(b.amountPaid)||0)),method:b.paymentMethod||'cash',notes:'Marked as paid'}});await loadBookings();loadStats();toast('Marked as paid','success');}catch(e){toast(e.message,'error');}
+}
+async function setPaymentStatus(id,status){
+  try{const b=bookingsData.find(x=>x.id===id);const body={paymentStatus:status};if(status==='paid'&&b)body.amountPaid=Number(b.totalAed)||0;if(status==='unpaid')body.amountPaid=0;await api('PATCH','/bookings/'+id+'/payment',body);await loadBookings();openBookingDetail(id);toast('Payment status updated','success');}catch(e){toast(e.message,'error');}
+}
+async function recordPayment(id){
+  const amt=Number(document.getElementById('pmtAmount').value)||0;
+  if(amt<=0){toast('Enter a valid amount','error');return;}
+  const method=document.getElementById('pmtMethod').value;
+  const notes=document.getElementById('pmtNotes').value;
+  try{await api('PATCH','/bookings/'+id+'/payment',{addPayment:{amount:amt,method,notes}});await loadBookings();openBookingDetail(id);toast('Payment recorded','success');}catch(e){toast(e.message,'error');}
+}
+async function loadOutstanding(){
+  try{const d=await api('GET','/stats/outstanding');const el=document.getElementById('kpiOutstanding');if(el)el.textContent='AED '+(d.outstandingAmount||0).toLocaleString();const u=document.getElementById('kpiUnpaidCount');if(u)u.textContent=d.unpaidCount||0;}catch(e){}
+}
+
+// ═══════ INVOICE PDF (Feature 2) ═══════
+async function generateInvoice(bookingId){
+  const b=bookingsData.find(x=>x.id===bookingId); if(!b)return;
+  let invNum=b.invoiceNumber;
+  if(!invNum){
+    try{const d=await api('POST','/bookings/'+bookingId+'/invoice');invNum=d.invoiceNumber;b.invoiceNumber=invNum;}catch(e){toast(e.message,'error');return;}
+  }
+  if(!window.jspdf){toast('PDF library not loaded','error');return;}
+  const { jsPDF }=window.jspdf;
+  const doc=new jsPDF();
+  doc.setFontSize(22);doc.setFont(undefined,'bold');doc.setTextColor(255,95,0);doc.text('FASTRACK',20,22);
+  doc.setFontSize(10);doc.setFont(undefined,'normal');doc.setTextColor(100,100,100);doc.text('Rent a Car — Dubai, UAE',20,28);
+  doc.setFontSize(10);doc.setTextColor(0,0,0);doc.text('info@fasttrackrac.com  |  +971 58 596 9960',20,34);
+  doc.setFontSize(18);doc.setFont(undefined,'bold');doc.text('INVOICE',150,22);
+  doc.setFontSize(10);doc.setFont(undefined,'normal');doc.text('#'+invNum,150,30);doc.text('Ref: '+b.ref,150,35);doc.text('Date: '+fmtDate(b.createdAt),150,40);
+  doc.setDrawColor(200,200,200);doc.line(20,45,190,45);
+  let y=55;
+  doc.setFontSize(11);doc.setFont(undefined,'bold');doc.text('Bill To:',20,y);
+  doc.setFont(undefined,'normal');doc.text(b.fullName||'',20,y+6);doc.text(b.phone||'',20,y+12);if(b.email)doc.text(b.email,20,y+18);
+  y+=30;doc.setFont(undefined,'bold');doc.text('Booking Details:',20,y);y+=8;doc.setFont(undefined,'normal');
+  const rows=[['Vehicle',b.carName||'—'],['Start Date',b.startDate?fmtDate(b.startDate):'—'],['Duration',b.duration+' month'+(b.duration>1?'s':'')],['Delivery Location',b.location||'—'],['Status',cap(b.status||'pending')]];
+  rows.forEach(function(r){doc.text(r[0]+':',20,y);doc.text(String(r[1]),80,y);y+=6;});
+  y+=4;doc.setDrawColor(200,200,200);doc.line(20,y,190,y);y+=8;
+  const total=Number(b.totalAed)||0,paid=Number(b.amountPaid)||0,rem=Math.max(0,total-paid);
+  doc.setFont(undefined,'bold');doc.text('Subtotal:',130,y);doc.text('AED '+total.toLocaleString(),170,y,{align:'right'});y+=6;
+  if(b.promoDiscount){doc.setFont(undefined,'normal');doc.text('Promo ('+b.promoCode+'):',130,y);doc.text('-AED '+Number(b.promoDiscount).toLocaleString(),170,y,{align:'right'});y+=6;}
+  doc.setFont(undefined,'bold');doc.setFontSize(12);doc.setTextColor(255,95,0);doc.text('TOTAL:',130,y);doc.text('AED '+total.toLocaleString(),170,y,{align:'right'});y+=8;
+  doc.setTextColor(0,0,0);doc.setFontSize(10);doc.text('Paid:',130,y);doc.text('AED '+paid.toLocaleString(),170,y,{align:'right'});y+=6;
+  doc.text('Balance Due:',130,y);doc.setTextColor(rem>0?255:34,rem>0?50:197,rem>0?50:94);doc.text('AED '+rem.toLocaleString(),170,y,{align:'right'});y+=10;
+  doc.setTextColor(0,0,0);doc.setFont(undefined,'bold');doc.text('Payment Status: ',20,y);doc.setFont(undefined,'normal');doc.text(cap(b.paymentStatus||'unpaid'),55,y);y+=10;
+  doc.setDrawColor(200,200,200);doc.line(20,y,190,y);y+=8;
+  doc.setFontSize(8);doc.setTextColor(120,120,120);
+  const terms=['Terms & Conditions:','- Insurance and UAE delivery are included in the monthly rate.','- Cancellation policy: free cancellation up to 48 hours before start date.','- For questions, contact us on WhatsApp: +971 58 596 9960','','Thank you for choosing Fastrack Rent a Car!'];
+  terms.forEach(function(t){doc.text(t,20,y);y+=5;});
+  doc.save('invoice-'+invNum+'.pdf');
+  toast('Invoice '+invNum+' generated','success');
+  await loadBookings();
+}
+
+// ═══════ CUSTOMERS (Feature 3) ═══════
+async function loadCustomers(){try{customersData=await api('GET','/customers');renderCustomers();}catch(e){}}
+function renderCustomers(){
+  const tb=document.getElementById('customersTbody'); if(!tb)return;
+  const s=(document.getElementById('customersSearch')?.value||'').toLowerCase();
+  const tag=document.getElementById('customersTagFilter')?.value||'';
+  let f=customersData.filter(c=>{
+    if(s&&!`${c.fullName} ${c.phone} ${c.email}`.toLowerCase().includes(s))return false;
+    if(tag&&!(c.tags||[]).includes(tag))return false;
+    return true;
+  });
+  document.getElementById('customersCount').textContent=f.length+' customers';
+  if(!f.length){tb.innerHTML='<tr><td colspan="8" class="empty-state"><div class="empty-state-icon">&#128101;</div><div class="empty-state-title">No customers yet</div></td></tr>';return;}
+  tb.innerHTML=f.map(c=>`<tr>
+    <td><strong>${esc(c.fullName||'—')}</strong></td>
+    <td><a href="tel:${esc(c.phone)}" style="color:var(--primary);text-decoration:none">${esc(c.phone)}</a></td>
+    <td>${esc(c.email||'—')}</td>
+    <td>${c.bookingCount||0}</td>
+    <td><strong>AED ${(c.totalSpent||0).toLocaleString()}</strong></td>
+    <td style="font-size:11px">${c.lastBooking?fmtDate(c.lastBooking):'—'}</td>
+    <td><div style="display:flex;gap:3px;flex-wrap:wrap">${(c.tags||[]).map(t=>`<span class="badge badge-${t==='VIP'?'superadmin':t==='Repeat'?'confirmed':t==='New'?'new':'viewer'}" style="font-size:9px">${esc(t)}</span>`).join('')}</div></td>
+    <td><div style="display:flex;gap:3px"><button class="btn btn-ghost btn-xs" onclick="openCustomerDetail('${esc(c.id)}')" title="Details">&#128269;</button><a href="https://wa.me/${c.phone.replace(/[^0-9]/g,'')}" target="_blank" class="btn btn-ghost btn-xs">&#128172;</a></div></td>
+  </tr>`).join('');
+}
+async function openCustomerDetail(id){
+  try{const c=await api('GET','/customers/'+encodeURIComponent(id));
+  document.getElementById('modal').classList.add('wide');
+  document.getElementById('modalTitle').textContent='Customer: '+(c.fullName||'—');
+  const bookingRows=(c.bookings||[]).map(b=>`<div class="detail-row"><span class="detail-label">${esc(b.ref)}</span><span class="detail-value">${esc(b.carName)} &middot; AED ${(b.totalAed||0).toLocaleString()} &middot; <span class="badge badge-${b.status}">${cap(b.status)}</span></span></div>`).join('');
+  const leadRows=(c.leads||[]).map(l=>`<div class="detail-row"><span class="detail-label">${fmtDate(l.createdAt)}</span><span class="detail-value">${esc(l.interest||'—')} &middot; <span class="badge badge-${l.status}">${cap(l.status)}</span></span></div>`).join('');
+  document.getElementById('modalBody').innerHTML=`
+  <div class="detail-row"><span class="detail-label">Name</span><span class="detail-value">${esc(c.fullName)}</span></div>
+  <div class="detail-row"><span class="detail-label">Phone</span><span class="detail-value"><a href="tel:${esc(c.phone)}" style="color:var(--primary)">${esc(c.phone)}</a></span></div>
+  <div class="detail-row"><span class="detail-label">Email</span><span class="detail-value">${esc(c.email||'—')}</span></div>
+  <div class="detail-row"><span class="detail-label">Address</span><span class="detail-value">${esc(c.address||'—')}</span></div>
+  <div class="detail-row"><span class="detail-label">Customer Since</span><span class="detail-value">${fmtDate(c.customerSince)}</span></div>
+  <div class="detail-row"><span class="detail-label">Total Spent</span><span class="detail-value" style="color:var(--green);font-weight:700">AED ${(c.totalSpent||0).toLocaleString()}</span></div>
+  <div class="detail-row"><span class="detail-label">Tags</span><span class="detail-value">${(c.tags||[]).map(t=>`<span class="badge badge-viewer" style="font-size:10px;margin-left:4px">${esc(t)}</span>`).join('')}</span></div>
+  ${canEdit()?`<div style="margin-top:12px"><label style="font-size:12px;color:var(--text-muted)">Custom Tags (comma-separated)</label><input class="form-input" id="custTags" value="${esc(((c.tags||[]).filter(t=>['VIP','Repeat','New','Lead'].indexOf(t)===-1)).join(', '))}"><label style="font-size:12px;color:var(--text-muted);margin-top:8px;display:block">Internal Notes</label><textarea class="form-input" id="custNotes" rows="3">${esc(c.notes||'')}</textarea><button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="saveCustomerMeta('${esc(c.id)}')">Save</button></div>`:''}
+  ${bookingRows?`<div style="margin-top:18px;padding-top:12px;border-top:1px solid var(--border)"><div style="font-size:13px;font-weight:700;margin-bottom:8px">Bookings (${c.bookings.length})</div>${bookingRows}</div>`:''}
+  ${leadRows?`<div style="margin-top:18px;padding-top:12px;border-top:1px solid var(--border)"><div style="font-size:13px;font-weight:700;margin-bottom:8px">Lead History (${c.leads.length})</div>${leadRows}</div>`:''}
+  <div style="display:flex;gap:6px;margin-top:16px"><a href="tel:${esc(c.phone)}" class="btn btn-secondary btn-sm">Call</a><a href="https://wa.me/${c.phone.replace(/[^0-9]/g,'')}" target="_blank" class="btn btn-secondary btn-sm">WhatsApp</a>${c.email?`<a href="mailto:${esc(c.email)}" class="btn btn-secondary btn-sm">Email</a>`:''}</div>`;
+  openModal();
+  }catch(e){toast(e.message,'error');}
+}
+async function saveCustomerMeta(id){
+  const notes=document.getElementById('custNotes').value;
+  const tagsStr=document.getElementById('custTags').value;
+  const tags=tagsStr?tagsStr.split(',').map(t=>t.trim()).filter(Boolean):[];
+  try{await api('PATCH','/customers/'+encodeURIComponent(id),{notes,tags});toast('Saved','success');closeModal();await loadCustomers();}catch(e){toast(e.message,'error');}
+}
+
+// ═══════ PROMOS (Feature 4) ═══════
+async function loadPromos(){try{promosData=await api('GET','/promos');renderPromos();}catch(e){}}
+function renderPromos(){
+  const tb=document.getElementById('promosTbody');if(!tb)return;
+  document.getElementById('promosCount').textContent=promosData.length+' promos';
+  if(!promosData.length){tb.innerHTML='<tr><td colspan="7" class="empty-state"><div class="empty-state-icon">&#127873;</div><div class="empty-state-title">No promos yet</div></td></tr>';return;}
+  const ed=canEdit();
+  tb.innerHTML=promosData.map(p=>{
+    const disc=p.discountType==='percentage'?p.value+'%':'AED '+p.value;
+    const expired=p.expiryDate&&new Date(p.expiryDate)<new Date();
+    return `<tr>
+      <td><strong style="color:var(--primary);font-family:monospace">${esc(p.code)}</strong></td>
+      <td>${disc}</td>
+      <td>${p.usageCount||0}${p.maxUses?' / '+p.maxUses:' / ∞'}</td>
+      <td>${p.minDuration?p.minDuration+' mo':'—'}</td>
+      <td style="font-size:11px">${p.expiryDate?fmtDate(p.expiryDate):'Never'}</td>
+      <td><span class="badge badge-${!p.active?'cancelled':expired?'cancelled':'active'}">${!p.active?'Inactive':expired?'Expired':'Active'}</span></td>
+      <td>${ed?`<div style="display:flex;gap:3px"><button class="btn btn-secondary btn-xs" onclick="openPromoModal('${p.id}')">Edit</button><button class="btn btn-secondary btn-xs" onclick="togglePromo('${p.id}',${!p.active})">${p.active?'Disable':'Enable'}</button><button class="btn btn-danger btn-xs" onclick="deletePromo('${p.id}')">&#128465;</button></div>`:''}</td>
+    </tr>`;
+  }).join('');
+}
+function openPromoModal(editId){
+  const p=editId?promosData.find(x=>x.id===editId):null;
+  document.getElementById('modal').classList.remove('wide');
+  document.getElementById('modalTitle').textContent=p?'Edit Promo':'Add Promo';
+  document.getElementById('modalBody').innerHTML=`<form onsubmit="submitPromo(event,${p?`'${p.id}'`:'null'})">
+    <div class="form-row"><div class="form-group"><label>Code *</label><input class="form-input" id="prCode" value="${esc(p?.code||'')}" required style="text-transform:uppercase;font-family:monospace"></div><div class="form-group"><label>Status</label><select class="form-input" id="prActive"><option value="true" ${p?.active!==false?'selected':''}>Active</option><option value="false" ${p?.active===false?'selected':''}>Inactive</option></select></div></div>
+    <div class="form-row"><div class="form-group"><label>Discount Type</label><select class="form-input" id="prType"><option value="percentage" ${(p?.discountType||'percentage')==='percentage'?'selected':''}>Percentage (%)</option><option value="fixed" ${p?.discountType==='fixed'?'selected':''}>Fixed (AED)</option></select></div><div class="form-group"><label>Value *</label><input type="number" class="form-input" id="prValue" value="${p?.value||''}" required></div></div>
+    <div class="form-row"><div class="form-group"><label>Min Duration (months)</label><input type="number" class="form-input" id="prMin" value="${p?.minDuration||''}" placeholder="0"></div><div class="form-group"><label>Max Uses</label><input type="number" class="form-input" id="prMax" value="${p?.maxUses||''}" placeholder="0 = unlimited"></div></div>
+    <div class="form-group"><label>Expiry Date</label><input type="date" class="form-input" id="prExp" value="${p?.expiryDate||''}"></div>
+    <div style="display:flex;gap:8px;margin-top:16px"><button type="submit" class="btn btn-primary" style="flex:1">${p?'Save':'Create'}</button><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button></div>
+  </form>`;
+  openModal();
+}
+async function submitPromo(e,editId){
+  e.preventDefault();
+  const body={code:document.getElementById('prCode').value.toUpperCase(),discountType:document.getElementById('prType').value,value:Number(document.getElementById('prValue').value),minDuration:Number(document.getElementById('prMin').value)||0,maxUses:Number(document.getElementById('prMax').value)||0,expiryDate:document.getElementById('prExp').value,active:document.getElementById('prActive').value==='true'};
+  try{if(editId)await api('PUT','/promos/'+editId,body);else await api('POST','/promos',body);closeModal();await loadPromos();toast('Promo saved','success');}catch(e){toast(e.message,'error');}
+}
+async function togglePromo(id,active){try{await api('PUT','/promos/'+id,{active});await loadPromos();}catch(e){toast(e.message,'error');}}
+async function deletePromo(id){if(!await showConfirm('Delete Promo','This promo code will be permanently removed.'))return;try{await api('DELETE','/promos/'+id);await loadPromos();toast('Promo deleted','success');}catch(e){toast(e.message,'error');}}
+
+// ═══════ LEAD KANBAN (Feature 5) ═══════
+function setLeadsView(mode){
+  leadsViewMode=mode;
+  document.getElementById('leadsViewTable').classList.toggle('active',mode==='table');
+  document.getElementById('leadsViewKanban').classList.toggle('active',mode==='kanban');
+  document.querySelector('#leadsView .data-section').style.display=mode==='table'?'':'none';
+  document.getElementById('leadsKanbanSection').style.display=mode==='kanban'?'':'none';
+  if(mode==='kanban')renderKanban();
+}
+function renderKanban(){
+  const el=document.getElementById('leadsKanban');if(!el)return;
+  const cols=['new','contacted','qualified','converted','lost'];
+  const labels={new:'New',contacted:'Contacted',qualified:'Qualified',converted:'Converted',lost:'Lost'};
+  const colors={new:'var(--blue)',contacted:'var(--yellow)',qualified:'var(--green)',converted:'var(--purple)',lost:'var(--red)'};
+  el.innerHTML=`<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;overflow-x:auto">${cols.map(col=>{
+    const items=leadsData.filter(l=>l.status===col);
+    return `<div class="kanban-col" data-status="${col}" ondragover="event.preventDefault();this.style.background='var(--bg-card-hover)'" ondragleave="this.style.background=''" ondrop="dropLead(event,'${col}')" style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:12px;min-width:180px;min-height:300px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid ${colors[col]}"><span style="font-size:12px;font-weight:700;text-transform:uppercase;color:${colors[col]}">${labels[col]}</span><span style="font-size:11px;color:var(--text-muted)">${items.length}</span></div>
+      ${items.map(l=>`<div class="kanban-card" draggable="true" ondragstart="dragLead(event,${l.id})" onclick="openLeadDetail(${l.id})" style="background:var(--bg-input);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;cursor:grab">
+        <div style="font-size:13px;font-weight:600;margin-bottom:2px">${esc(l.fullName)}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px">${esc(l.phone)}</div>
+        ${l.interest?`<div style="font-size:11px;margin-bottom:4px">${esc(l.interest)}</div>`:''}
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:4px;margin-top:8px"><span style="font-size:10px;color:var(--text-muted)">${fmtDate(l.createdAt)} &middot; ${esc(l.source||'—')}</span>
+        <div style="display:flex;gap:3px" onclick="event.stopPropagation()"><a href="tel:${esc(l.phone)}" class="btn btn-ghost btn-xs">&#128222;</a><a href="https://wa.me/${l.phone.replace(/[^0-9]/g,'')}" target="_blank" class="btn btn-ghost btn-xs">&#128172;</a></div></div>
+      </div>`).join('')}
+    </div>`;
+  }).join('')}</div>`;
+}
+let dragLeadId=null;
+function dragLead(e,id){dragLeadId=id;e.dataTransfer.effectAllowed='move';}
+async function dropLead(e,newStatus){
+  e.preventDefault();const col=e.currentTarget;col.style.background='';
+  if(!dragLeadId)return;
+  const l=leadsData.find(x=>x.id===dragLeadId);
+  if(!l||l.status===newStatus){dragLeadId=null;return;}
+  try{await api('PATCH','/leads/'+dragLeadId,{status:newStatus});l.status=newStatus;renderKanban();loadStats();toast('Lead moved to '+newStatus,'success');}catch(e){toast(e.message,'error');await loadLeads();}
+  dragLeadId=null;
+}
+
+// ═══════ CAR ALERTS (Feature 6) ═══════
+async function loadAlerts(){
+  try{alertsData=await api('GET','/cars/alerts');renderAlertsWidget();}catch(e){}
+}
+function renderAlertsWidget(){
+  const widget=document.getElementById('alertsWidget'),list=document.getElementById('alertsList');
+  if(!widget||!list)return;
+  if(!alertsData.length){widget.style.display='none';return;}
+  widget.style.display='';
+  list.innerHTML=alertsData.map(a=>`<div class="team-card" style="padding:8px 0"><div class="team-info"><div class="team-name">${esc(a.carName)}</div><div class="team-email">${esc(a.fieldLabel)}: ${fmtDate(a.date)} (${a.daysRemaining<0?Math.abs(a.daysRemaining)+' days overdue':a.daysRemaining+' days left'})</div></div><span class="badge badge-${a.severity==='expired'?'cancelled':'pending'}">${a.severity==='expired'?'Expired':'Expiring soon'}</span></div>`).join('');
+}
+
+// ═══════ TEMPLATES (Feature 7) ═══════
+async function loadTemplates(){try{templatesData=await api('GET','/templates');renderTemplates();}catch(e){}}
+function renderTemplates(){
+  const el=document.getElementById('templatesList');if(!el)return;
+  if(!templatesData.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">&#128172;</div><div class="empty-state-title">No templates</div></div>';return;}
+  const ed=canEdit();
+  el.innerHTML=templatesData.map(t=>`<div class="team-card"><div class="team-info"><div class="team-name">${esc(t.name)} <span class="badge badge-viewer" style="font-size:9px;margin-left:4px">${esc(t.category)}</span></div><div class="team-email" style="font-size:11px;color:var(--text-muted);margin-top:3px;max-width:500px">${esc(t.body)}</div></div>${ed?`<div class="team-actions"><button class="btn btn-ghost btn-sm" onclick="openTemplateModal('${t.id}')">&#9998;</button><button class="btn btn-danger btn-xs" onclick="deleteTemplate('${t.id}')">&#128465;</button></div>`:''}</div>`).join('');
+}
+function openTemplateModal(editId){
+  const t=editId?templatesData.find(x=>x.id===editId):null;
+  document.getElementById('modal').classList.remove('wide');
+  document.getElementById('modalTitle').textContent=t?'Edit Template':'Add Template';
+  document.getElementById('modalBody').innerHTML=`<form onsubmit="submitTemplate(event,${t?`'${t.id}'`:'null'})">
+    <div class="form-row"><div class="form-group"><label>Name *</label><input class="form-input" id="tpName" value="${esc(t?.name||'')}" required></div><div class="form-group"><label>Category</label><select class="form-input" id="tpCat"><option value="welcome" ${t?.category==='welcome'?'selected':''}>Welcome</option><option value="booking" ${t?.category==='booking'?'selected':''}>Booking</option><option value="payment" ${t?.category==='payment'?'selected':''}>Payment</option><option value="delivery" ${t?.category==='delivery'?'selected':''}>Delivery</option><option value="return" ${t?.category==='return'?'selected':''}>Return</option><option value="followup" ${t?.category==='followup'?'selected':''}>Follow-up</option><option value="custom" ${t?.category==='custom'?'selected':''}>Custom</option></select></div></div>
+    <div class="form-group"><label>Message Body *</label><textarea class="form-input" id="tpBody" rows="5" required>${esc(t?.body||'')}</textarea><p style="font-size:11px;color:var(--text-muted);margin-top:4px">Variables: {{name}}, {{car}}, {{date}}, {{price}}, {{ref}}, {{phone}}</p></div>
+    <div style="display:flex;gap:8px;margin-top:16px"><button type="submit" class="btn btn-primary" style="flex:1">${t?'Save':'Create'}</button><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button></div>
+  </form>`;
+  openModal();
+}
+async function submitTemplate(e,editId){
+  e.preventDefault();
+  const body={name:document.getElementById('tpName').value,category:document.getElementById('tpCat').value,body:document.getElementById('tpBody').value};
+  try{if(editId)await api('PUT','/templates/'+editId,body);else await api('POST','/templates',body);closeModal();await loadTemplates();toast('Template saved','success');}catch(e){toast(e.message,'error');}
+}
+async function deleteTemplate(id){if(!await showConfirm('Delete Template','Remove this message template?'))return;try{await api('DELETE','/templates/'+id);await loadTemplates();toast('Template deleted','success');}catch(e){toast(e.message,'error');}}
+function applyTemplateVars(body,data){return body.replace(/\{\{(\w+)\}\}/g,function(m,k){return data[k]!=null?data[k]:m;});}
+function openTemplatePicker(type,id){
+  const vars={};let phone='';
+  if(type==='booking'){const b=bookingsData.find(x=>x.id===id);if(!b)return;vars.name=b.fullName;vars.car=b.carName;vars.date=b.startDate?fmtDate(b.startDate):'';vars.price=(b.totalAed||0).toLocaleString();vars.ref=b.ref;vars.phone=b.phone;phone=b.whatsapp||b.phone;}
+  else if(type==='lead'){const l=leadsData.find(x=>x.id===id);if(!l)return;vars.name=l.fullName;vars.car=l.interest||'';vars.price='';vars.ref='';vars.date='';vars.phone=l.phone;phone=l.whatsapp||l.phone;}
+  document.getElementById('modal').classList.remove('wide');
+  document.getElementById('modalTitle').textContent='Send WhatsApp';
+  document.getElementById('modalBody').innerHTML=`<div style="margin-bottom:12px"><label style="font-size:12px;color:var(--text-muted)">Choose Template</label><select class="form-input" id="tpPick" onchange="previewTemplate('${phone.replace(/[^0-9]/g,'')}')"><option value="">— Custom message —</option>${templatesData.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('')}</select></div>
+  <div class="form-group"><label>Message Preview (editable)</label><textarea class="form-input" id="tpMsg" rows="6"></textarea></div>
+  <div style="display:flex;gap:8px"><button class="btn btn-primary" style="flex:1" onclick="sendWhatsApp('${phone.replace(/[^0-9]/g,'')}')">Open WhatsApp</button><button class="btn btn-secondary" onclick="closeModal()">Cancel</button></div>`;
+  window._tplVars=vars;
+  openModal();
+}
+function previewTemplate(){
+  const id=document.getElementById('tpPick').value;
+  const ta=document.getElementById('tpMsg');
+  if(!id){ta.value='';return;}
+  const t=templatesData.find(x=>x.id===id);
+  if(t)ta.value=applyTemplateVars(t.body,window._tplVars||{});
+}
+function sendWhatsApp(phone){
+  const msg=document.getElementById('tpMsg').value;
+  if(!phone){toast('No phone number','error');return;}
+  window.open('https://wa.me/'+phone+(msg?'?text='+encodeURIComponent(msg):''),'_blank');
+  closeModal();
+}
+
+// ═══════ ARABIC (Feature 8) ═══════
+const I18N={
+  en:{nav_customers:'Customers',nav_promos:'Promos',nav_cars:'Cars',nav_bookings:'Bookings',title_leads:'Leads',title_customers:'Customers',title_promos:'Promo Codes',title_templates:'WhatsApp Templates',kpi_outstanding:'Outstanding Payments'},
+  ar:{nav_customers:'العملاء',nav_promos:'الأكواد الترويجية',nav_cars:'السيارات',nav_bookings:'الحجوزات',title_leads:'العملاء المحتملون',title_customers:'العملاء',title_promos:'الأكواد الترويجية',title_templates:'قوالب واتساب',kpi_outstanding:'المدفوعات المستحقة'}
+};
+const I18N_NAV={Dashboard:'لوحة التحكم',Leads:'العملاء المحتملون',Bookings:'الحجوزات',Customers:'العملاء',Cars:'السيارات',Promos:'الأكواد الترويجية','Content Editor':'محرر المحتوى','Section Builder':'منشئ الأقسام','Page Settings':'إعدادات الصفحة','Live Preview':'معاينة مباشرة',Team:'الفريق','Activity Log':'سجل النشاط','Data & Backup':'البيانات والنسخ الاحتياطي',Settings:'الإعدادات'};
+function applyLang(lang){
+  currentLang=lang;
+  localStorage.setItem('ft_lang',lang);
+  document.documentElement.setAttribute('dir',lang==='ar'?'rtl':'ltr');
+  document.documentElement.setAttribute('lang',lang);
+  document.getElementById('langBtn').textContent=lang==='ar'?'AR':'EN';
+  // Apply data-i18n keys
+  const dict=I18N[lang]||{};
+  document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(dict[k])el.textContent=dict[k];else if(I18N.en[k])el.textContent=I18N.en[k];});
+  // Translate nav labels by text content
+  document.querySelectorAll('.sidebar-nav .nav-label').forEach(el=>{
+    const orig=el.getAttribute('data-orig')||el.textContent;
+    if(!el.getAttribute('data-orig'))el.setAttribute('data-orig',orig);
+    if(lang==='ar'&&I18N_NAV[orig])el.textContent=I18N_NAV[orig];else el.textContent=orig;
+  });
+}
+function toggleLang(){applyLang(currentLang==='en'?'ar':'en');}
+
+// WhatsApp template trigger in booking modal (data-tpl-btn) - hook existing WhatsApp links
+// (No modifications to existing WhatsApp anchors — template picker is opened from dedicated buttons)
+
 // ═══════ INIT ═══════
-document.addEventListener('DOMContentLoaded',()=>{initTheme();if(loadSession()&&currentUser)enterDashboard();});
+document.addEventListener('DOMContentLoaded',()=>{initTheme();applyLang(currentLang);if(loadSession()&&currentUser)enterDashboard();});
 </script>
 </body>
 </html>
