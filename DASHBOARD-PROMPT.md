@@ -355,3 +355,46 @@ Full audit completed and all 33 issues fixed:
 31. Body overflow-x:clip replaces overflow-x:hidden (Safari fix)
 32. Breadcrumbs update when modals open/close
 33. Notification IDs use timestamp+random (restart-safe)
+
+---
+
+## QA Integration Fixes — RESOLVED
+
+After full QA audit, the following issues were fixed:
+
+1. **Section reorder now applies to DOM** (`index.html` config-loader)
+   - Built-in reorderable sections (hero, ticker, trust, cars, why, reviews, guarantee, finalcta) now physically reorder via `document.body.appendChild(el)` in config-order.
+   - Applied after visibility so hidden sections are skipped from DOM move.
+
+2. **Custom sections now render** (`index.html` config-loader)
+   - New renderer reads non-builtin sections from config and creates `<section id="custom-{id}">` elements.
+   - Supports 3 types: `text` (centered block), `image_text` (2-column grid), `cta_banner` (dark CTA block).
+   - Inserted before the footer in the DOM. Hidden sections skipped. Re-renders cleanly if config changes.
+
+3. **Lead popup CMS selector fixed** (`index.html` config-loader)
+   - Changed `.lead-box .desc` → `.lead-box .offer-desc` to match the redesigned lead popup DOM.
+   - CMS edits to lead popup subtext now apply correctly.
+
+4. **Transmission field normalized** (`server.js` GET `/api/cars` + `/api/cars/admin`)
+   - Response now includes `trans: car.transmission || car.trans || 'Auto'` on every car object.
+   - Landing page `renderCars()` reads `c.trans` and now gets the correct value.
+   - Dashboard still reads `c.transmission` directly (unchanged, still works).
+   - Fallback `CARS` array in index.html left untouched.
+
+5. **Booking back button restored** (`index.html` booking flow)
+   - Added `bkPrev()` function + inline back button in steps 2 and 3.
+   - Step 2→1 preserves location, date, duration (already in window vars).
+   - Step 2→1 also captures current field values before navigating back, so re-entry retains them.
+   - Step 1, 2 re-render now populates form fields from window vars (`_bkDt`, `_bkLc`, `_bkDu`, `_bkNm`, `_bkPh`, `_bkWa`, `_bkEm`).
+   - New CSS `.bk-back-inline` for the inline back link.
+
+6. **Lead popup empty-field display** (`dashboard.html`) — already satisfied
+   - Interest, address, source columns already render `||'-'` when empty.
+   - Email only shown in detail modal if present.
+   - No code change needed — verified during audit.
+
+7. **Custom scripts injected** (`index.html` config-loader)
+   - After config load, `settings.scripts.headerScripts` is parsed, `<script>` tags extracted and appended to `<head>` with proper attributes and inline code.
+   - `settings.scripts.footerScripts` appended to `<body>`.
+   - Safety guard: scripts with `document.cookie=` or `localStorage.clear/removeItem` blocked, max 50KB per field.
+   - Enables Google Analytics, Meta Pixel, etc.

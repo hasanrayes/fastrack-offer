@@ -187,6 +187,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--dark);color:var(-
 .bk-hero{position:relative;overflow:hidden}
 .bk-back{position:absolute;top:16px;left:16px;z-index:5;width:38px;height:38px;border-radius:50%;background:rgba(0,0,0,.4);backdrop-filter:blur(6px);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s}
 .bk-back:hover{background:rgba(0,0,0,.6)}
+.bk-back-inline{background:transparent;border:none;color:var(--txt2);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;padding:0 0 12px;margin-bottom:4px;display:inline-flex;align-items:center;gap:4px;transition:.2s}
+.bk-back-inline:hover{color:var(--orange)}
 .bk-car-img{width:100%;height:280px;display:block;object-fit:cover}
 .bk-info{padding:20px 20px 0;max-width:600px;margin:0 auto}
 .bk-name{font-size:clamp(20px,4.5vw,28px);font-weight:900;color:var(--txt);text-transform:uppercase;line-height:1.15;letter-spacing:-.02em}
@@ -625,23 +627,25 @@ function renderBkStep(){
       '</div>'+
       '<hr style="border:none;border-top:1px solid var(--border);margin:14px 0">'+
       '<div class="bk-section-title">Pickup</div>'+
-      '<div class="bk-fg"><label class="bk-fl" for="bkL">Location</label><select class="bk-fs" id="bkL"><option value="">Select area</option><option>Dubai Marina</option><option>Downtown Dubai</option><option>Business Bay</option><option>JBR</option><option>Deira</option><option>Dubai Airport</option><option>Abu Dhabi</option><option>Sharjah</option><option>Other</option></select></div>'+
-      '<div class="bk-fg"><label class="bk-fl" for="bkD">Start Date</label><input class="bk-fi" type="date" id="bkD" min="'+td+'"></div>'+
-      '<div class="bk-fg"><label class="bk-fl" for="bkDu">Duration</label><select class="bk-fs" id="bkDu" onchange="updateBkPrice()"><option value="1">1 Month</option><option value="3" selected>3 Months (Best Value)</option><option value="6">6 Months</option><option value="12">12 Months</option></select></div>';
+      '<div class="bk-fg"><label class="bk-fl" for="bkL">Location</label><select class="bk-fs" id="bkL"><option value="">Select area</option>'+['Dubai Marina','Downtown Dubai','Business Bay','JBR','Deira','Dubai Airport','Abu Dhabi','Sharjah','Other'].map(function(loc){return '<option'+(window._bkLc===loc?' selected':'')+'>'+loc+'</option>';}).join('')+'</select></div>'+
+      '<div class="bk-fg"><label class="bk-fl" for="bkD">Start Date</label><input class="bk-fi" type="date" id="bkD" min="'+td+'" value="'+(window._bkDt||'')+'"></div>'+
+      '<div class="bk-fg"><label class="bk-fl" for="bkDu">Duration</label><select class="bk-fs" id="bkDu" onchange="updateBkPrice()">'+[['1','1 Month'],['3','3 Months (Best Value)'],['6','6 Months'],['12','12 Months']].map(function(o){var sel2=(window._bkDu||'3')===o[0]?' selected':'';return '<option value="'+o[0]+'"'+sel2+'>'+o[1]+'</option>';}).join('')+'</select></div>';
     document.getElementById('bkNextBtn').textContent='Next';
   } else if(bkStep===2){
     b.innerHTML=
+      '<button type="button" class="bk-back-inline" onclick="bkPrev()">&larr; Back</button>'+
       '<div class="bk-section-title">Your Details</div>'+
-      '<div class="bk-fg"><label class="bk-fl" for="bkN">Full Name</label><input class="bk-fi" type="text" id="bkN" placeholder="John Doe"></div>'+
+      '<div class="bk-fg"><label class="bk-fl" for="bkN">Full Name</label><input class="bk-fi" type="text" id="bkN" placeholder="John Doe" value="'+(window._bkNm||'').replace(/"/g,'&quot;')+'"></div>'+
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
-        '<div class="bk-fg"><label class="bk-fl" for="bkP">Phone</label><input class="bk-fi" type="tel" id="bkP" placeholder="+971 5X XXX XXXX"></div>'+
-        '<div class="bk-fg"><label class="bk-fl" for="bkW">WhatsApp</label><input class="bk-fi" type="tel" id="bkW" placeholder="Same as phone?"></div>'+
+        '<div class="bk-fg"><label class="bk-fl" for="bkP">Phone</label><input class="bk-fi" type="tel" id="bkP" placeholder="+971 5X XXX XXXX" value="'+(window._bkPh||'').replace(/"/g,'&quot;')+'"></div>'+
+        '<div class="bk-fg"><label class="bk-fl" for="bkW">WhatsApp</label><input class="bk-fi" type="tel" id="bkW" placeholder="Same as phone?" value="'+(window._bkWa||'').replace(/"/g,'&quot;')+'"></div>'+
       '</div>'+
-      '<div class="bk-fg"><label class="bk-fl" for="bkE">Email (optional)</label><input class="bk-fi" type="email" id="bkE" placeholder="you@email.com"></div>';
+      '<div class="bk-fg"><label class="bk-fl" for="bkE">Email (optional)</label><input class="bk-fi" type="email" id="bkE" placeholder="you@email.com" value="'+(window._bkEm||'').replace(/"/g,'&quot;')+'"></div>';
     document.getElementById('bkNextBtn').textContent='Review Booking';
   } else {
     var du=window._bkDu||'3',tot=sel.price*parseInt(du),was=sel.was*parseInt(du),sv=was-tot;
     b.innerHTML=
+      '<button type="button" class="bk-back-inline" onclick="bkPrev()">&larr; Back</button>'+
       '<div class="bk-section-title">Review & Confirm</div>'+
       '<div class="bk-rr"><span class="k">Car</span><span class="v">'+sel.name+'</span></div>'+
       '<div class="bk-rr"><span class="k">Start</span><span class="v">'+(window._bkDt||'-')+'</span></div>'+
@@ -680,6 +684,18 @@ function bkNext(){
     submitBooking();return;
   }
   bkStep++;
+  document.getElementById('bkOverlay').scrollTop=0;
+  renderBkStep();updateBkPrice();
+}
+
+function bkPrev(){
+  // Preserve current step values before going back
+  if(bkStep===2){
+    var n=document.getElementById('bkN'),p=document.getElementById('bkP'),w=document.getElementById('bkW'),e=document.getElementById('bkE');
+    if(n)window._bkNm=n.value.trim();if(p)window._bkPh=p.value.trim();if(w)window._bkWa=w.value.trim();if(e)window._bkEm=e.value.trim();
+  }
+  if(bkStep<=1)return;
+  bkStep--;
   document.getElementById('bkOverlay').scrollTop=0;
   renderBkStep();updateBkPrice();
 }
@@ -766,14 +782,78 @@ document.addEventListener('mouseout',function(e){if(!exitS&&!localStorage.getIte
     if(c.finalCta){var fc=document.querySelector('.final-cta');if(fc){var fh=fc.querySelector('h2');if(fh&&c.finalCta.headline)fh.innerHTML=c.finalCta.headline;var fp=fc.querySelector('p');if(fp&&c.finalCta.subtext)fp.textContent=c.finalCta.subtext;var fb=fc.querySelector('a');if(fb&&c.finalCta.buttonText)fb.innerHTML=c.finalCta.buttonText+' &#8594;';}}
     if(c.footer){t('.footer-left',c.footer.copyright);var fl=document.querySelectorAll('.footer-links a');if(fl[0]&&c.footer.phone){fl[0].textContent=c.footer.phone;fl[0].href='tel:'+c.footer.phone.replace(/\s/g,'');}if(fl[1]&&c.footer.whatsappText)fl[1].textContent=c.footer.whatsappText;if(fl[2]&&c.footer.email){fl[2].textContent=c.footer.email;fl[2].href='mailto:'+c.footer.email;}}
     if(c.stickyBar){var sb=document.querySelector('.sticky-text');if(sb)sb.innerHTML=c.stickyBar.prefix+' <s style="opacity:.5">'+c.stickyBar.wasPrice+'</s> <strong style="color:var(--o,#FF5F00);font-size:1.2em">'+c.stickyBar.currentPrice+'</strong>';var sbt=document.querySelector('.sticky-btn');if(sbt&&c.stickyBar.buttonText)sbt.innerHTML=c.stickyBar.buttonText+' &#8594;';}
-    if(c.leadPopup){t('.lead-box h3',c.leadPopup.headline);t('.lead-box .desc',c.leadPopup.subtext);var lbtn=document.querySelector('.lead-box button[type="submit"]');if(lbtn&&c.leadPopup.buttonText)lbtn.textContent=c.leadPopup.buttonText;t('.lead-skip',c.leadPopup.skipText);}
+    if(c.leadPopup){t('.lead-box h3',c.leadPopup.headline);t('.lead-box .offer-desc',c.leadPopup.subtext);var lbtn=document.querySelector('.lead-box button[type="submit"]');if(lbtn&&c.leadPopup.buttonText)lbtn.textContent=c.leadPopup.buttonText;t('.lead-skip',c.leadPopup.skipText);}
     if(s&&s.colors){var root=document.documentElement;if(s.colors.primary)root.style.setProperty('--orange',s.colors.primary);if(s.colors.dark)root.style.setProperty('--dark',s.colors.dark);}
     if(s&&s.seo){if(s.seo.title)document.title=s.seo.title;var md=document.querySelector('meta[name="description"]');if(md&&s.seo.description)md.setAttribute('content',s.seo.description);else if(s.seo.description){md=document.createElement('meta');md.name='description';md.content=s.seo.description;document.head.appendChild(md);}}
     if(s&&s.social&&s.social.whatsapp){var waLinks=document.querySelectorAll('a[href*="wa.me"]');waLinks.forEach(function(a){a.href='https://wa.me/'+s.social.whatsapp;});}
     if(sec&&sec.length){
       var sectionMap={nav:'.nav',countdown:'.cd-timer',hero:'.hero',ticker:'.ticker',trust:'.trust',cars:'.cars-section',why:'#why',reviews:'.reviews-section',guarantee:'.guarantee',finalcta:'.final-cta',footer:'.footer',sticky:'.sticky-bottom',leadpopup:'.lead-ov'};
       sec.sort(function(a,b){return(a.order||0)-(b.order||0);});
+      // 1) Apply visibility
       sec.forEach(function(section){var sel2=sectionMap[section.id];if(!sel2)return;var el=document.querySelector(sel2);if(!el)return;el.style.display=section.visible===false?'none':'';});
+      // 2) Reorder built-in sections in DOM to match config order (only sections that share a common parent — body)
+      var reorderable=['hero','ticker','trust','cars','why','reviews','guarantee','finalcta'];
+      sec.forEach(function(section){
+        if(section.type==='builtin'&&reorderable.indexOf(section.id)!==-1&&section.visible!==false){
+          var sel2=sectionMap[section.id];var el=document.querySelector(sel2);
+          if(el&&el.parentElement===document.body){document.body.appendChild(el);}
+        }
+      });
+      // 3) Render custom sections (non-builtin) before footer
+      var footerEl=document.querySelector('.footer');
+      sec.forEach(function(section){
+        if(section.type==='builtin')return;
+        if(!section.content)return;
+        var existing=document.getElementById('custom-'+section.id);
+        if(existing)existing.remove();
+        if(section.visible===false)return;
+        var el=document.createElement('section');
+        el.id='custom-'+section.id;
+        var cc=section.content;
+        if(section.type==='image_text'){
+          el.style.cssText='padding:40px 0;background:var(--bg)';
+          el.innerHTML='<div style="max-width:1200px;margin:0 auto;padding:0 20px;display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:center">'+
+            (cc.imageUrl?'<img src="'+cc.imageUrl+'" alt="" style="width:100%;border-radius:14px;object-fit:cover;max-height:320px">':'<div></div>')+
+            '<div>'+
+              (cc.heading?'<h2 style="font-size:clamp(18px,2.5vw,24px);font-weight:900;text-transform:uppercase;margin-bottom:10px;color:var(--txt)">'+cc.heading+'</h2>':'')+
+              (cc.body?'<p style="font-size:13px;color:var(--txt2);line-height:1.6;margin-bottom:14px">'+cc.body+'</p>':'')+
+              (cc.buttonText?'<a href="'+(cc.buttonUrl||'#offers')+'" style="display:inline-block;padding:11px 24px;background:var(--orange);color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none">'+cc.buttonText+'</a>':'')+
+            '</div></div>';
+        } else if(section.type==='cta_banner'){
+          el.style.cssText='padding:40px 0;background:var(--dark);text-align:center';
+          el.innerHTML='<div style="max-width:600px;margin:0 auto;padding:0 20px">'+
+            (cc.heading?'<h2 style="font-size:clamp(18px,2.5vw,28px);font-weight:900;color:var(--onDark);text-transform:uppercase;margin-bottom:6px;letter-spacing:-.02em">'+cc.heading+'</h2>':'')+
+            (cc.body?'<p style="font-size:13px;color:var(--onDarkM);margin-bottom:18px">'+cc.body+'</p>':'')+
+            (cc.buttonText?'<a href="'+(cc.buttonUrl||'#offers')+'" style="display:inline-block;padding:11px 24px;background:var(--orange);color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none">'+cc.buttonText+' &#8594;</a>':'')+
+            '</div>';
+        } else {
+          el.style.cssText='padding:40px 0;background:var(--bg)';
+          el.innerHTML='<div style="max-width:800px;margin:0 auto;padding:0 20px;text-align:center">'+
+            (cc.heading?'<h2 style="font-size:clamp(16px,2.5vw,24px);font-weight:900;text-transform:uppercase;letter-spacing:-.01em;margin-bottom:10px;color:var(--txt)">'+cc.heading+'</h2>':'')+
+            (cc.body?'<p style="font-size:13px;color:var(--txt2);line-height:1.6">'+cc.body+'</p>':'')+
+            '</div>';
+        }
+        if(footerEl&&footerEl.parentElement)footerEl.parentElement.insertBefore(el,footerEl);
+        else document.body.appendChild(el);
+      });
+    }
+    // 4) Inject custom scripts (header / footer)
+    if(s&&s.scripts){
+      function safe(code){return typeof code==='string'&&code.length<50000&&!/document\.cookie\s*=|localStorage\.(clear|removeItem)/i.test(code);}
+      if(s.scripts.headerScripts&&safe(s.scripts.headerScripts)){
+        var hd=document.createElement('div');hd.innerHTML=s.scripts.headerScripts;
+        Array.prototype.forEach.call(hd.querySelectorAll('script'),function(oldS){
+          var n=document.createElement('script');for(var i=0;i<oldS.attributes.length;i++){n.setAttribute(oldS.attributes[i].name,oldS.attributes[i].value);}n.text=oldS.text||'';document.head.appendChild(n);
+        });
+        Array.prototype.forEach.call(hd.children,function(ch){if(ch.tagName!=='SCRIPT')document.head.appendChild(ch);});
+      }
+      if(s.scripts.footerScripts&&safe(s.scripts.footerScripts)){
+        var fd=document.createElement('div');fd.innerHTML=s.scripts.footerScripts;
+        Array.prototype.forEach.call(fd.querySelectorAll('script'),function(oldS){
+          var n=document.createElement('script');for(var i=0;i<oldS.attributes.length;i++){n.setAttribute(oldS.attributes[i].name,oldS.attributes[i].value);}n.text=oldS.text||'';document.body.appendChild(n);
+        });
+        Array.prototype.forEach.call(fd.children,function(ch){if(ch.tagName!=='SCRIPT')document.body.appendChild(ch);});
+      }
     }
   }).catch(function(){});
 })();

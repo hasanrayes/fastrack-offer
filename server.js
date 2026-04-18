@@ -209,7 +209,8 @@ function auth(req, res, next) {
 // ══════════════════════════════
 
 app.get('/api/cars', (req, res) => {
-  const activeCars = cars.filter(c => c.active !== false).sort((a, b) => (a.order || 0) - (b.order || 0));
+  const activeCars = cars.filter(c => c.active !== false).sort((a, b) => (a.order || 0) - (b.order || 0))
+    .map(c => ({ ...c, trans: c.transmission || c.trans || 'Auto' }));
   res.json(activeCars);
 });
 
@@ -644,7 +645,8 @@ app.post('/api/upload', auth, requireRole('superadmin', 'manager'), (req, res) =
 
 // Admin cars listing (includes inactive)
 app.get('/api/cars/admin', auth, (req, res) => {
-  const sorted = [...cars].sort((a, b) => (a.order || 0) - (b.order || 0));
+  const sorted = [...cars].sort((a, b) => (a.order || 0) - (b.order || 0))
+    .map(c => ({ ...c, trans: c.transmission || c.trans || 'Auto' }));
   res.json(sorted);
 });
 
