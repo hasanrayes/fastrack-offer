@@ -130,8 +130,14 @@ let activityLog = [];
 let notifications = [];
 
 function addNotification(type, title, body, userId) {
-  notifications.unshift({ id: Date.now().toString(36) + crypto.randomBytes(3).toString('hex'), type, title, body, read: false, userId: userId || null, createdAt: new Date().toISOString() });
+  const n = { id: Date.now().toString(36) + crypto.randomBytes(3).toString('hex'), type, title, body, read: false, userId: userId || null, createdAt: new Date().toISOString() };
+  notifications.unshift(n);
   if (notifications.length > 200) notifications.length = 200;
+  if (db.isReady()) {
+    db.query('INSERT INTO notifications (id, type, title, body, read, user_id) VALUES ($1,$2,$3,$4,$5,$6)',
+      [n.id, n.type, n.title, n.body, n.read, n.userId])
+      .catch(err => console.error('[DB] notification insert failed:', err.message));
+  }
 }
 
 // ── Status whitelists ──
@@ -166,7 +172,7 @@ let templates = [
 // ── Activity Logger ──
 function logActivity(userId, action, details) {
   const user = users.find(u => u.id === userId);
-  activityLog.unshift({
+  const entry = {
     id: generateId('act'),
     userId,
     userName: user ? user.name : 'System',
@@ -174,9 +180,158 @@ function logActivity(userId, action, details) {
     action,
     details,
     timestamp: new Date().toISOString()
-  });
+  };
+  activityLog.unshift(entry);
   if (activityLog.length > 490 && activityLog.length <= 500) console.warn('Activity log approaching limit: ' + activityLog.length + '/500');
   if (activityLog.length > 500) activityLog.length = 500;
+  if (db.isReady()) {
+    db.query('INSERT INTO activity_log (id, user_id, user_name, user_role, action, details) VALUES ($1,$2,$3,$4,$5,$6)',
+      [entry.id, entry.userId, entry.userName, entry.userRole, entry.action, entry.details])
+      .catch(err => console.error('[DB] activity log write failed:', err.message));
+  }
+}
+
+// ── Dual-write helpers (memory + PostgreSQL) ──
+async function upsertCarToDb(c) {
+  if (!db.isReady()) return;
+  try {
+    await db.query(
+      `INSERT INTO cars (id, name, cat, img, price, was, type, seats, doors, transmission, bags, viewers, spots, badge, feats, includes, active, sort_order)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
+       ON CONFLICT (id) DO UPDATE SET
+         name=EXCLUDED.name, cat=EXCLUDED.cat, img=EXCLUDED.img, price=EXCLUDED.price, was=EXCLUDED.was,
+         type=EXCLUDED.type, seats=EXCLUDED.seats, doors=EXCLUDED.doors, transmission=EXCLUDED.transmission,
+         bags=EXCLUDED.bags, viewers=EXCLUDED.viewers, spots=EXCLUDED.spots, badge=EXCLUDED.badge,
+         feats=EXCLUDED.feats, includes=EXCLUDED.includes, active=EXCLUDED.active, sort_order=EXCLUDED.sort_order`,
+      [c.id, c.name, c.cat || '', c.img || '', c.price, c.was, c.type || '', c.seats || null, c.doors || null, c.transmission || '', c.bags || null, c.viewers || 0, c.spots || 0, c.badge || '', JSON.stringify(c.feats || []), c.includes || '', c.active !== false, c.order || 0]
+    );
+  } catch (err) { console.error('[DB] car upsert failed:', err.message); }
+}
+
+async function deleteCarFromDb(id) {
+  if (!db.isReady()) return;
+  try { await db.query('DELETE FROM cars WHERE id = $1', [id]); }
+  catch (err) { console.error('[DB] car delete failed:', err.message); }
+}
+
+async function upsertBookingToDb(b) {
+  if (!db.isReady()) return;
+  try {
+    await db.query(
+      `INSERT INTO bookings (id, ref, customer_name, customer_email, customer_phone, car_id, car_name, start_date, end_date, duration, total, status, payment_status, payment_method, source)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
+       ON CONFLICT (id) DO UPDATE SET
+         ref=EXCLUDED.ref, customer_name=EXCLUDED.customer_name, customer_email=EXCLUDED.customer_email,
+         customer_phone=EXCLUDED.customer_phone, car_id=EXCLUDED.car_id, car_name=EXCLUDED.car_name,
+         start_date=EXCLUDED.start_date, end_date=EXCLUDED.end_date, duration=EXCLUDED.duration,
+         total=EXCLUDED.total, status=EXCLUDED.status, payment_status=EXCLUDED.payment_status,
+         payment_method=EXCLUDED.payment_method, updated_at=NOW()`,
+      [b.id, b.ref, b.fullName || '', b.email || '', b.phone || '', b.carId || null, b.carName || '', b.startDate || '', b.endDate || '', parseInt(b.duration) || null, Number(b.totalAed) || 0, b.status || 'pending', b.paymentStatus || 'unpaid', b.paymentMethod || '', b.source || 'website']
+    );
+  } catch (err) { console.error('[DB] booking upsert failed:', err.message); }
+}
+
+async function deleteBookingFromDb(id) {
+  if (!db.isReady()) return;
+  try { await db.query('DELETE FROM bookings WHERE id = $1', [id]); }
+  catch (err) { console.error('[DB] booking delete failed:', err.message); }
+}
+
+async function upsertLeadToDb(l) {
+  if (!db.isReady()) return;
+  try {
+    await db.query(
+      `INSERT INTO leads (id, name, email, phone, car, source, status)
+       VALUES ($1,$2,$3,$4,$5,$6,$7)
+       ON CONFLICT (id) DO UPDATE SET
+         name=EXCLUDED.name, email=EXCLUDED.email, phone=EXCLUDED.phone, car=EXCLUDED.car,
+         source=EXCLUDED.source, status=EXCLUDED.status, updated_at=NOW()`,
+      [l.id, l.fullName || '', l.email || '', l.phone || '', l.interest || '', l.source || 'website', l.status || 'new']
+    );
+  } catch (err) { console.error('[DB] lead upsert failed:', err.message); }
+}
+
+async function deleteLeadFromDb(id) {
+  if (!db.isReady()) return;
+  try { await db.query('DELETE FROM leads WHERE id = $1', [id]); }
+  catch (err) { console.error('[DB] lead delete failed:', err.message); }
+}
+
+async function upsertPromoToDb(p) {
+  if (!db.isReady()) return;
+  try {
+    await db.query(
+      `INSERT INTO promos (id, code, type, value, min_months, max_uses, used_count, active, expires_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+       ON CONFLICT (id) DO UPDATE SET
+         code=EXCLUDED.code, type=EXCLUDED.type, value=EXCLUDED.value, min_months=EXCLUDED.min_months,
+         max_uses=EXCLUDED.max_uses, used_count=EXCLUDED.used_count, active=EXCLUDED.active, expires_at=EXCLUDED.expires_at`,
+      [p.id, p.code, p.discountType || 'percentage', Number(p.value) || 0, Number(p.minDuration) || 0, Number(p.maxUses) || null, Number(p.usageCount) || 0, p.active !== false, p.expiryDate ? new Date(p.expiryDate) : null]
+    );
+  } catch (err) { console.error('[DB] promo upsert failed:', err.message); }
+}
+
+async function deletePromoFromDb(id) {
+  if (!db.isReady()) return;
+  try { await db.query('DELETE FROM promos WHERE id = $1', [id]); }
+  catch (err) { console.error('[DB] promo delete failed:', err.message); }
+}
+
+async function upsertTemplateToDb(t) {
+  if (!db.isReady()) return;
+  try {
+    await db.query(
+      `INSERT INTO templates (id, name, category, body)
+       VALUES ($1,$2,$3,$4)
+       ON CONFLICT (id) DO UPDATE SET name=EXCLUDED.name, category=EXCLUDED.category, body=EXCLUDED.body`,
+      [t.id, t.name, t.category || 'custom', t.body]
+    );
+  } catch (err) { console.error('[DB] template upsert failed:', err.message); }
+}
+
+async function deleteTemplateFromDb(id) {
+  if (!db.isReady()) return;
+  try { await db.query('DELETE FROM templates WHERE id = $1', [id]); }
+  catch (err) { console.error('[DB] template delete failed:', err.message); }
+}
+
+async function upsertUserToDb(u) {
+  if (!db.isReady()) return;
+  try {
+    await db.query(
+      `INSERT INTO users (id, email, password_hash, name, role, avatar, active)
+       VALUES ($1,$2,$3,$4,$5,$6,$7)
+       ON CONFLICT (id) DO UPDATE SET
+         email=EXCLUDED.email, password_hash=EXCLUDED.password_hash, name=EXCLUDED.name,
+         role=EXCLUDED.role, avatar=EXCLUDED.avatar, active=EXCLUDED.active`,
+      [u.id, u.email, u.passwordHash, u.name, u.role, u.avatar, u.active !== false]
+    );
+  } catch (err) { console.error('[DB] user upsert failed:', err.message); }
+}
+
+async function deleteUserFromDb(id) {
+  if (!db.isReady()) return;
+  try { await db.query('DELETE FROM users WHERE id = $1', [id]); }
+  catch (err) { console.error('[DB] user delete failed:', err.message); }
+}
+
+async function syncSiteConfigToDb() {
+  if (!db.isReady()) return;
+  try {
+    await db.query(
+      `INSERT INTO site_config (key, value, updated_at) VALUES ('main', $1::jsonb, NOW())
+       ON CONFLICT (key) DO UPDATE SET value=EXCLUDED.value, updated_at=NOW()`,
+      [JSON.stringify(siteConfig)]
+    );
+  } catch (err) { console.error('[DB] site_config sync failed:', err.message); }
+}
+
+async function markNotificationReadInDb(id, all) {
+  if (!db.isReady()) return;
+  try {
+    if (all) await db.query('UPDATE notifications SET read = true');
+    else await db.query('UPDATE notifications SET read = true WHERE id = $1', [String(id)]);
+  } catch (err) { console.error('[DB] notification read update failed:', err.message); }
 }
 
 // ── JWT Auth Middleware ──
@@ -263,6 +418,7 @@ app.post('/api/leads', (req, res) => {
     createdAt: new Date().toISOString()
   };
   leads.unshift(lead);
+  upsertLeadToDb(lead);
   logActivity('system', 'lead_created', `New lead: ${fullName} (${phone})`);
   addNotification('lead', 'New Lead', `${fullName} (${phone}) — ${interest || 'General'}`);
   res.json({ success: true, lead });
@@ -307,8 +463,13 @@ app.post('/api/bookings', (req, res) => {
     if (p) { p.usageCount = (p.usageCount || 0) + 1; }
   }
   bookings.unshift(booking);
+  upsertBookingToDb(booking);
   const matchLead = leads.find(l => l.phone === phone && !l.convertedToBooking);
-  if (matchLead) matchLead.convertedToBooking = true;
+  if (matchLead) { matchLead.convertedToBooking = true; upsertLeadToDb(matchLead); }
+  if (promoCode) {
+    const p = promos.find(pp => pp.code.toUpperCase() === promoCode.toUpperCase() && pp.active);
+    if (p) upsertPromoToDb(p);
+  }
   logActivity('system', 'booking_created', `New booking: ${ref} - ${fullName} for ${carName}`);
   addNotification('booking', 'New Booking', `${ref} — ${fullName} booked ${carName}`);
   res.json({ success: true, ref, booking });
@@ -424,6 +585,7 @@ app.post('/api/team', jwtAuth, requireRole('superadmin'), (req, res) => {
   if (users.find(u => u.email.toLowerCase() === email.toLowerCase())) return res.status(400).json({ error: 'Email already exists' });
   const newUser = { id: generateId('usr'), email: email.toLowerCase(), passwordHash: hashPassword(password), name, role: role || 'viewer', avatar: null, active: true, createdAt: new Date().toISOString() };
   users.push(newUser);
+  upsertUserToDb(newUser);
   logActivity(req.user.id, 'team_member_added', `${req.user.name} added ${name} (${role || 'viewer'})`);
   res.json({ success: true, user: { id: newUser.id, email: newUser.email, name: newUser.name, role: newUser.role, active: newUser.active, createdAt: newUser.createdAt } });
 });
@@ -441,6 +603,7 @@ app.put('/api/team/:id', jwtAuth, requireRole('superadmin'), (req, res) => {
   if (role) user.role = role;
   if (active !== undefined) user.active = active;
   if (password) user.passwordHash = hashPassword(password);
+  upsertUserToDb(user);
   logActivity(req.user.id, 'team_member_updated', `${req.user.name} updated ${user.name}'s profile`);
   res.json({ success: true, user: { id: user.id, email: user.email, name: user.name, role: user.role, active: user.active, createdAt: user.createdAt } });
 });
@@ -450,6 +613,7 @@ app.delete('/api/team/:id', jwtAuth, requireRole('superadmin'), (req, res) => {
   if (idx === -1) return res.status(404).json({ error: 'User not found' });
   if (users[idx].id === req.user.id) return res.status(400).json({ error: 'Cannot delete yourself' });
   const deleted = users.splice(idx, 1)[0];
+  deleteUserFromDb(deleted.id);
   logActivity(req.user.id, 'team_member_deleted', `${req.user.name} removed ${deleted.name}`);
   res.json({ success: true });
 });
@@ -540,7 +704,7 @@ app.post('/api/leads/bulk', auth, requireRole('superadmin', 'manager'), (req, re
   if (action === 'delete') {
     const deleted = ids.filter(id => {
       const idx = leads.findIndex(l => l.id === id);
-      if (idx !== -1) { leads.splice(idx, 1); return true; }
+      if (idx !== -1) { leads.splice(idx, 1); deleteLeadFromDb(id); return true; }
       return false;
     });
     logActivity(req.user.id, 'leads_bulk_deleted', `Deleted ${deleted.length} leads`);
@@ -550,7 +714,7 @@ app.post('/api/leads/bulk', auth, requireRole('superadmin', 'manager'), (req, re
     let count = 0;
     ids.forEach(id => {
       const l = leads.find(x => x.id === id);
-      if (l) { l.status = status; count++; }
+      if (l) { l.status = status; upsertLeadToDb(l); count++; }
     });
     logActivity(req.user.id, 'leads_bulk_status', `Changed ${count} leads to ${status}`);
     return res.json({ success: true, affected: count });
@@ -564,6 +728,7 @@ app.patch('/api/leads/:id', auth, (req, res) => {
   if (req.body.status && !VALID_LEAD_STATUSES.includes(req.body.status)) return res.status(400).json({ error: 'Invalid status' });
   const fields = ['status', 'fullName', 'phone', 'whatsapp', 'email', 'interest', 'address', 'source', 'convertedToBooking'];
   fields.forEach(f => { if (req.body[f] !== undefined) l[f] = req.body[f]; });
+  upsertLeadToDb(l);
   logActivity(req.user.id, 'lead_updated', `Updated lead ${l.fullName}`);
   res.json(l);
 });
@@ -589,6 +754,7 @@ app.delete('/api/leads/:id', auth, requireRole('superadmin', 'manager'), (req, r
   const idx = leads.findIndex(x => x.id === parseInt(req.params.id));
   if (idx === -1) return res.status(404).json({ error: 'Not found' });
   const deleted = leads.splice(idx, 1)[0];
+  deleteLeadFromDb(deleted.id);
   logActivity(req.user.id, 'lead_deleted', `Deleted lead ${deleted.fullName}`);
   res.json({ success: true });
 });
@@ -672,6 +838,7 @@ app.patch('/api/bookings/:id', auth, (req, res) => {
     }
   });
   if (changed.includes('totalAed')) b.totalAed = Number(b.totalAed);
+  upsertBookingToDb(b);
   logActivity(req.user.id, 'booking_updated', `Updated booking ${b.ref}: ${changed.join(', ')}`);
   res.json(b);
 });
@@ -692,13 +859,13 @@ app.post('/api/bookings/bulk', auth, requireRole('superadmin', 'manager'), (req,
   const { ids, action, status } = req.body;
   if (!ids || !Array.isArray(ids)) return res.status(400).json({ error: 'ids array required' });
   if (action === 'delete') {
-    const deleted = ids.filter(id => { const idx = bookings.findIndex(b => b.id === id); if (idx !== -1) { bookings.splice(idx, 1); return true; } return false; });
+    const deleted = ids.filter(id => { const idx = bookings.findIndex(b => b.id === id); if (idx !== -1) { bookings.splice(idx, 1); deleteBookingFromDb(id); return true; } return false; });
     logActivity(req.user.id, 'bookings_bulk_deleted', `Deleted ${deleted.length} bookings`);
     return res.json({ success: true, affected: deleted.length });
   }
   if (action === 'status' && status) {
     let count = 0;
-    ids.forEach(id => { const b = bookings.find(x => x.id === id); if (b) { b.status = status; count++; } });
+    ids.forEach(id => { const b = bookings.find(x => x.id === id); if (b) { b.status = status; upsertBookingToDb(b); count++; } });
     logActivity(req.user.id, 'bookings_bulk_status', `Changed ${count} bookings to ${status}`);
     return res.json({ success: true, affected: count });
   }
@@ -709,6 +876,7 @@ app.delete('/api/bookings/:id', auth, requireRole('superadmin', 'manager'), (req
   const idx = bookings.findIndex(x => x.id === parseInt(req.params.id));
   if (idx === -1) return res.status(404).json({ error: 'Not found' });
   const deleted = bookings.splice(idx, 1)[0];
+  deleteBookingFromDb(deleted.id);
   logActivity(req.user.id, 'booking_deleted', `Deleted booking ${deleted.ref}`);
   res.json({ success: true });
 });
@@ -776,6 +944,7 @@ app.post('/api/cars', auth, requireRole('superadmin', 'manager'), (req, res) => 
     active: true, order: cars.length
   };
   cars.push(car);
+  upsertCarToDb(car);
   logActivity(req.user.id, 'car_added', `Added car: ${name}`);
   res.json(car);
 });
@@ -790,6 +959,7 @@ app.put('/api/cars/:id', auth, requireRole('superadmin', 'manager'), (req, res) 
   if (car.seats) car.seats = Number(car.seats);
   if (car.doors) car.doors = Number(car.doors);
   if (car.bags) car.bags = Number(car.bags);
+  upsertCarToDb(car);
   logActivity(req.user.id, 'car_updated', `Updated car: ${car.name}`);
   res.json(car);
 });
@@ -799,6 +969,7 @@ app.patch('/api/cars/:id/toggle', auth, requireRole('superadmin', 'manager'), (r
   const car = cars.find(x => x.id === parseInt(req.params.id));
   if (!car) return res.status(404).json({ error: 'Not found' });
   car.active = !car.active;
+  upsertCarToDb(car);
   logActivity(req.user.id, 'car_toggled', `${car.active ? 'Activated' : 'Deactivated'} car: ${car.name}`);
   res.json(car);
 });
@@ -815,6 +986,7 @@ app.post('/api/cars/:id/duplicate', auth, requireRole('superadmin', 'manager'), 
     viewers: Math.floor(Math.random() * 15) + 5
   };
   cars.push(dup);
+  upsertCarToDb(dup);
   logActivity(req.user.id, 'car_duplicated', `Duplicated car: ${original.name}`);
   res.json(dup);
 });
@@ -825,7 +997,7 @@ app.put('/api/cars/reorder', auth, requireRole('superadmin', 'manager'), (req, r
   if (!order || !Array.isArray(order)) return res.status(400).json({ error: 'order array required' });
   order.forEach((id, idx) => {
     const car = cars.find(c => c.id === id);
-    if (car) car.order = idx;
+    if (car) { car.order = idx; upsertCarToDb(car); }
   });
   logActivity(req.user.id, 'cars_reordered', 'Reordered car display order');
   res.json({ success: true });
@@ -835,6 +1007,7 @@ app.delete('/api/cars/:id', auth, requireRole('superadmin', 'manager'), (req, re
   const idx = cars.findIndex(x => x.id === parseInt(req.params.id));
   if (idx === -1) return res.status(404).json({ error: 'Not found' });
   const deleted = cars.splice(idx, 1)[0];
+  deleteCarFromDb(deleted.id);
   logActivity(req.user.id, 'car_deleted', `Deleted car: ${deleted.name}`);
   res.json({ success: true });
 });
@@ -1186,6 +1359,7 @@ app.put('/api/config', auth, requireRole('superadmin', 'manager'), (req, res) =>
   const { content, settings } = req.body;
   if (content) siteConfig.content = { ...siteConfig.content, ...content };
   if (settings) siteConfig.settings = { ...siteConfig.settings, ...settings };
+  syncSiteConfigToDb();
   logActivity(req.user.id, 'config_updated', 'Updated landing page configuration');
   res.json({ success: true, config: siteConfig });
 });
@@ -1203,6 +1377,7 @@ app.put('/api/config/sections/reorder', auth, requireRole('superadmin', 'manager
     const sec = siteConfig.sections.find(s => s.id === id);
     if (sec) sec.order = idx;
   });
+  syncSiteConfigToDb();
   logActivity(req.user.id, 'sections_reordered', 'Reordered landing page sections');
   res.json({ success: true, sections: siteConfig.sections.sort((a, b) => a.order - b.order) });
 });
@@ -1217,6 +1392,7 @@ app.patch('/api/config/sections/:id', auth, requireRole('superadmin', 'manager')
     if (req.body.type && ['text', 'image_text', 'cta_banner'].includes(req.body.type)) sec.type = req.body.type;
     if (req.body.content && typeof req.body.content === 'object') sec.content = { ...(sec.content || {}), ...req.body.content };
   }
+  syncSiteConfigToDb();
   logActivity(req.user.id, 'section_updated', `Updated section: ${sec.name}`);
   res.json(sec);
 });
@@ -1235,6 +1411,7 @@ app.post('/api/config/sections', auth, requireRole('superadmin', 'manager'), (re
     content: content || { heading: '', body: '', imageUrl: '', buttonText: '', buttonUrl: '' }
   };
   siteConfig.sections.push(sec);
+  syncSiteConfigToDb();
   logActivity(req.user.id, 'section_added', `Added custom section: ${name}`);
   res.json(sec);
 });
@@ -1245,6 +1422,7 @@ app.delete('/api/config/sections/:id', auth, requireRole('superadmin', 'manager'
   if (idx === -1) return res.status(404).json({ error: 'Section not found' });
   if (siteConfig.sections[idx].type === 'builtin') return res.status(400).json({ error: 'Cannot delete built-in sections' });
   const deleted = siteConfig.sections.splice(idx, 1)[0];
+  syncSiteConfigToDb();
   logActivity(req.user.id, 'section_deleted', `Deleted section: ${deleted.name}`);
   res.json({ success: true });
 });
@@ -1252,6 +1430,7 @@ app.delete('/api/config/sections/:id', auth, requireRole('superadmin', 'manager'
 // Reset config to defaults
 app.post('/api/config/reset', auth, requireRole('superadmin'), (req, res) => {
   siteConfig.sections = JSON.parse(JSON.stringify(DEFAULT_SECTIONS));
+  syncSiteConfigToDb();
   logActivity(req.user.id, 'config_reset', 'Reset landing page sections to defaults');
   res.json({ success: true });
 });
@@ -1287,11 +1466,13 @@ app.get('/api/notifications', auth, async (req, res) => {
 app.patch('/api/notifications/:id/read', auth, (req, res) => {
   const n = notifications.find(x => String(x.id) === req.params.id);
   if (n) n.read = true;
+  markNotificationReadInDb(req.params.id, false);
   res.json({ success: true });
 });
 
 app.post('/api/notifications/read-all', auth, (req, res) => {
   notifications.forEach(n => n.read = true);
+  markNotificationReadInDb(null, true);
   res.json({ success: true });
 });
 
@@ -1389,6 +1570,7 @@ app.patch('/api/bookings/:id/payment', auth, requireRole('superadmin', 'manager'
   if (b.amountPaid >= total && total > 0) b.paymentStatus = 'paid';
   else if (b.amountPaid > 0) b.paymentStatus = 'partial';
   else if (!paymentStatus) b.paymentStatus = b.paymentStatus || 'unpaid';
+  upsertBookingToDb(b);
   logActivity(req.user.id, 'payment_updated', `Payment updated for ${b.ref}: ${b.paymentStatus} (AED ${b.amountPaid}/${total})`);
   res.json(b);
 });
@@ -1523,6 +1705,7 @@ app.post('/api/promos', auth, requireRole('superadmin', 'manager'), (req, res) =
     createdAt: new Date().toISOString()
   };
   promos.push(promo);
+  upsertPromoToDb(promo);
   logActivity(req.user.id, 'promo_created', `Created promo ${promo.code}`);
   res.json(promo);
 });
@@ -1538,6 +1721,7 @@ app.put('/api/promos/:id', auth, requireRole('superadmin', 'manager'), (req, res
   if (maxUses !== undefined) p.maxUses = Number(maxUses);
   if (expiryDate !== undefined) p.expiryDate = expiryDate;
   if (active !== undefined) p.active = active;
+  upsertPromoToDb(p);
   logActivity(req.user.id, 'promo_updated', `Updated promo ${p.code}`);
   res.json(p);
 });
@@ -1546,6 +1730,7 @@ app.delete('/api/promos/:id', auth, requireRole('superadmin', 'manager'), (req, 
   const idx = promos.findIndex(x => x.id === req.params.id);
   if (idx === -1) return res.status(404).json({ error: 'Not found' });
   const deleted = promos.splice(idx, 1)[0];
+  deletePromoFromDb(deleted.id);
   logActivity(req.user.id, 'promo_deleted', `Deleted promo ${deleted.code}`);
   res.json({ success: true });
 });
@@ -1617,6 +1802,7 @@ app.post('/api/templates', auth, requireRole('superadmin', 'manager'), (req, res
   if (!name || !body) return res.status(400).json({ error: 'Name and body required' });
   const tpl = { id: generateId('tpl'), name, category: category || 'custom', body, createdAt: new Date().toISOString() };
   templates.push(tpl);
+  upsertTemplateToDb(tpl);
   logActivity(req.user.id, 'template_created', `Created template: ${name}`);
   res.json(tpl);
 });
@@ -1627,6 +1813,7 @@ app.put('/api/templates/:id', auth, requireRole('superadmin', 'manager'), (req, 
   if (req.body.name) t.name = req.body.name;
   if (req.body.category) t.category = req.body.category;
   if (req.body.body) t.body = req.body.body;
+  upsertTemplateToDb(t);
   logActivity(req.user.id, 'template_updated', `Updated template: ${t.name}`);
   res.json(t);
 });
@@ -1635,6 +1822,7 @@ app.delete('/api/templates/:id', auth, requireRole('superadmin', 'manager'), (re
   const idx = templates.findIndex(x => x.id === req.params.id);
   if (idx === -1) return res.status(404).json({ error: 'Not found' });
   const deleted = templates.splice(idx, 1)[0];
+  deleteTemplateFromDb(deleted.id);
   logActivity(req.user.id, 'template_deleted', `Deleted template: ${deleted.name}`);
   res.json({ success: true });
 });
