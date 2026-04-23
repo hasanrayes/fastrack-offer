@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Style Comparison — Fastrack</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: system-ui, -apple-system, sans-serif; background:#0a0a0a; color:#fff; }
+.header { text-align:center; padding:40px 20px 20px; }
+.header h1 { font-size:28px; font-weight:700; margin-bottom:8px; }
+.header p { color:#888; font-size:15px; }
+.grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; padding:24px; max-width:1400px; margin:0 auto; }
+@media(max-width:900px){ .grid{grid-template-columns:1fr;} }
+.card { border-radius:16px; overflow:hidden; border:1px solid #222; transition:all .3s; cursor:pointer; }
+.card:hover { border-color:#FF5F00; transform:translateY(-2px); box-shadow:0 8px 32px rgba(255,95,0,.15); }
+.card.selected { border-color:#FF5F00; box-shadow:0 0 0 2px #FF5F00; }
+.card-label { padding:16px 20px; background:#111; border-bottom:1px solid #222; display:flex; justify-content:space-between; align-items:center; }
+.card-label h3 { font-size:16px; font-weight:600; }
+.card-label .tag { font-size:11px; padding:3px 10px; border-radius:20px; background:#FF5F00; color:#fff; font-weight:600; }
+.preview { height:420px; position:relative; overflow:hidden; }
+
+/* === STYLE 1: Shadcn/Vercel === */
+.s1 { background:#000; padding:20px; font-family:'Inter',system-ui,sans-serif; }
+.s1 .top { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+.s1 .logo { font-size:15px; font-weight:700; letter-spacing:-.5px; }
+.s1 .nav { display:flex; gap:16px; font-size:12px; color:#666; }
+.s1 .nav span.active { color:#fff; }
+.s1 .title { font-size:20px; font-weight:700; letter-spacing:-.5px; margin-bottom:16px; }
+.s1 .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px; }
+.s1 .stat { background:#111; border:1px solid #1a1a1a; border-radius:8px; padding:14px; }
+.s1 .stat .label { font-size:11px; color:#666; text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; }
+.s1 .stat .val { font-size:22px; font-weight:700; letter-spacing:-1px; }
+.s1 .stat .change { font-size:11px; color:#22c55e; margin-top:4px; }
+.s1 .table { background:#111; border:1px solid #1a1a1a; border-radius:8px; overflow:hidden; }
+.s1 .thead { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; padding:10px 14px; font-size:11px; color:#666; text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid #1a1a1a; }
+.s1 .trow { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; padding:10px 14px; font-size:13px; border-bottom:1px solid #0a0a0a; }
+.s1 .trow .name { font-weight:500; }
+.s1 .badge { font-size:10px; padding:2px 8px; border-radius:20px; display:inline-block; }
+.s1 .badge.green { background:#052e16; color:#4ade80; }
+.s1 .badge.yellow { background:#422006; color:#fbbf24; }
+
+/* === STYLE 2: Glassmorphism === */
+.s2 { background:linear-gradient(135deg,#0f0f23 0%,#1a0a2e 50%,#0a1628 100%); padding:20px; font-family:system-ui,sans-serif; }
+.s2 .sidebar { position:absolute; left:0; top:0; bottom:0; width:56px; background:rgba(255,255,255,.03); backdrop-filter:blur(20px); border-right:1px solid rgba(255,255,255,.06); display:flex; flex-direction:column; align-items:center; padding-top:16px; gap:18px; }
+.s2 .sidebar .icon { width:28px; height:28px; border-radius:8px; background:rgba(255,255,255,.06); display:flex; align-items:center; justify-content:center; font-size:12px; }
+.s2 .sidebar .icon.active { background:rgba(255,95,0,.2); color:#FF5F00; }
+.s2 .main { margin-left:72px; }
+.s2 .glass { background:rgba(255,255,255,.04); backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:16px; margin-bottom:14px; }
+.s2 .stats2 { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:14px; }
+.s2 .stat2 { background:rgba(255,255,255,.04); backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:14px; }
+.s2 .stat2 .label { font-size:11px; color:rgba(255,255,255,.4); margin-bottom:6px; }
+.s2 .stat2 .val { font-size:20px; font-weight:700; }
+.s2 .stat2 .bar { height:3px; background:rgba(255,255,255,.08); border-radius:2px; margin-top:10px; }
+.s2 .stat2 .bar-fill { height:100%; border-radius:2px; background:linear-gradient(90deg,#FF5F00,#ff8534); }
+.s2 .chart-area { height:100px; display:flex; align-items:flex-end; gap:6px; padding:0 4px; }
+.s2 .chart-bar { flex:1; border-radius:4px 4px 0 0; background:linear-gradient(180deg,rgba(255,95,0,.4),rgba(255,95,0,.1)); min-height:10px; }
+.s2 h3 { font-size:13px; font-weight:600; margin-bottom:12px; color:rgba(255,255,255,.8); }
+
+/* === STYLE 3: Linear/Notion === */
+.s3 { background:#fff; padding:20px; color:#1a1a1a; font-family:'Inter',system-ui,sans-serif; }
+.s3 .top3 { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; padding-bottom:12px; border-bottom:1px solid #eee; }
+.s3 .logo3 { font-size:14px; font-weight:700; color:#1a1a1a; display:flex; align-items:center; gap:8px; }
+.s3 .logo3 .dot { width:8px; height:8px; border-radius:50%; background:#FF5F00; }
+.s3 .tabs3 { display:flex; gap:2px; background:#f5f5f5; padding:3px; border-radius:8px; }
+.s3 .tabs3 span { font-size:12px; padding:5px 12px; border-radius:6px; color:#666; }
+.s3 .tabs3 span.active { background:#fff; color:#1a1a1a; font-weight:500; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+.s3 .stats3 { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:16px; }
+.s3 .stat3 { padding:14px; border:1px solid #eee; border-radius:10px; }
+.s3 .stat3 .label { font-size:11px; color:#999; margin-bottom:4px; }
+.s3 .stat3 .val { font-size:20px; font-weight:700; color:#1a1a1a; }
+.s3 .stat3 .sub { font-size:11px; color:#22c55e; margin-top:2px; }
+.s3 .list3 { border:1px solid #eee; border-radius:10px; overflow:hidden; }
+.s3 .list3 .lh { padding:10px 14px; font-size:12px; color:#999; border-bottom:1px solid #eee; display:grid; grid-template-columns:2fr 1fr 1fr 80px; }
+.s3 .list3 .lr { padding:10px 14px; font-size:13px; border-bottom:1px solid #f5f5f5; display:grid; grid-template-columns:2fr 1fr 1fr 80px; align-items:center; }
+.s3 .pill { font-size:10px; padding:3px 10px; border-radius:20px; font-weight:500; }
+.s3 .pill.o { background:#fff7ed; color:#ea580c; }
+.s3 .pill.g { background:#f0fdf4; color:#16a34a; }
+.s3 .pill.b { background:#eff6ff; color:#2563eb; }
+
+/* === STYLE 4: Current + Modernized === */
+.s4 { background:#1A1A1A; padding:20px; font-family:system-ui,sans-serif; }
+.s4 .top4 { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+.s4 .logo4 { color:#FF5F00; font-size:16px; font-weight:800; letter-spacing:1px; }
+.s4 .avatar { width:32px; height:32px; border-radius:50%; background:#FF5F00; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; }
+.s4 .stats4 { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px; }
+.s4 .stat4 { background:#222; border-radius:12px; padding:16px; border-left:3px solid #FF5F00; }
+.s4 .stat4 .label { font-size:11px; color:#888; margin-bottom:6px; text-transform:uppercase; letter-spacing:.5px; }
+.s4 .stat4 .val { font-size:24px; font-weight:700; }
+.s4 .stat4 .sub { font-size:11px; color:#4ade80; margin-top:4px; }
+.s4 .cards4 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.s4 .crd4 { background:#222; border-radius:12px; padding:14px; }
+.s4 .crd4 h4 { font-size:13px; font-weight:600; margin-bottom:10px; color:#ccc; }
+.s4 .crd4 .item { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #2a2a2a; font-size:12px; }
+.s4 .crd4 .item:last-child { border:none; }
+.s4 .crd4 .item .name { color:#ddd; }
+.s4 .crd4 .item .amt { color:#FF5F00; font-weight:600; }
+.s4 .tag4 { font-size:10px; padding:2px 8px; border-radius:4px; }
+.s4 .tag4.new { background:rgba(255,95,0,.15); color:#FF5F00; }
+.s4 .tag4.done { background:rgba(74,222,128,.15); color:#4ade80; }
+
+.vote-section { padding:30px 24px 60px; max-width:1400px; margin:0 auto; text-align:center; }
+.vote-section p { color:#888; font-size:14px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Dashboard Design Styles</h1>
+  <p>Click on the style you like most — then tell me your choice</p>
+</div>
+
+<div class="grid">
+
+  <!-- STYLE 1: Shadcn/Vercel -->
+  <div class="card" onclick="this.classList.toggle('selected')">
+    <div class="card-label">
+      <h3>1 — Shadcn / Vercel Style</h3>
+      <span class="tag">TRENDING 2026</span>
+    </div>
+    <div class="preview s1">
+      <div class="top">
+        <div class="logo">FASTRACK</div>
+        <div class="nav"><span class="active">Overview</span><span>Leads</span><span>Bookings</span><span>Cars</span></div>
+      </div>
+      <div class="title">Dashboard</div>
+      <div class="stats">
+        <div class="stat"><div class="label">Total Revenue</div><div class="val">AED 48.2K</div><div class="change">+12.5% from last month</div></div>
+        <div class="stat"><div class="label">Active Bookings</div><div class="val">127</div><div class="change">+8.2% from last month</div></div>
+        <div class="stat"><div class="label">New Leads</div><div class="val">43</div><div class="change">+23.1% from last month</div></div>
+      </div>
+      <div class="table">
+        <div class="thead"><span>Customer</span><span>Car</span><span>Status</span><span>Amount</span></div>
+        <div class="trow"><span class="name">Ahmed K.</span><span>JAC J7</span><span><span class="badge green">Active</span></span><span>1,299</span></div>
+        <div class="trow"><span class="name">Sara M.</span><span>ASX</span><span><span class="badge yellow">Pending</span></span><span>1,499</span></div>
+        <div class="trow"><span class="name">Omar H.</span><span>Attrage</span><span><span class="badge green">Active</span></span><span>999</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STYLE 2: Glassmorphism -->
+  <div class="card" onclick="this.classList.toggle('selected')">
+    <div class="card-label">
+      <h3>2 — Glassmorphism Dark</h3>
+      <span class="tag">PREMIUM</span>
+    </div>
+    <div class="preview s2">
+      <div class="sidebar">
+        <div class="icon active">F</div>
+        <div class="icon">📊</div>
+        <div class="icon">👥</div>
+        <div class="icon">🚗</div>
+        <div class="icon">📋</div>
+        <div class="icon">⚙</div>
+      </div>
+      <div class="main">
+        <div class="stats2">
+          <div class="stat2"><div class="label">Revenue</div><div class="val">48.2K</div><div class="bar"><div class="bar-fill" style="width:72%"></div></div></div>
+          <div class="stat2"><div class="label">Bookings</div><div class="val">127</div><div class="bar"><div class="bar-fill" style="width:85%"></div></div></div>
+          <div class="stat2"><div class="label">Leads</div><div class="val">43</div><div class="bar"><div class="bar-fill" style="width:45%"></div></div></div>
+        </div>
+        <div class="glass">
+          <h3>Weekly Overview</h3>
+          <div class="chart-area">
+            <div class="chart-bar" style="height:40%"></div>
+            <div class="chart-bar" style="height:60%"></div>
+            <div class="chart-bar" style="height:35%"></div>
+            <div class="chart-bar" style="height:80%"></div>
+            <div class="chart-bar" style="height:65%"></div>
+            <div class="chart-bar" style="height:90%"></div>
+            <div class="chart-bar" style="height:55%"></div>
+            <div class="chart-bar" style="height:70%"></div>
+            <div class="chart-bar" style="height:45%"></div>
+            <div class="chart-bar" style="height:85%"></div>
+            <div class="chart-bar" style="height:50%"></div>
+            <div class="chart-bar" style="height:75%"></div>
+          </div>
+        </div>
+        <div class="glass" style="padding:10px 14px;">
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.5);margin-bottom:8px"><span>Latest Bookings</span><span>View all →</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06)"><span>Ahmed K. — JAC J7</span><span style="color:#FF5F00">AED 1,299</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0"><span>Sara M. — ASX</span><span style="color:#FF5F00">AED 1,499</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STYLE 3: Linear/Notion -->
+  <div class="card" onclick="this.classList.toggle('selected')">
+    <div class="card-label">
+      <h3>3 — Linear / Notion (Light)</h3>
+      <span class="tag">CLEAN</span>
+    </div>
+    <div class="preview s3">
+      <div class="top3">
+        <div class="logo3"><span class="dot"></span> Fastrack</div>
+        <div class="tabs3"><span class="active">Overview</span><span>Leads</span><span>Bookings</span><span>Fleet</span></div>
+      </div>
+      <div class="stats3">
+        <div class="stat3"><div class="label">Revenue</div><div class="val">48.2K</div><div class="sub">↑ 12.5%</div></div>
+        <div class="stat3"><div class="label">Bookings</div><div class="val">127</div><div class="sub">↑ 8.2%</div></div>
+        <div class="stat3"><div class="label">Leads</div><div class="val">43</div><div class="sub">↑ 23.1%</div></div>
+        <div class="stat3"><div class="label">Fleet</div><div class="val">18</div><div class="sub">4 available</div></div>
+      </div>
+      <div class="list3">
+        <div class="lh"><span>Customer</span><span>Vehicle</span><span>Status</span><span>Monthly</span></div>
+        <div class="lr"><span style="font-weight:500">Ahmed Khalil</span><span style="color:#666">JAC J7</span><span><span class="pill o">Pending</span></span><span style="font-weight:600">1,299</span></div>
+        <div class="lr"><span style="font-weight:500">Sara Mansour</span><span style="color:#666">Mitsubishi ASX</span><span><span class="pill g">Active</span></span><span style="font-weight:600">1,499</span></div>
+        <div class="lr"><span style="font-weight:500">Omar Hassan</span><span style="color:#666">Attrage</span><span><span class="pill g">Active</span></span><span style="font-weight:600">999</span></div>
+        <div class="lr"><span style="font-weight:500">Layla Farid</span><span style="color:#666">JAC JS4</span><span><span class="pill b">Confirmed</span></span><span style="font-weight:600">1,499</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STYLE 4: Current Modernized -->
+  <div class="card" onclick="this.classList.toggle('selected')">
+    <div class="card-label">
+      <h3>4 — Fastrack Dark (Modernized)</h3>
+      <span class="tag">SAFE UPGRADE</span>
+    </div>
+    <div class="preview s4">
+      <div class="top4">
+        <div class="logo4">FASTRACK</div>
+        <div class="avatar">HR</div>
+      </div>
+      <div class="stats4">
+        <div class="stat4"><div class="label">Revenue</div><div class="val">AED 48.2K</div><div class="sub">↑ 12.5% vs last month</div></div>
+        <div class="stat4"><div class="label">Active Bookings</div><div class="val">127</div><div class="sub">↑ 8 new this week</div></div>
+        <div class="stat4"><div class="label">New Leads</div><div class="val">43</div><div class="sub">↑ 23% conversion rate</div></div>
+      </div>
+      <div class="cards4">
+        <div class="crd4">
+          <h4>Recent Bookings</h4>
+          <div class="item"><span class="name">Ahmed K. — JAC J7</span><span class="amt">1,299/mo</span></div>
+          <div class="item"><span class="name">Sara M. — ASX</span><span class="amt">1,499/mo</span></div>
+          <div class="item"><span class="name">Omar H. — Attrage</span><span class="amt">999/mo</span></div>
+        </div>
+        <div class="crd4">
+          <h4>Lead Activity</h4>
+          <div class="item"><span class="name">New lead from website</span><span class="tag4 new">New</span></div>
+          <div class="item"><span class="name">Follow-up: Layla F.</span><span class="tag4 new">Pending</span></div>
+          <div class="item"><span class="name">Converted: Khalid R.</span><span class="tag4 done">Done</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="vote-section">
+  <p>Click on your favorite, then tell me the number (1, 2, 3, or 4)</p>
+</div>
+
+</body>
+</html>
