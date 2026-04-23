@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 let helmet;
 try { helmet = require('helmet'); } catch(e) { helmet = null; }
 const db = require('./db');
+const { initSchema } = require('./schema');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -1515,6 +1516,12 @@ app.listen(PORT, async () => {
   const dbConnected = await db.testConnection();
   if (dbConnected) {
     console.log('[Server] Database ready — future phases will migrate data to PostgreSQL');
+    const schemaOk = await initSchema();
+    if (schemaOk) {
+      console.log('[Server] Database schema initialized — all tables ready');
+    } else {
+      console.error('[Server] Schema initialization failed — running in memory-only mode');
+    }
   } else {
     console.log('[Server] Running in memory-only mode — all data stored in RAM (resets on restart)');
   }
