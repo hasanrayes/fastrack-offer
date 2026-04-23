@@ -6,6 +6,7 @@ let helmet;
 try { helmet = require('helmet'); } catch(e) { helmet = null; }
 const db = require('./db');
 const { initSchema } = require('./schema');
+const { seedDefaults } = require('./seed');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -223,7 +224,20 @@ function auth(req, res, next) {
 // PUBLIC API
 // ══════════════════════════════
 
-app.get('/api/cars', (req, res) => {
+function mapCarRow(r) {
+  const { sort_order, ...rest } = r;
+  return { ...rest, order: sort_order, feats: Array.isArray(rest.feats) ? rest.feats : [], trans: rest.transmission || 'Auto' };
+}
+
+app.get('/api/cars', async (req, res) => {
+  try {
+    if (db.isReady()) {
+      const result = await db.query('SELECT * FROM cars WHERE active = true ORDER BY sort_order');
+      if (result.rows.length > 0) return res.json(result.rows.map(mapCarRow));
+    }
+  } catch (err) {
+    console.error('[API] DB read failed for /api/cars:', err.message);
+  }
   const activeCars = cars.filter(c => c.active !== false).sort((a, b) => (a.order || 0) - (b.order || 0))
     .map(c => ({ ...c, trans: c.transmission || c.trans || 'Auto' }));
   res.json(activeCars);
@@ -389,7 +403,17 @@ app.post('/api/auth/reset-password', (req, res) => {
 // TEAM MANAGEMENT
 // ══════════════════════════════
 
-app.get('/api/team', jwtAuth, requireRole('superadmin', 'manager'), (req, res) => {
+app.get('/api/team', jwtAuth, requireRole('superadmin', 'manager'), async (req, res) => {
+  try {
+    if (db.isReady()) {
+      const result = await db.query('SELECT id, email, name, role, active, avatar, created_at FROM users ORDER BY created_at');
+      if (result.rows.length > 0) {
+        return res.json(result.rows.map(u => ({ id: u.id, email: u.email, name: u.name, role: u.role, active: u.active, avatar: u.avatar, createdAt: u.created_at })));
+      }
+    }
+  } catch (err) {
+    console.error('[API] DB read failed for /api/team:', err.message);
+  }
   res.json(users.map(u => ({ id: u.id, email: u.email, name: u.name, role: u.role, active: u.active, avatar: u.avatar, createdAt: u.createdAt })));
 });
 
@@ -434,9 +458,23 @@ app.delete('/api/team/:id', jwtAuth, requireRole('superadmin'), (req, res) => {
 // ACTIVITY LOG
 // ══════════════════════════════
 
-app.get('/api/activity-log', jwtAuth, (req, res) => {
+app.get('/api/activity-log', jwtAuth, async (req, res) => {
   const limit = parseInt(req.query.limit) || 50;
   const offset = parseInt(req.query.offset) || 0;
+  try {
+    if (db.isReady()) {
+      const countR = await db.query('SELECT COUNT(*)::int AS c FROM activity_log');
+      if (countR.rows[0].c > 0) {
+        const items = await db.query('SELECT id, user_id, user_name, user_role, action, details, created_at FROM activity_log ORDER BY created_at DESC LIMIT $1 OFFSET $2', [limit, offset]);
+        return res.json({
+          items: items.rows.map(r => ({ id: r.id, userId: r.user_id, userName: r.user_name, userRole: r.user_role, action: r.action, details: r.details, timestamp: r.created_at })),
+          total: countR.rows[0].c
+        });
+      }
+    }
+  } catch (err) {
+    console.error('[API] DB read failed for /api/activity-log:', err.message);
+  }
   res.json({ items: activityLog.slice(offset, offset + limit), total: activityLog.length });
 });
 
@@ -444,8 +482,24 @@ app.get('/api/activity-log', jwtAuth, (req, res) => {
 // LEADS API (full CRUD + filters)
 // ══════════════════════════════
 
-app.get('/api/leads', auth, (req, res) => {
-  let result = [...leads];
+app.get('/api/leads', auth, async (req, res) => {
+  let source = leads;
+  try {
+    if (db.isReady()) {
+      const r = await db.query('SELECT * FROM leads ORDER BY created_at DESC');
+      if (r.rows.length > 0) {
+        source = r.rows.map(l => ({
+          id: l.id, fullName: l.name || '', phone: l.phone || '', whatsapp: l.phone || '',
+          email: l.email || '', interest: l.car || '', address: '',
+          source: l.source || 'website', status: l.status || 'new',
+          notes: [], convertedToBooking: false, createdAt: l.created_at
+        }));
+      }
+    }
+  } catch (err) {
+    console.error('[API] DB read failed for /api/leads:', err.message);
+  }
+  let result = [...source];
   // Filters
   if (req.query.status) result = result.filter(l => l.status === req.query.status);
   if (req.query.source) result = result.filter(l => l.source === req.query.source);
@@ -543,8 +597,29 @@ app.delete('/api/leads/:id', auth, requireRole('superadmin', 'manager'), (req, r
 // BOOKINGS API (full CRUD + filters)
 // ══════════════════════════════
 
-app.get('/api/bookings', auth, (req, res) => {
-  let result = [...bookings];
+app.get('/api/bookings', auth, async (req, res) => {
+  let source = bookings;
+  try {
+    if (db.isReady()) {
+      const r = await db.query('SELECT * FROM bookings ORDER BY created_at DESC');
+      if (r.rows.length > 0) {
+        source = r.rows.map(b => ({
+          id: b.id, ref: b.ref, carId: b.car_id, carName: b.car_name || '',
+          startDate: b.start_date || '', endDate: b.end_date || '', duration: b.duration || '',
+          location: '', fullName: b.customer_name || '', phone: b.customer_phone || '',
+          email: b.customer_email || '', whatsapp: '',
+          totalAed: Number(b.total) || 0, savedAed: 0, promoCode: '', promoDiscount: 0,
+          paymentStatus: b.payment_status || 'unpaid', amountPaid: 0,
+          paymentMethod: b.payment_method || '', paymentNotes: '', paymentHistory: [],
+          invoiceNumber: '', status: b.status || 'pending', notes: [],
+          type: 'booking', createdAt: b.created_at
+        }));
+      }
+    }
+  } catch (err) {
+    console.error('[API] DB read failed for /api/bookings:', err.message);
+  }
+  let result = [...source];
   if (req.query.status) result = result.filter(b => b.status === req.query.status);
   if (req.query.car) result = result.filter(b => b.carName.toLowerCase().includes(req.query.car.toLowerCase()));
   if (req.query.location) result = result.filter(b => b.location.toLowerCase().includes(req.query.location.toLowerCase()));
@@ -671,7 +746,15 @@ app.post('/api/upload', auth, requireRole('superadmin', 'manager'), (req, res) =
 // ══════════════════════════════
 
 // Admin cars listing (includes inactive)
-app.get('/api/cars/admin', auth, (req, res) => {
+app.get('/api/cars/admin', auth, async (req, res) => {
+  try {
+    if (db.isReady()) {
+      const result = await db.query('SELECT * FROM cars ORDER BY sort_order');
+      if (result.rows.length > 0) return res.json(result.rows.map(mapCarRow));
+    }
+  } catch (err) {
+    console.error('[API] DB read failed for /api/cars/admin:', err.message);
+  }
   const sorted = [...cars].sort((a, b) => (a.order || 0) - (b.order || 0))
     .map(c => ({ ...c, trans: c.transmission || c.trans || 'Auto' }));
   res.json(sorted);
@@ -771,7 +854,32 @@ app.get('/api/cars/stats', auth, (req, res) => {
 });
 
 // Stats
-app.get('/api/stats', auth, (req, res) => {
+app.get('/api/stats', auth, async (req, res) => {
+  try {
+    if (db.isReady()) {
+      const [b, l, c] = await Promise.all([
+        db.query(`SELECT COUNT(*)::int AS total_count, COALESCE(SUM(total),0)::numeric AS revenue, SUM(CASE WHEN status IN ('new','pending') THEN 1 ELSE 0 END)::int AS new_count FROM bookings`),
+        db.query(`SELECT COUNT(*)::int AS total_count, SUM(CASE WHEN status='new' THEN 1 ELSE 0 END)::int AS new_count FROM leads`),
+        db.query(`SELECT COUNT(*)::int AS c FROM cars`)
+      ]);
+      if (b.rows[0].total_count > 0 || l.rows[0].total_count > 0) {
+        const pop = await db.query(`SELECT car_name FROM bookings WHERE car_name IS NOT NULL GROUP BY car_name ORDER BY COUNT(*) DESC LIMIT 1`);
+        return res.json({
+          totalBookings: b.rows[0].total_count,
+          totalLeads: l.rows[0].total_count,
+          totalRevenue: Number(b.rows[0].revenue) || 0,
+          newBookings: b.rows[0].new_count || 0,
+          newLeads: l.rows[0].new_count || 0,
+          convertedLeads: 0,
+          conversionRate: 0,
+          popularCar: (pop.rows[0] && pop.rows[0].car_name) || '-',
+          totalCars: c.rows[0].c
+        });
+      }
+    }
+  } catch (err) {
+    console.error('[API] DB read failed for /api/stats:', err.message);
+  }
   const totalBookings = bookings.length;
   const totalLeads = leads.length;
   const totalRevenue = bookings.reduce((s, b) => s + (Number(b.totalAed) || 0), 0);
@@ -1061,7 +1169,15 @@ let siteConfig = {
 };
 
 // Public: landing page fetches config
-app.get('/api/config', (req, res) => {
+app.get('/api/config', async (req, res) => {
+  try {
+    if (db.isReady()) {
+      const result = await db.query(`SELECT value FROM site_config WHERE key = 'main'`);
+      if (result.rows.length > 0 && result.rows[0].value) return res.json(result.rows[0].value);
+    }
+  } catch (err) {
+    console.error('[API] DB read failed for /api/config:', err.message);
+  }
   res.json(siteConfig);
 });
 
@@ -1144,9 +1260,25 @@ app.post('/api/config/reset', auth, requireRole('superadmin'), (req, res) => {
 // NOTIFICATIONS API
 // ══════════════════════════════
 
-app.get('/api/notifications', auth, (req, res) => {
+app.get('/api/notifications', auth, async (req, res) => {
   const limit = parseInt(req.query.limit) || 30;
   const unreadOnly = req.query.unread === 'true';
+  try {
+    if (db.isReady()) {
+      const countR = await db.query('SELECT COUNT(*)::int AS c FROM notifications');
+      if (countR.rows[0].c > 0) {
+        const filter = unreadOnly ? ' WHERE read = false' : '';
+        const rowsR = await db.query(`SELECT id, type, title, body, read, user_id, created_at FROM notifications${filter} ORDER BY created_at DESC LIMIT $1`, [limit]);
+        const unreadR = await db.query('SELECT COUNT(*)::int AS c FROM notifications WHERE read = false');
+        return res.json({
+          items: rowsR.rows.map(r => ({ id: r.id, type: r.type, title: r.title, body: r.body, read: r.read, userId: r.user_id, createdAt: r.created_at })),
+          unreadCount: unreadR.rows[0].c
+        });
+      }
+    }
+  } catch (err) {
+    console.error('[API] DB read failed for /api/notifications:', err.message);
+  }
   let result = notifications;
   if (unreadOnly) result = result.filter(n => !n.read);
   res.json({ items: result.slice(0, limit), unreadCount: notifications.filter(n => !n.read).length });
@@ -1353,7 +1485,23 @@ app.patch('/api/customers/:id', auth, requireRole('superadmin', 'manager'), (req
 // ══════════════════════════════
 // PROMO CODES API (Feature 4)
 // ══════════════════════════════
-app.get('/api/promos', auth, (req, res) => {
+app.get('/api/promos', auth, async (req, res) => {
+  try {
+    if (db.isReady()) {
+      const countR = await db.query('SELECT COUNT(*)::int AS c FROM promos');
+      if (countR.rows[0].c > 0) {
+        const result = await db.query('SELECT id, code, type, value, min_months, max_uses, used_count, active, expires_at, created_at FROM promos ORDER BY created_at DESC');
+        return res.json(result.rows.map(p => ({
+          id: p.id, code: p.code, discountType: p.type, value: Number(p.value),
+          minDuration: p.min_months || 0, maxUses: p.max_uses || 0,
+          usageCount: p.used_count || 0, expiryDate: p.expires_at || '',
+          active: p.active, createdAt: p.created_at
+        })));
+      }
+    }
+  } catch (err) {
+    console.error('[API] DB read failed for /api/promos:', err.message);
+  }
   res.json(promos.map(p => ({ ...p, usageCount: p.usageCount || 0 })));
 });
 
@@ -1450,7 +1598,17 @@ app.get('/api/cars/alerts', auth, (req, res) => {
 // ══════════════════════════════
 // WHATSAPP TEMPLATES API (Feature 7)
 // ══════════════════════════════
-app.get('/api/templates', auth, (req, res) => {
+app.get('/api/templates', auth, async (req, res) => {
+  try {
+    if (db.isReady()) {
+      const result = await db.query('SELECT id, name, category, body, created_at FROM templates ORDER BY created_at');
+      if (result.rows.length > 0) {
+        return res.json(result.rows.map(t => ({ id: t.id, name: t.name, category: t.category, body: t.body, createdAt: t.created_at })));
+      }
+    }
+  } catch (err) {
+    console.error('[API] DB read failed for /api/templates:', err.message);
+  }
   res.json(templates);
 });
 
@@ -1519,6 +1677,8 @@ app.listen(PORT, async () => {
     const schemaOk = await initSchema();
     if (schemaOk) {
       console.log('[Server] Database schema initialized — all tables ready');
+      await seedDefaults();
+      console.log('[Server] Default data seeded (if tables were empty)');
     } else {
       console.error('[Server] Schema initialization failed — running in memory-only mode');
     }
