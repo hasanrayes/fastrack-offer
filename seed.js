@@ -1,11 +1,7 @@
-const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
 const db = require('./db');
 
 const ADMIN_PASS = process.env.ADMIN_PASS || 'fastrack2024';
-
-function hashPassword(pw) {
-  return crypto.createHash('sha256').update(pw).digest('hex');
-}
 
 const DEFAULT_CARS = [
   { id: 1, name: 'Mitsubishi Attrage', cat: 'Economy Sedan', img: 'https://fasttrackrac.com/cdn/shop/products/fastrack-Mitsubishi-attrage-car.jpg?v=1726815463&width=900', price: 999, was: 1399, type: 'Sedan', seats: 5, doors: 4, transmission: 'Automatic', bags: 2, viewers: 12, spots: 3, badge: 'Best Value', feats: ['A/C','Reverse Camera','Bluetooth','Fog Lights'], includes: 'Insurance + UAE delivery included', active: true, sort_order: 0 },
@@ -152,9 +148,10 @@ async function isEmpty(table) {
 
 async function seedUsers() {
   if (!(await isEmpty('users'))) return 0;
+  const hashedPassword = await bcrypt.hash(ADMIN_PASS, 12);
   await db.query(
     `INSERT INTO users (id, email, password_hash, name, role, avatar, active) VALUES ($1,$2,$3,$4,$5,$6,$7)`,
-    ['usr_admin', 'admin@fastrack.ae', hashPassword(ADMIN_PASS), 'Super Admin', 'superadmin', null, true]
+    ['usr_admin', 'admin@fastrack.ae', hashedPassword, 'Super Admin', 'superadmin', null, true]
   );
   return 1;
 }

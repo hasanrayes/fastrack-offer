@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 let helmet;
 try { helmet = require('helmet'); } catch(e) { helmet = null; }
 const db = require('./db');
@@ -102,8 +103,25 @@ app.use((req, res, next) => {
 });
 
 // ── Utility ──
-function hashPassword(pw) {
-  return crypto.createHash('sha256').update(pw).digest('hex');
+async function hashPassword(pw) {
+  return bcrypt.hash(pw, 12);
+}
+
+// Verify a password against a stored hash. Supports both legacy SHA-256 (64 hex chars)
+// and bcrypt hashes. When a SHA-256 match succeeds, returns an upgradedHash so the
+// caller can persist the bcrypt version.
+async function comparePassword(pw, hash) {
+  if (!hash) return { match: false };
+  if (typeof hash === 'string' && hash.length === 64 && /^[0-9a-f]+$/i.test(hash)) {
+    const sha256 = crypto.createHash('sha256').update(pw).digest('hex');
+    if (sha256 === hash) {
+      const upgradedHash = await bcrypt.hash(pw, 12);
+      return { match: true, upgradedHash };
+    }
+    return { match: false };
+  }
+  const match = await bcrypt.compare(pw, hash);
+  return { match };
 }
 
 function generateId(prefix) {
@@ -557,8 +575,12 @@ app.post('/api/auth/login', rateLimit(5, 60000), async (req, res) => {
       [email]
     );
     const user = rows[0] ? mapUserRow(rows[0]) : null;
-    if (!user || user.passwordHash !== hashPassword(password)) {
-      return res.status(401).json({ error: 'Invalid email or password' });
+    if (!user) return res.status(401).json({ error: 'Invalid email or password' });
+    const pwCheck = await comparePassword(password, user.passwordHash);
+    if (!pwCheck.match) return res.status(401).json({ error: 'Invalid email or password' });
+    if (pwCheck.upgradedHash) {
+      await db.query('UPDATE users SET password_hash = $1 WHERE id = $2', [pwCheck.upgradedHash, user.id]);
+      console.log('[Auth] Upgraded password hash to bcrypt for:', user.email);
     }
     const accessToken = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, {
       expiresIn: rememberMe ? '7d' : JWT_EXPIRY
@@ -658,7 +680,7 @@ app.post('/api/auth/reset-password', async (req, res) => {
     const { rows } = await db.query('SELECT * FROM users WHERE id = $1 LIMIT 1', [tokenData.userId]);
     if (!rows[0]) return res.status(404).json({ error: 'User not found' });
     const user = mapUserRow(rows[0]);
-    await db.query('UPDATE users SET password_hash = $1 WHERE id = $2', [hashPassword(newPassword), user.id]);
+    await db.query('UPDATE users SET password_hash = $1 WHERE id = $2', [await hashPassword(newPassword), user.id]);
     resetTokens.delete(token);
     logActivity(user.id, 'password_reset', `Password was reset for ${user.email}`);
     res.json({ success: true });
@@ -694,7 +716,7 @@ app.post('/api/team', jwtAuth, requireRole('superadmin'), async (req, res) => {
     const newUser = await insertUser({
       id: generateId('usr'),
       email: email.toLowerCase(),
-      passwordHash: hashPassword(password),
+      passwordHash: await hashPassword(password),
       name,
       role: role || 'viewer',
       avatar: null,
@@ -723,7 +745,7 @@ app.put('/api/team/:id', jwtAuth, requireRole('superadmin'), async (req, res) =>
     }
     if (role) patch.role = role;
     if (active !== undefined) patch.active = active;
-    if (password) patch.passwordHash = hashPassword(password);
+    if (password) patch.passwordHash = await hashPassword(password);
     const user = await updateUserById(req.params.id, patch);
     logActivity(req.user.id, 'team_member_updated', `${req.user.name} updated ${user.name}'s profile`);
     res.json({ success: true, user: { id: user.id, email: user.email, name: user.name, role: user.role, active: user.active, createdAt: user.createdAt } });
@@ -2139,6 +2161,10 @@ app.get('/api/health', (req, res) => {
 
 app.listen(PORT, async () => {
   console.log(`Fastrack server running on port ${PORT}`);
+
+  if (process.env.JWT_SECRET === undefined) {
+    console.warn('[Security] WARNING: Using default JWT_SECRET — set JWT_SECRET env variable in production!');
+  }
 
   // Test database connection
   const dbConnected = await db.testConnection();
