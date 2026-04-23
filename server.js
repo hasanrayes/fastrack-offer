@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 let helmet;
 try { helmet = require('helmet'); } catch(e) { helmet = null; }
+const db = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -1497,6 +1498,24 @@ app.get('/dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, 'dashboard.html'));
 });
 
-app.listen(PORT, () => {
-  console.log('Fastrack server running on port ' + PORT);
+// Database health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    database: db.isReady() ? 'connected' : 'not connected (memory-only mode)',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.listen(PORT, async () => {
+  console.log(`Fastrack server running on port ${PORT}`);
+
+  // Test database connection (non-blocking, app works without DB)
+  const dbConnected = await db.testConnection();
+  if (dbConnected) {
+    console.log('[Server] Database ready — future phases will migrate data to PostgreSQL');
+  } else {
+    console.log('[Server] Running in memory-only mode — all data stored in RAM (resets on restart)');
+  }
 });
