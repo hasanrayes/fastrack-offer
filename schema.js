@@ -119,7 +119,38 @@ const statements = [
     key TEXT PRIMARY KEY,
     value JSONB NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT NOW()
-  )`
+  )`,
+  // Phase 5 extensions — add columns for fields previously only in memory
+  `ALTER TABLE cars ADD COLUMN IF NOT EXISTS img_card TEXT`,
+  `ALTER TABLE cars ADD COLUMN IF NOT EXISTS img_booking TEXT`,
+  `ALTER TABLE cars ADD COLUMN IF NOT EXISTS description TEXT`,
+  `ALTER TABLE cars ADD COLUMN IF NOT EXISTS year TEXT`,
+  `ALTER TABLE cars ADD COLUMN IF NOT EXISTS color TEXT`,
+  `ALTER TABLE cars ADD COLUMN IF NOT EXISTS mileage TEXT`,
+  `ALTER TABLE cars ADD COLUMN IF NOT EXISTS fuel_type TEXT`,
+  `ALTER TABLE cars ADD COLUMN IF NOT EXISTS insurance_expiry TEXT`,
+  `ALTER TABLE cars ADD COLUMN IF NOT EXISTS registration_expiry TEXT`,
+  `ALTER TABLE cars ADD COLUMN IF NOT EXISTS last_service_date TEXT`,
+  `ALTER TABLE cars ADD COLUMN IF NOT EXISTS next_service_due TEXT`,
+  `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS whatsapp TEXT`,
+  `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS location TEXT`,
+  `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS saved_aed NUMERIC DEFAULT 0`,
+  `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS promo_code TEXT`,
+  `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS promo_discount NUMERIC DEFAULT 0`,
+  `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS amount_paid NUMERIC DEFAULT 0`,
+  `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS payment_notes TEXT`,
+  `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS payment_history JSONB DEFAULT '[]'`,
+  `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS notes_data JSONB DEFAULT '[]'`,
+  `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS invoice_number TEXT`,
+  `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS invoice_generated_at TIMESTAMPTZ`,
+  `ALTER TABLE leads ADD COLUMN IF NOT EXISTS whatsapp TEXT`,
+  `ALTER TABLE leads ADD COLUMN IF NOT EXISTS address TEXT`,
+  `ALTER TABLE leads ADD COLUMN IF NOT EXISTS notes_data JSONB DEFAULT '[]'`,
+  `ALTER TABLE leads ADD COLUMN IF NOT EXISTS converted_to_booking BOOLEAN DEFAULT false`,
+  `CREATE SEQUENCE IF NOT EXISTS invoice_seq START 1`,
+  `CREATE INDEX IF NOT EXISTS idx_bookings_created ON bookings(created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_leads_created ON leads(created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_notifications_created ON notifications(created_at DESC)`
 ];
 
 async function initSchema() {

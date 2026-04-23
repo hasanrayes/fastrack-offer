@@ -6,7 +6,7 @@ let helmet;
 try { helmet = require('helmet'); } catch(e) { helmet = null; }
 const db = require('./db');
 const { initSchema } = require('./schema');
-const { seedDefaults } = require('./seed');
+const { seedDefaults, DEFAULT_SITE_CONFIG } = require('./seed');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -110,255 +110,343 @@ function generateId(prefix) {
   return prefix + '_' + Date.now().toString(36) + crypto.randomBytes(4).toString('hex');
 }
 
-// ── In-memory data stores ──
-let users = [
-  {
-    id: 'usr_admin',
-    email: 'admin@fastrack.ae',
-    passwordHash: hashPassword(ADMIN_PASS),
-    name: 'Super Admin',
-    role: 'superadmin',
-    avatar: null,
-    active: true,
-    createdAt: new Date().toISOString()
-  }
-];
-
+// ── Ephemeral in-memory state (session/rate-limit only — not business data) ──
 let refreshTokens = new Map();
 let resetTokens = new Map();
-let activityLog = [];
-let notifications = [];
-
-function addNotification(type, title, body, userId) {
-  const n = { id: Date.now().toString(36) + crypto.randomBytes(3).toString('hex'), type, title, body, read: false, userId: userId || null, createdAt: new Date().toISOString() };
-  notifications.unshift(n);
-  if (notifications.length > 200) notifications.length = 200;
-  if (db.isReady()) {
-    db.query('INSERT INTO notifications (id, type, title, body, read, user_id) VALUES ($1,$2,$3,$4,$5,$6)',
-      [n.id, n.type, n.title, n.body, n.read, n.userId])
-      .catch(err => console.error('[DB] notification insert failed:', err.message));
-  }
-}
 
 // ── Status whitelists ──
 const VALID_LEAD_STATUSES = ['new', 'contacted', 'qualified', 'converted', 'lost'];
 const VALID_BOOKING_STATUSES = ['pending', 'confirmed', 'active', 'completed', 'cancelled'];
 
-let cars = [
-  {id:1,name:'Mitsubishi Attrage',cat:'Economy Sedan',img:'https://fasttrackrac.com/cdn/shop/products/fastrack-Mitsubishi-attrage-car.jpg?v=1726815463&width=900',price:999,was:1399,type:'Sedan',seats:5,doors:4,transmission:'Automatic',bags:2,viewers:12,spots:3,badge:'Best Value',feats:['A/C','Reverse Camera','Bluetooth','Fog Lights'],includes:'Insurance + UAE delivery included',active:true,order:0},
-  {id:2,name:'JAC J7',cat:'Sport Sedan',img:'https://fasttrackrac.com/cdn/shop/products/3_4084eaf4-7efa-4c62-bc2d-85fb8ee7faaa.jpg?v=1676898190&width=900',price:1299,was:1899,type:'Liftback',seats:5,doors:4,transmission:'Automatic',bags:2,viewers:9,spots:5,badge:'Hot Deal',feats:['Premium Audio','Leather Seats','Touchscreen','Keyless Entry'],includes:'Full insurance + Free delivery',active:true,order:1},
-  {id:3,name:'Mitsubishi ASX',cat:'Compact SUV',img:'https://fasttrackrac.com/cdn/shop/files/20240622_110500.jpg?v=1726652270&width=900',price:1299,was:1899,type:'SUV',seats:5,doors:5,transmission:'Automatic',bags:3,viewers:18,spots:2,badge:'Most Popular',feats:['Apple CarPlay','Cruise Control','Rear Camera','Fuel Efficient'],includes:'Insurance + Unlimited km',active:true,order:2},
-  {id:4,name:'JAC JS4',cat:'Crossover SUV',img:'https://fasttrackrac.com/cdn/shop/products/11_1ae257ad-721e-4766-9db8-38e299289cab.jpg?v=1676898117&width=900',price:1499,was:1999,type:'SUV',seats:5,doors:5,transmission:'Automatic',bags:3,viewers:7,spots:4,badge:'SUV Special',feats:['10.25" Display','Panoramic Roof','360 Camera','Keyless Entry'],includes:'Full insurance + Free delivery',active:true,order:3}
-];
-let nextCarId = 5;
-let bookings = [];
-let nextBookingId = 1;
-let leads = [];
-let nextLeadId = 1;
+// Async user-name lookup for activity log (cached per call)
+async function getUserForLog(userId) {
+  if (!userId || userId === 'system' || !db.isReady()) return null;
+  try {
+    const { rows } = await db.query('SELECT id, name, role FROM users WHERE id = $1 LIMIT 1', [userId]);
+    return rows[0] || null;
+  } catch { return null; }
+}
 
-// New stores for v3 features
-let promos = [];
-let customerMeta = new Map(); // phone -> { notes, tags[] }
-let nextInvoiceNumber = 1;
-let templates = [
-  { id: 'tpl_welcome', name: 'Welcome Message', category: 'welcome', body: 'Hi {{name}}! Welcome to Fastrack Rent a Car. We received your inquiry about {{car}}. One of our agents will contact you shortly.', createdAt: new Date().toISOString() },
-  { id: 'tpl_confirmation', name: 'Booking Confirmation', category: 'booking', body: 'Hi {{name}}, your booking {{ref}} for {{car}} starting {{date}} is confirmed. Total: AED {{price}}. We will be in touch to finalize delivery.', createdAt: new Date().toISOString() },
-  { id: 'tpl_payment', name: 'Payment Reminder', category: 'payment', body: 'Hi {{name}}, friendly reminder about your pending payment for booking {{ref}}. Total due: AED {{price}}. Please let us know how you would like to proceed.', createdAt: new Date().toISOString() },
-  { id: 'tpl_delivery', name: 'Delivery Scheduled', category: 'delivery', body: 'Hi {{name}}, your {{car}} delivery is scheduled for {{date}}. Our driver will contact you 30 minutes before arrival. Ref: {{ref}}', createdAt: new Date().toISOString() },
-  { id: 'tpl_return', name: 'Return Reminder', category: 'return', body: 'Hi {{name}}, this is a reminder that your rental ({{car}}, ref {{ref}}) ends on {{date}}. Please let us know if you would like to extend.', createdAt: new Date().toISOString() },
-  { id: 'tpl_followup', name: 'Follow Up', category: 'followup', body: 'Hi {{name}}, following up on your interest in renting with Fastrack. Is there anything I can help clarify? We have great monthly offers available!', createdAt: new Date().toISOString() }
-];
+function addNotification(type, title, body, userId) {
+  if (!db.isReady()) return;
+  const id = Date.now().toString(36) + crypto.randomBytes(3).toString('hex');
+  db.query('INSERT INTO notifications (id, type, title, body, read, user_id) VALUES ($1,$2,$3,$4,$5,$6)',
+    [id, type, title, body, false, userId || null])
+    .catch(err => console.error('[DB] notification insert failed:', err.message));
+}
 
-// ── Activity Logger ──
+// ── Activity Logger (DB-only; fire-and-forget) ──
 function logActivity(userId, action, details) {
-  const user = users.find(u => u.id === userId);
-  const entry = {
-    id: generateId('act'),
-    userId,
-    userName: user ? user.name : 'System',
-    userRole: user ? user.role : 'system',
-    action,
-    details,
-    timestamp: new Date().toISOString()
+  if (!db.isReady()) return;
+  const id = generateId('act');
+  getUserForLog(userId).then(user => {
+    return db.query('INSERT INTO activity_log (id, user_id, user_name, user_role, action, details) VALUES ($1,$2,$3,$4,$5,$6)',
+      [id, userId || null, user ? user.name : 'System', user ? user.role : 'system', action, details]);
+  }).catch(err => console.error('[DB] activity log write failed:', err.message));
+}
+
+// ── Row mappers (DB columns → API/memory shape) ──
+function mapUserRow(u) {
+  return { id: u.id, email: u.email, name: u.name, role: u.role, active: u.active, avatar: u.avatar, createdAt: u.created_at, passwordHash: u.password_hash };
+}
+function mapCarRowFull(r) {
+  if (!r) return null;
+  return {
+    id: r.id, name: r.name, cat: r.cat || '', img: r.img || '',
+    imgCard: r.img_card || '', imgBooking: r.img_booking || '',
+    price: Number(r.price), was: Number(r.was),
+    type: r.type || '', seats: r.seats || null, doors: r.doors || null,
+    transmission: r.transmission || '', bags: r.bags || null,
+    viewers: r.viewers || 0, spots: r.spots || 0,
+    badge: r.badge || '', feats: Array.isArray(r.feats) ? r.feats : [],
+    includes: r.includes || '',
+    description: r.description || '', year: r.year || '', color: r.color || '',
+    mileage: r.mileage || '', fuelType: r.fuel_type || 'Petrol',
+    insuranceExpiry: r.insurance_expiry || '', registrationExpiry: r.registration_expiry || '',
+    lastServiceDate: r.last_service_date || '', nextServiceDue: r.next_service_due || '',
+    active: r.active, order: r.sort_order || 0,
+    trans: r.transmission || 'Auto'
   };
-  activityLog.unshift(entry);
-  if (activityLog.length > 490 && activityLog.length <= 500) console.warn('Activity log approaching limit: ' + activityLog.length + '/500');
-  if (activityLog.length > 500) activityLog.length = 500;
-  if (db.isReady()) {
-    db.query('INSERT INTO activity_log (id, user_id, user_name, user_role, action, details) VALUES ($1,$2,$3,$4,$5,$6)',
-      [entry.id, entry.userId, entry.userName, entry.userRole, entry.action, entry.details])
-      .catch(err => console.error('[DB] activity log write failed:', err.message));
+}
+function mapBookingRow(b) {
+  if (!b) return null;
+  return {
+    id: b.id, ref: b.ref, carId: b.car_id, carName: b.car_name || '',
+    startDate: b.start_date || '', endDate: b.end_date || '',
+    duration: b.duration != null ? String(b.duration) : '',
+    location: b.location || '',
+    fullName: b.customer_name || '', phone: b.customer_phone || '',
+    email: b.customer_email || '', whatsapp: b.whatsapp || '',
+    totalAed: Number(b.total) || 0, savedAed: Number(b.saved_aed) || 0,
+    promoCode: b.promo_code || '', promoDiscount: Number(b.promo_discount) || 0,
+    paymentStatus: b.payment_status || 'unpaid',
+    amountPaid: Number(b.amount_paid) || 0,
+    paymentMethod: b.payment_method || '',
+    paymentNotes: b.payment_notes || '',
+    paymentHistory: Array.isArray(b.payment_history) ? b.payment_history : [],
+    invoiceNumber: b.invoice_number || '',
+    invoiceGeneratedAt: b.invoice_generated_at || null,
+    status: b.status || 'pending',
+    notes: Array.isArray(b.notes_data) ? b.notes_data : [],
+    type: 'booking', createdAt: b.created_at
+  };
+}
+function mapLeadRow(l) {
+  if (!l) return null;
+  return {
+    id: l.id, fullName: l.name || '', phone: l.phone || '',
+    whatsapp: l.whatsapp || l.phone || '', email: l.email || '',
+    interest: l.car || '', address: l.address || '',
+    source: l.source || 'website', status: l.status || 'new',
+    notes: Array.isArray(l.notes_data) ? l.notes_data : [],
+    convertedToBooking: !!l.converted_to_booking,
+    createdAt: l.created_at
+  };
+}
+function mapPromoRow(p) {
+  if (!p) return null;
+  return {
+    id: p.id, code: p.code,
+    discountType: p.type || 'percentage', value: Number(p.value) || 0,
+    minDuration: p.min_months || 0, maxUses: p.max_uses || 0,
+    usageCount: p.used_count || 0,
+    expiryDate: p.expires_at || '',
+    active: p.active !== false, createdAt: p.created_at
+  };
+}
+function mapTemplateRow(t) {
+  if (!t) return null;
+  return { id: t.id, name: t.name, category: t.category || 'custom', body: t.body, createdAt: t.created_at };
+}
+function mapNotificationRow(n) {
+  if (!n) return null;
+  return { id: n.id, type: n.type, title: n.title, body: n.body, read: n.read, userId: n.user_id, createdAt: n.created_at };
+}
+function mapActivityRow(r) {
+  return { id: r.id, userId: r.user_id, userName: r.user_name, userRole: r.user_role, action: r.action, details: r.details, timestamp: r.created_at };
+}
+
+// ── DB CRUD helpers ──
+const CAR_COLS = `id, name, cat, img, img_card, img_booking, price, was, type, seats, doors, transmission, bags, viewers, spots, badge, feats, includes, description, year, color, mileage, fuel_type, insurance_expiry, registration_expiry, last_service_date, next_service_due, active, sort_order`;
+
+async function insertCar(c) {
+  const { rows } = await db.query(
+    `INSERT INTO cars (name, cat, img, img_card, img_booking, price, was, type, seats, doors, transmission, bags, viewers, spots, badge, feats, includes, description, year, color, mileage, fuel_type, insurance_expiry, registration_expiry, last_service_date, next_service_due, active, sort_order)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28) RETURNING *`,
+    [c.name, c.cat || '', c.img || '', c.imgCard || '', c.imgBooking || '', Number(c.price), Number(c.was) || Number(c.price), c.type || '', c.seats || null, c.doors || null, c.transmission || 'Automatic', c.bags || null, c.viewers || 0, c.spots || 0, c.badge || '', JSON.stringify(c.feats || []), c.includes || '', c.description || '', c.year || '', c.color || '', c.mileage || '', c.fuelType || 'Petrol', c.insuranceExpiry || '', c.registrationExpiry || '', c.lastServiceDate || '', c.nextServiceDue || '', c.active !== false, c.order || 0]
+  );
+  return mapCarRowFull(rows[0]);
+}
+
+async function updateCarById(id, patch) {
+  const m = {
+    name: 'name', cat: 'cat', img: 'img', imgCard: 'img_card', imgBooking: 'img_booking',
+    price: 'price', was: 'was', type: 'type', seats: 'seats', doors: 'doors',
+    transmission: 'transmission', bags: 'bags', viewers: 'viewers', spots: 'spots',
+    badge: 'badge', feats: 'feats', includes: 'includes', description: 'description',
+    year: 'year', color: 'color', mileage: 'mileage', fuelType: 'fuel_type',
+    insuranceExpiry: 'insurance_expiry', registrationExpiry: 'registration_expiry',
+    lastServiceDate: 'last_service_date', nextServiceDue: 'next_service_due',
+    active: 'active', order: 'sort_order'
+  };
+  const sets = []; const vals = []; let i = 1;
+  for (const [k, col] of Object.entries(m)) {
+    if (patch[k] === undefined) continue;
+    let v = patch[k];
+    if (k === 'feats') v = JSON.stringify(Array.isArray(v) ? v : []);
+    else if (['price','was'].includes(k)) v = Number(v);
+    else if (['seats','doors','bags','viewers','spots','order'].includes(k)) v = v === null || v === '' ? null : Number(v);
+    sets.push(`${col} = $${i++}`); vals.push(v);
   }
+  if (!sets.length) { const { rows } = await db.query('SELECT * FROM cars WHERE id = $1', [id]); return mapCarRowFull(rows[0]); }
+  vals.push(id);
+  const { rows } = await db.query(`UPDATE cars SET ${sets.join(', ')} WHERE id = $${i} RETURNING *`, vals);
+  return mapCarRowFull(rows[0]);
 }
 
-// ── Dual-write helpers (memory + PostgreSQL) ──
-async function upsertCarToDb(c) {
-  if (!db.isReady()) return;
-  try {
-    await db.query(
-      `INSERT INTO cars (id, name, cat, img, price, was, type, seats, doors, transmission, bags, viewers, spots, badge, feats, includes, active, sort_order)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
-       ON CONFLICT (id) DO UPDATE SET
-         name=EXCLUDED.name, cat=EXCLUDED.cat, img=EXCLUDED.img, price=EXCLUDED.price, was=EXCLUDED.was,
-         type=EXCLUDED.type, seats=EXCLUDED.seats, doors=EXCLUDED.doors, transmission=EXCLUDED.transmission,
-         bags=EXCLUDED.bags, viewers=EXCLUDED.viewers, spots=EXCLUDED.spots, badge=EXCLUDED.badge,
-         feats=EXCLUDED.feats, includes=EXCLUDED.includes, active=EXCLUDED.active, sort_order=EXCLUDED.sort_order`,
-      [c.id, c.name, c.cat || '', c.img || '', c.price, c.was, c.type || '', c.seats || null, c.doors || null, c.transmission || '', c.bags || null, c.viewers || 0, c.spots || 0, c.badge || '', JSON.stringify(c.feats || []), c.includes || '', c.active !== false, c.order || 0]
-    );
-  } catch (err) { console.error('[DB] car upsert failed:', err.message); }
+async function insertBooking(b) {
+  const { rows } = await db.query(
+    `INSERT INTO bookings (ref, customer_name, customer_email, customer_phone, whatsapp, car_id, car_name, start_date, end_date, duration, location, total, saved_aed, promo_code, promo_discount, status, payment_status, payment_method, source, notes_data, payment_history)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20::jsonb,$21::jsonb) RETURNING *`,
+    [b.ref, b.fullName || '', b.email || '', b.phone || '', b.whatsapp || '', b.carId || null, b.carName || '', b.startDate || '', b.endDate || '', parseInt(b.duration) || null, b.location || '', Number(b.totalAed) || 0, Number(b.savedAed) || 0, b.promoCode || '', Number(b.promoDiscount) || 0, b.status || 'pending', b.paymentStatus || 'unpaid', b.paymentMethod || '', b.source || 'website', JSON.stringify(b.notes || []), JSON.stringify(b.paymentHistory || [])]
+  );
+  return mapBookingRow(rows[0]);
 }
 
-async function deleteCarFromDb(id) {
-  if (!db.isReady()) return;
-  try { await db.query('DELETE FROM cars WHERE id = $1', [id]); }
-  catch (err) { console.error('[DB] car delete failed:', err.message); }
+async function updateBookingById(id, patch) {
+  const m = {
+    ref: 'ref', fullName: 'customer_name', email: 'customer_email', phone: 'customer_phone',
+    whatsapp: 'whatsapp', carId: 'car_id', carName: 'car_name',
+    startDate: 'start_date', endDate: 'end_date', duration: 'duration', location: 'location',
+    totalAed: 'total', savedAed: 'saved_aed', promoCode: 'promo_code', promoDiscount: 'promo_discount',
+    status: 'status', paymentStatus: 'payment_status', paymentMethod: 'payment_method',
+    paymentNotes: 'payment_notes', amountPaid: 'amount_paid',
+    invoiceNumber: 'invoice_number', invoiceGeneratedAt: 'invoice_generated_at'
+  };
+  const sets = []; const vals = []; let i = 1;
+  for (const [k, col] of Object.entries(m)) {
+    if (patch[k] === undefined) continue;
+    let v = patch[k];
+    if (['totalAed','savedAed','promoDiscount','amountPaid'].includes(k)) v = Number(v) || 0;
+    else if (k === 'duration') v = v === null || v === '' ? null : parseInt(v);
+    else if (k === 'carId') v = v === null || v === '' ? null : Number(v);
+    sets.push(`${col} = $${i++}`); vals.push(v);
+  }
+  if (patch.paymentHistory !== undefined) { sets.push(`payment_history = $${i++}::jsonb`); vals.push(JSON.stringify(patch.paymentHistory || [])); }
+  if (patch.notes !== undefined) { sets.push(`notes_data = $${i++}::jsonb`); vals.push(JSON.stringify(patch.notes || [])); }
+  sets.push('updated_at = NOW()');
+  if (sets.length === 1) { const { rows } = await db.query('SELECT * FROM bookings WHERE id = $1', [id]); return mapBookingRow(rows[0]); }
+  vals.push(id);
+  const { rows } = await db.query(`UPDATE bookings SET ${sets.join(', ')} WHERE id = $${i} RETURNING *`, vals);
+  return mapBookingRow(rows[0]);
 }
 
-async function upsertBookingToDb(b) {
-  if (!db.isReady()) return;
-  try {
-    await db.query(
-      `INSERT INTO bookings (id, ref, customer_name, customer_email, customer_phone, car_id, car_name, start_date, end_date, duration, total, status, payment_status, payment_method, source)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
-       ON CONFLICT (id) DO UPDATE SET
-         ref=EXCLUDED.ref, customer_name=EXCLUDED.customer_name, customer_email=EXCLUDED.customer_email,
-         customer_phone=EXCLUDED.customer_phone, car_id=EXCLUDED.car_id, car_name=EXCLUDED.car_name,
-         start_date=EXCLUDED.start_date, end_date=EXCLUDED.end_date, duration=EXCLUDED.duration,
-         total=EXCLUDED.total, status=EXCLUDED.status, payment_status=EXCLUDED.payment_status,
-         payment_method=EXCLUDED.payment_method, updated_at=NOW()`,
-      [b.id, b.ref, b.fullName || '', b.email || '', b.phone || '', b.carId || null, b.carName || '', b.startDate || '', b.endDate || '', parseInt(b.duration) || null, Number(b.totalAed) || 0, b.status || 'pending', b.paymentStatus || 'unpaid', b.paymentMethod || '', b.source || 'website']
-    );
-  } catch (err) { console.error('[DB] booking upsert failed:', err.message); }
+async function insertLead(l) {
+  const { rows } = await db.query(
+    `INSERT INTO leads (name, email, phone, whatsapp, car, address, source, status, notes_data, converted_to_booking)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb,$10) RETURNING *`,
+    [l.fullName || '', l.email || '', l.phone || '', l.whatsapp || l.phone || '', l.interest || '', l.address || '', l.source || 'website', l.status || 'new', JSON.stringify(l.notes || []), !!l.convertedToBooking]
+  );
+  return mapLeadRow(rows[0]);
 }
 
-async function deleteBookingFromDb(id) {
-  if (!db.isReady()) return;
-  try { await db.query('DELETE FROM bookings WHERE id = $1', [id]); }
-  catch (err) { console.error('[DB] booking delete failed:', err.message); }
+async function updateLeadById(id, patch) {
+  const m = {
+    fullName: 'name', email: 'email', phone: 'phone', whatsapp: 'whatsapp',
+    interest: 'car', address: 'address', source: 'source', status: 'status',
+    convertedToBooking: 'converted_to_booking'
+  };
+  const sets = []; const vals = []; let i = 1;
+  for (const [k, col] of Object.entries(m)) {
+    if (patch[k] === undefined) continue;
+    sets.push(`${col} = $${i++}`); vals.push(patch[k]);
+  }
+  if (patch.notes !== undefined) { sets.push(`notes_data = $${i++}::jsonb`); vals.push(JSON.stringify(patch.notes || [])); }
+  sets.push('updated_at = NOW()');
+  if (sets.length === 1) { const { rows } = await db.query('SELECT * FROM leads WHERE id = $1', [id]); return mapLeadRow(rows[0]); }
+  vals.push(id);
+  const { rows } = await db.query(`UPDATE leads SET ${sets.join(', ')} WHERE id = $${i} RETURNING *`, vals);
+  return mapLeadRow(rows[0]);
 }
 
-async function upsertLeadToDb(l) {
-  if (!db.isReady()) return;
-  try {
-    await db.query(
-      `INSERT INTO leads (id, name, email, phone, car, source, status)
-       VALUES ($1,$2,$3,$4,$5,$6,$7)
-       ON CONFLICT (id) DO UPDATE SET
-         name=EXCLUDED.name, email=EXCLUDED.email, phone=EXCLUDED.phone, car=EXCLUDED.car,
-         source=EXCLUDED.source, status=EXCLUDED.status, updated_at=NOW()`,
-      [l.id, l.fullName || '', l.email || '', l.phone || '', l.interest || '', l.source || 'website', l.status || 'new']
-    );
-  } catch (err) { console.error('[DB] lead upsert failed:', err.message); }
+async function insertPromo(p) {
+  const { rows } = await db.query(
+    `INSERT INTO promos (id, code, type, value, min_months, max_uses, used_count, active, expires_at)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
+    [p.id || generateId('promo'), p.code.toUpperCase(), p.discountType || 'percentage', Number(p.value) || 0, Number(p.minDuration) || 0, Number(p.maxUses) || null, Number(p.usageCount) || 0, p.active !== false, p.expiryDate ? new Date(p.expiryDate) : null]
+  );
+  return mapPromoRow(rows[0]);
 }
 
-async function deleteLeadFromDb(id) {
-  if (!db.isReady()) return;
-  try { await db.query('DELETE FROM leads WHERE id = $1', [id]); }
-  catch (err) { console.error('[DB] lead delete failed:', err.message); }
+async function updatePromoById(id, patch) {
+  const m = {
+    code: 'code', discountType: 'type', value: 'value',
+    minDuration: 'min_months', maxUses: 'max_uses', usageCount: 'used_count',
+    active: 'active'
+  };
+  const sets = []; const vals = []; let i = 1;
+  for (const [k, col] of Object.entries(m)) {
+    if (patch[k] === undefined) continue;
+    let v = patch[k];
+    if (k === 'code') v = String(v).toUpperCase();
+    if (['value','minDuration','maxUses','usageCount'].includes(k)) v = Number(v) || 0;
+    sets.push(`${col} = $${i++}`); vals.push(v);
+  }
+  if (patch.expiryDate !== undefined) { sets.push(`expires_at = $${i++}`); vals.push(patch.expiryDate ? new Date(patch.expiryDate) : null); }
+  if (!sets.length) { const { rows } = await db.query('SELECT * FROM promos WHERE id = $1', [id]); return mapPromoRow(rows[0]); }
+  vals.push(id);
+  const { rows } = await db.query(`UPDATE promos SET ${sets.join(', ')} WHERE id = $${i} RETURNING *`, vals);
+  return mapPromoRow(rows[0]);
 }
 
-async function upsertPromoToDb(p) {
-  if (!db.isReady()) return;
-  try {
-    await db.query(
-      `INSERT INTO promos (id, code, type, value, min_months, max_uses, used_count, active, expires_at)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
-       ON CONFLICT (id) DO UPDATE SET
-         code=EXCLUDED.code, type=EXCLUDED.type, value=EXCLUDED.value, min_months=EXCLUDED.min_months,
-         max_uses=EXCLUDED.max_uses, used_count=EXCLUDED.used_count, active=EXCLUDED.active, expires_at=EXCLUDED.expires_at`,
-      [p.id, p.code, p.discountType || 'percentage', Number(p.value) || 0, Number(p.minDuration) || 0, Number(p.maxUses) || null, Number(p.usageCount) || 0, p.active !== false, p.expiryDate ? new Date(p.expiryDate) : null]
-    );
-  } catch (err) { console.error('[DB] promo upsert failed:', err.message); }
+async function insertTemplate(t) {
+  const { rows } = await db.query(
+    `INSERT INTO templates (id, name, category, body) VALUES ($1,$2,$3,$4) RETURNING *`,
+    [t.id || generateId('tpl'), t.name, t.category || 'custom', t.body]
+  );
+  return mapTemplateRow(rows[0]);
 }
 
-async function deletePromoFromDb(id) {
-  if (!db.isReady()) return;
-  try { await db.query('DELETE FROM promos WHERE id = $1', [id]); }
-  catch (err) { console.error('[DB] promo delete failed:', err.message); }
+async function updateTemplateById(id, patch) {
+  const sets = []; const vals = []; let i = 1;
+  if (patch.name !== undefined) { sets.push(`name = $${i++}`); vals.push(patch.name); }
+  if (patch.category !== undefined) { sets.push(`category = $${i++}`); vals.push(patch.category); }
+  if (patch.body !== undefined) { sets.push(`body = $${i++}`); vals.push(patch.body); }
+  if (!sets.length) { const { rows } = await db.query('SELECT * FROM templates WHERE id = $1', [id]); return mapTemplateRow(rows[0]); }
+  vals.push(id);
+  const { rows } = await db.query(`UPDATE templates SET ${sets.join(', ')} WHERE id = $${i} RETURNING *`, vals);
+  return mapTemplateRow(rows[0]);
 }
 
-async function upsertTemplateToDb(t) {
-  if (!db.isReady()) return;
-  try {
-    await db.query(
-      `INSERT INTO templates (id, name, category, body)
-       VALUES ($1,$2,$3,$4)
-       ON CONFLICT (id) DO UPDATE SET name=EXCLUDED.name, category=EXCLUDED.category, body=EXCLUDED.body`,
-      [t.id, t.name, t.category || 'custom', t.body]
-    );
-  } catch (err) { console.error('[DB] template upsert failed:', err.message); }
+async function insertUser(u) {
+  const { rows } = await db.query(
+    `INSERT INTO users (id, email, password_hash, name, role, avatar, active) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
+    [u.id || generateId('usr'), u.email.toLowerCase(), u.passwordHash, u.name, u.role || 'viewer', u.avatar || null, u.active !== false]
+  );
+  return mapUserRow(rows[0]);
 }
 
-async function deleteTemplateFromDb(id) {
-  if (!db.isReady()) return;
-  try { await db.query('DELETE FROM templates WHERE id = $1', [id]); }
-  catch (err) { console.error('[DB] template delete failed:', err.message); }
+async function updateUserById(id, patch) {
+  const sets = []; const vals = []; let i = 1;
+  if (patch.name !== undefined) { sets.push(`name = $${i++}`); vals.push(patch.name); }
+  if (patch.email !== undefined) { sets.push(`email = $${i++}`); vals.push(String(patch.email).toLowerCase()); }
+  if (patch.role !== undefined) { sets.push(`role = $${i++}`); vals.push(patch.role); }
+  if (patch.active !== undefined) { sets.push(`active = $${i++}`); vals.push(patch.active); }
+  if (patch.avatar !== undefined) { sets.push(`avatar = $${i++}`); vals.push(patch.avatar); }
+  if (patch.passwordHash !== undefined) { sets.push(`password_hash = $${i++}`); vals.push(patch.passwordHash); }
+  if (!sets.length) { const { rows } = await db.query('SELECT * FROM users WHERE id = $1', [id]); return mapUserRow(rows[0]); }
+  vals.push(id);
+  const { rows } = await db.query(`UPDATE users SET ${sets.join(', ')} WHERE id = $${i} RETURNING *`, vals);
+  return mapUserRow(rows[0]);
 }
 
-async function upsertUserToDb(u) {
-  if (!db.isReady()) return;
-  try {
-    await db.query(
-      `INSERT INTO users (id, email, password_hash, name, role, avatar, active)
-       VALUES ($1,$2,$3,$4,$5,$6,$7)
-       ON CONFLICT (id) DO UPDATE SET
-         email=EXCLUDED.email, password_hash=EXCLUDED.password_hash, name=EXCLUDED.name,
-         role=EXCLUDED.role, avatar=EXCLUDED.avatar, active=EXCLUDED.active`,
-      [u.id, u.email, u.passwordHash, u.name, u.role, u.avatar, u.active !== false]
-    );
-  } catch (err) { console.error('[DB] user upsert failed:', err.message); }
-}
-
-async function deleteUserFromDb(id) {
-  if (!db.isReady()) return;
-  try { await db.query('DELETE FROM users WHERE id = $1', [id]); }
-  catch (err) { console.error('[DB] user delete failed:', err.message); }
-}
-
-async function syncSiteConfigToDb() {
+async function syncSiteConfigToDb(cfg) {
   if (!db.isReady()) return;
   try {
     await db.query(
       `INSERT INTO site_config (key, value, updated_at) VALUES ('main', $1::jsonb, NOW())
        ON CONFLICT (key) DO UPDATE SET value=EXCLUDED.value, updated_at=NOW()`,
-      [JSON.stringify(siteConfig)]
+      [JSON.stringify(cfg)]
     );
   } catch (err) { console.error('[DB] site_config sync failed:', err.message); }
 }
 
-async function markNotificationReadInDb(id, all) {
-  if (!db.isReady()) return;
+async function loadSiteConfigFromDb() {
+  if (!db.isReady()) return null;
   try {
-    if (all) await db.query('UPDATE notifications SET read = true');
-    else await db.query('UPDATE notifications SET read = true WHERE id = $1', [String(id)]);
-  } catch (err) { console.error('[DB] notification read update failed:', err.message); }
+    const { rows } = await db.query(`SELECT value FROM site_config WHERE key = 'main' LIMIT 1`);
+    return rows[0] ? rows[0].value : null;
+  } catch (err) { console.error('[DB] site_config load failed:', err.message); return null; }
 }
 
-// ── JWT Auth Middleware ──
-function jwtAuth(req, res, next) {
+// ── JWT Auth Middleware (DB-backed) ──
+async function jwtAuth(req, res, next) {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
   let token = null;
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
     token = authHeader.slice(7);
   } else if (req.headers['x-admin-token']) {
     if (req.headers['x-admin-token'] === ADMIN_PASS) {
-      req.user = users[0];
-      return next();
+      try {
+        const { rows } = await db.query(`SELECT * FROM users WHERE id = 'usr_admin' OR role = 'superadmin' ORDER BY created_at LIMIT 1`);
+        if (rows[0]) { req.user = mapUserRow(rows[0]); return next(); }
+      } catch (err) { return res.status(503).json({ error: 'Database unavailable' }); }
+      return res.status(401).json({ error: 'Admin user not found' });
     }
   }
-  if (!token) {
-    return res.status(401).json({ error: 'Authentication required' });
-  }
+  if (!token) return res.status(401).json({ error: 'Authentication required' });
+  let decoded;
+  try { decoded = jwt.verify(token, JWT_SECRET); }
+  catch (err) { return res.status(401).json({ error: 'Invalid or expired token' }); }
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    const user = users.find(u => u.id === decoded.userId && u.active);
-    if (!user) {
-      return res.status(401).json({ error: 'User not found or deactivated' });
-    }
-    req.user = user;
+    const { rows } = await db.query('SELECT * FROM users WHERE id = $1 AND active = true LIMIT 1', [decoded.userId]);
+    if (!rows[0]) return res.status(401).json({ error: 'User not found or deactivated' });
+    req.user = mapUserRow(rows[0]);
     next();
   } catch (err) {
-    return res.status(401).json({ error: 'Invalid or expired token' });
+    console.error('[Auth] DB error:', err.message);
+    return res.status(503).json({ error: 'Database unavailable' });
   }
 }
 
@@ -379,136 +467,131 @@ function auth(req, res, next) {
 // PUBLIC API
 // ══════════════════════════════
 
-function mapCarRow(r) {
-  const { sort_order, ...rest } = r;
-  return { ...rest, order: sort_order, feats: Array.isArray(rest.feats) ? rest.feats : [], trans: rest.transmission || 'Auto' };
-}
-
 app.get('/api/cars', async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
   try {
-    if (db.isReady()) {
-      const result = await db.query('SELECT * FROM cars WHERE active = true ORDER BY sort_order');
-      if (result.rows.length > 0) return res.json(result.rows.map(mapCarRow));
-    }
+    const result = await db.query('SELECT * FROM cars WHERE active = true ORDER BY sort_order');
+    res.json(result.rows.map(mapCarRowFull));
   } catch (err) {
-    console.error('[API] DB read failed for /api/cars:', err.message);
+    console.error('[API] GET /api/cars', err.message);
+    res.status(500).json({ error: 'Server error' });
   }
-  const activeCars = cars.filter(c => c.active !== false).sort((a, b) => (a.order || 0) - (b.order || 0))
-    .map(c => ({ ...c, trans: c.transmission || c.trans || 'Auto' }));
-  res.json(activeCars);
 });
 
-app.post('/api/leads', (req, res) => {
+app.post('/api/leads', async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
   const { fullName, phone, interest, source, whatsapp, email, address } = req.body;
   if (!fullName || !phone) {
     return res.status(400).json({ error: 'Name and phone required' });
   }
-  const lead = {
-    id: nextLeadId++,
-    fullName,
-    phone,
-    whatsapp: whatsapp || phone,
-    email: email || '',
-    interest: interest || '',
-    address: address || '',
-    source: source || 'popup',
-    status: 'new',
-    notes: [],
-    convertedToBooking: false,
-    createdAt: new Date().toISOString()
-  };
-  leads.unshift(lead);
-  upsertLeadToDb(lead);
-  logActivity('system', 'lead_created', `New lead: ${fullName} (${phone})`);
-  addNotification('lead', 'New Lead', `${fullName} (${phone}) — ${interest || 'General'}`);
-  res.json({ success: true, lead });
+  try {
+    const lead = await insertLead({
+      fullName, phone, whatsapp: whatsapp || phone, email: email || '',
+      interest: interest || '', address: address || '', source: source || 'popup',
+      status: 'new', notes: [], convertedToBooking: false
+    });
+    logActivity('system', 'lead_created', `New lead: ${fullName} (${phone})`);
+    addNotification('lead', 'New Lead', `${fullName} (${phone}) — ${interest || 'General'}`);
+    res.json({ success: true, lead });
+  } catch (err) {
+    console.error('[API] POST /api/leads', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-app.post('/api/bookings', (req, res) => {
+app.post('/api/bookings', async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
   const { carId, carName, startDate, endDate, duration, location, fullName, phone, email, whatsapp, totalAed, savedAed, promoCode, promoDiscount } = req.body;
   if (!carName || !fullName || !phone) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
   const ref = 'FT-' + Math.random().toString(36).substr(2, 8).toUpperCase();
-  const booking = {
-    id: nextBookingId++,
-    ref,
-    carId: carId || null,
-    carName,
-    startDate: startDate || '',
-    endDate: endDate || '',
-    duration: duration || '3',
-    location: location || '',
-    fullName,
-    phone,
-    email: email || '',
-    whatsapp: whatsapp || '',
-    totalAed: totalAed || 0,
-    savedAed: savedAed || 0,
-    promoCode: promoCode || '',
-    promoDiscount: promoDiscount || 0,
-    paymentStatus: 'unpaid',
-    amountPaid: 0,
-    paymentMethod: '',
-    paymentNotes: '',
-    paymentHistory: [],
-    invoiceNumber: '',
-    status: 'pending',
-    notes: [],
-    type: 'booking',
-    createdAt: new Date().toISOString()
-  };
-  if (promoCode) {
-    const p = promos.find(pp => pp.code.toUpperCase() === promoCode.toUpperCase() && pp.active);
-    if (p) { p.usageCount = (p.usageCount || 0) + 1; }
+  try {
+    const booking = await insertBooking({
+      ref, carId: carId || null, carName,
+      startDate: startDate || '', endDate: endDate || '', duration: duration || '3',
+      location: location || '', fullName, phone, email: email || '', whatsapp: whatsapp || '',
+      totalAed: totalAed || 0, savedAed: savedAed || 0,
+      promoCode: promoCode || '', promoDiscount: promoDiscount || 0,
+      paymentStatus: 'unpaid', paymentMethod: '', status: 'pending',
+      notes: [], paymentHistory: [], source: 'website'
+    });
+    // Match lead by phone → mark converted
+    try {
+      await db.query(
+        `UPDATE leads SET converted_to_booking = true, updated_at = NOW() WHERE phone = $1 AND converted_to_booking = false`,
+        [phone]
+      );
+    } catch (err) { console.error('[API] lead convert update failed:', err.message); }
+    // Increment promo used_count
+    if (promoCode) {
+      try {
+        await db.query(
+          `UPDATE promos SET used_count = COALESCE(used_count,0) + 1 WHERE UPPER(code) = UPPER($1) AND active = true`,
+          [promoCode]
+        );
+      } catch (err) { console.error('[API] promo increment failed:', err.message); }
+    }
+    logActivity('system', 'booking_created', `New booking: ${ref} - ${fullName} for ${carName}`);
+    addNotification('booking', 'New Booking', `${ref} — ${fullName} booked ${carName}`);
+    res.json({ success: true, ref, booking });
+  } catch (err) {
+    console.error('[API] POST /api/bookings', err.message);
+    res.status(500).json({ error: 'Server error' });
   }
-  bookings.unshift(booking);
-  upsertBookingToDb(booking);
-  const matchLead = leads.find(l => l.phone === phone && !l.convertedToBooking);
-  if (matchLead) { matchLead.convertedToBooking = true; upsertLeadToDb(matchLead); }
-  if (promoCode) {
-    const p = promos.find(pp => pp.code.toUpperCase() === promoCode.toUpperCase() && pp.active);
-    if (p) upsertPromoToDb(p);
-  }
-  logActivity('system', 'booking_created', `New booking: ${ref} - ${fullName} for ${carName}`);
-  addNotification('booking', 'New Booking', `${ref} — ${fullName} booked ${carName}`);
-  res.json({ success: true, ref, booking });
 });
 
 // ══════════════════════════════
 // AUTH API
 // ══════════════════════════════
 
-app.post('/api/auth/login', rateLimit(5, 60000), (req, res) => {
+app.post('/api/auth/login', rateLimit(5, 60000), async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
   const { email, password, rememberMe } = req.body;
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password required' });
   }
-  const user = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.active);
-  if (!user || user.passwordHash !== hashPassword(password)) {
-    return res.status(401).json({ error: 'Invalid email or password' });
+  try {
+    const { rows } = await db.query(
+      'SELECT * FROM users WHERE LOWER(email) = LOWER($1) AND active = true LIMIT 1',
+      [email]
+    );
+    const user = rows[0] ? mapUserRow(rows[0]) : null;
+    if (!user || user.passwordHash !== hashPassword(password)) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+    const accessToken = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, {
+      expiresIn: rememberMe ? '7d' : JWT_EXPIRY
+    });
+    const refreshToken = crypto.randomBytes(40).toString('hex');
+    const refreshExpiry = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
+    refreshTokens.set(refreshToken, { userId: user.id, expiresAt: Date.now() + refreshExpiry });
+    logActivity(user.id, 'login', `${user.name} logged in`);
+    res.json({
+      success: true, accessToken, refreshToken,
+      user: { id: user.id, email: user.email, name: user.name, role: user.role, avatar: user.avatar }
+    });
+  } catch (err) {
+    console.error('[API] POST /api/auth/login', err.message);
+    res.status(500).json({ error: 'Server error' });
   }
-  const accessToken = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, {
-    expiresIn: rememberMe ? '7d' : JWT_EXPIRY
-  });
-  const refreshToken = crypto.randomBytes(40).toString('hex');
-  const refreshExpiry = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
-  refreshTokens.set(refreshToken, { userId: user.id, expiresAt: Date.now() + refreshExpiry });
-  logActivity(user.id, 'login', `${user.name} logged in`);
-  res.json({
-    success: true, accessToken, refreshToken,
-    user: { id: user.id, email: user.email, name: user.name, role: user.role, avatar: user.avatar }
-  });
 });
 
-app.post('/api/auth', (req, res) => {
+app.post('/api/auth', async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
   const { password } = req.body;
-  if (password === ADMIN_PASS) {
-    const user = users[0];
+  if (password !== ADMIN_PASS) return res.status(401).json({ error: 'Invalid password' });
+  try {
+    const { rows } = await db.query(
+      `SELECT * FROM users WHERE id = 'usr_admin' OR role = 'superadmin' ORDER BY created_at LIMIT 1`
+    );
+    if (!rows[0]) return res.status(401).json({ error: 'Admin user not found' });
+    const user = mapUserRow(rows[0]);
     const accessToken = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: JWT_EXPIRY });
     res.json({ success: true, token: ADMIN_PASS, accessToken, user: { id: user.id, email: user.email, name: user.name, role: user.role } });
-  } else {
-    res.status(401).json({ error: 'Invalid password' });
+  } catch (err) {
+    console.error('[API] POST /api/auth', err.message);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
@@ -519,7 +602,8 @@ app.post('/api/auth/logout', jwtAuth, (req, res) => {
   res.json({ success: true });
 });
 
-app.post('/api/auth/refresh', (req, res) => {
+app.post('/api/auth/refresh', async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
   const { refreshToken } = req.body;
   if (!refreshToken) return res.status(400).json({ error: 'Refresh token required' });
   const tokenData = refreshTokens.get(refreshToken);
@@ -527,37 +611,61 @@ app.post('/api/auth/refresh', (req, res) => {
     refreshTokens.delete(refreshToken);
     return res.status(401).json({ error: 'Invalid or expired refresh token' });
   }
-  const user = users.find(u => u.id === tokenData.userId && u.active);
-  if (!user) return res.status(401).json({ error: 'User not found' });
-  const accessToken = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: JWT_EXPIRY });
-  res.json({ success: true, accessToken });
+  try {
+    const { rows } = await db.query('SELECT * FROM users WHERE id = $1 AND active = true LIMIT 1', [tokenData.userId]);
+    if (!rows[0]) return res.status(401).json({ error: 'User not found' });
+    const user = mapUserRow(rows[0]);
+    const accessToken = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: JWT_EXPIRY });
+    res.json({ success: true, accessToken });
+  } catch (err) {
+    console.error('[API] POST /api/auth/refresh', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 app.get('/api/auth/me', jwtAuth, (req, res) => {
   res.json({ id: req.user.id, email: req.user.email, name: req.user.name, role: req.user.role, avatar: req.user.avatar, active: req.user.active, createdAt: req.user.createdAt });
 });
 
-app.post('/api/auth/reset-request', rateLimit(3, 60000), (req, res) => {
+app.post('/api/auth/reset-request', rateLimit(3, 60000), async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
   const { email } = req.body;
-  const user = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.active);
-  if (!user) return res.json({ success: true, message: 'If the email exists, a reset link has been generated' });
-  const token = crypto.randomBytes(32).toString('hex');
-  resetTokens.set(token, { userId: user.id, expiresAt: Date.now() + 3600000 });
-  logActivity(user.id, 'password_reset_requested', `Password reset requested for ${user.email}`);
-  res.json({ success: true, message: 'Reset token generated', resetToken: token });
+  if (!email) return res.json({ success: true, message: 'If the email exists, a reset link has been generated' });
+  try {
+    const { rows } = await db.query(
+      'SELECT * FROM users WHERE LOWER(email) = LOWER($1) AND active = true LIMIT 1',
+      [email]
+    );
+    if (!rows[0]) return res.json({ success: true, message: 'If the email exists, a reset link has been generated' });
+    const user = mapUserRow(rows[0]);
+    const token = crypto.randomBytes(32).toString('hex');
+    resetTokens.set(token, { userId: user.id, expiresAt: Date.now() + 3600000 });
+    logActivity(user.id, 'password_reset_requested', `Password reset requested for ${user.email}`);
+    res.json({ success: true, message: 'Reset token generated', resetToken: token });
+  } catch (err) {
+    console.error('[API] POST /api/auth/reset-request', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-app.post('/api/auth/reset-password', (req, res) => {
+app.post('/api/auth/reset-password', async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
   const { token, newPassword } = req.body;
   if (!token || !newPassword) return res.status(400).json({ error: 'Token and new password required' });
   const tokenData = resetTokens.get(token);
   if (!tokenData || tokenData.expiresAt < Date.now()) { resetTokens.delete(token); return res.status(400).json({ error: 'Invalid or expired reset token' }); }
-  const user = users.find(u => u.id === tokenData.userId);
-  if (!user) return res.status(404).json({ error: 'User not found' });
-  user.passwordHash = hashPassword(newPassword);
-  resetTokens.delete(token);
-  logActivity(user.id, 'password_reset', `Password was reset for ${user.email}`);
-  res.json({ success: true });
+  try {
+    const { rows } = await db.query('SELECT * FROM users WHERE id = $1 LIMIT 1', [tokenData.userId]);
+    if (!rows[0]) return res.status(404).json({ error: 'User not found' });
+    const user = mapUserRow(rows[0]);
+    await db.query('UPDATE users SET password_hash = $1 WHERE id = $2', [hashPassword(newPassword), user.id]);
+    resetTokens.delete(token);
+    logActivity(user.id, 'password_reset', `Password was reset for ${user.email}`);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[API] POST /api/auth/reset-password', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // ══════════════════════════════
@@ -565,57 +673,80 @@ app.post('/api/auth/reset-password', (req, res) => {
 // ══════════════════════════════
 
 app.get('/api/team', jwtAuth, requireRole('superadmin', 'manager'), async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
   try {
-    if (db.isReady()) {
-      const result = await db.query('SELECT id, email, name, role, active, avatar, created_at FROM users ORDER BY created_at');
-      if (result.rows.length > 0) {
-        return res.json(result.rows.map(u => ({ id: u.id, email: u.email, name: u.name, role: u.role, active: u.active, avatar: u.avatar, createdAt: u.created_at })));
-      }
-    }
+    const result = await db.query('SELECT id, email, name, role, active, avatar, created_at FROM users ORDER BY created_at');
+    res.json(result.rows.map(u => ({ id: u.id, email: u.email, name: u.name, role: u.role, active: u.active, avatar: u.avatar, createdAt: u.created_at })));
   } catch (err) {
-    console.error('[API] DB read failed for /api/team:', err.message);
+    console.error('[API] GET /api/team', err.message);
+    res.status(500).json({ error: 'Server error' });
   }
-  res.json(users.map(u => ({ id: u.id, email: u.email, name: u.name, role: u.role, active: u.active, avatar: u.avatar, createdAt: u.createdAt })));
 });
 
-app.post('/api/team', jwtAuth, requireRole('superadmin'), (req, res) => {
+app.post('/api/team', jwtAuth, requireRole('superadmin'), async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
   const { email, name, password, role } = req.body;
   if (!email || !name || !password) return res.status(400).json({ error: 'Email, name, and password required' });
   if (role && !['superadmin', 'manager', 'viewer'].includes(role)) return res.status(400).json({ error: 'Invalid role' });
-  if (users.find(u => u.email.toLowerCase() === email.toLowerCase())) return res.status(400).json({ error: 'Email already exists' });
-  const newUser = { id: generateId('usr'), email: email.toLowerCase(), passwordHash: hashPassword(password), name, role: role || 'viewer', avatar: null, active: true, createdAt: new Date().toISOString() };
-  users.push(newUser);
-  upsertUserToDb(newUser);
-  logActivity(req.user.id, 'team_member_added', `${req.user.name} added ${name} (${role || 'viewer'})`);
-  res.json({ success: true, user: { id: newUser.id, email: newUser.email, name: newUser.name, role: newUser.role, active: newUser.active, createdAt: newUser.createdAt } });
-});
-
-app.put('/api/team/:id', jwtAuth, requireRole('superadmin'), (req, res) => {
-  const user = users.find(u => u.id === req.params.id);
-  if (!user) return res.status(404).json({ error: 'User not found' });
-  const { name, email, role, active, password } = req.body;
-  if (name) user.name = name;
-  if (email) {
-    const dup = users.find(u => u.id !== user.id && u.email.toLowerCase() === email.toLowerCase());
-    if (dup) return res.status(400).json({ error: 'Email already in use by another member' });
-    user.email = email.toLowerCase();
+  try {
+    const dup = await db.query('SELECT id FROM users WHERE LOWER(email) = LOWER($1) LIMIT 1', [email]);
+    if (dup.rows[0]) return res.status(400).json({ error: 'Email already exists' });
+    const newUser = await insertUser({
+      id: generateId('usr'),
+      email: email.toLowerCase(),
+      passwordHash: hashPassword(password),
+      name,
+      role: role || 'viewer',
+      avatar: null,
+      active: true
+    });
+    logActivity(req.user.id, 'team_member_added', `${req.user.name} added ${name} (${role || 'viewer'})`);
+    res.json({ success: true, user: { id: newUser.id, email: newUser.email, name: newUser.name, role: newUser.role, active: newUser.active, createdAt: newUser.createdAt } });
+  } catch (err) {
+    console.error('[API] POST /api/team', err.message);
+    res.status(500).json({ error: 'Server error' });
   }
-  if (role) user.role = role;
-  if (active !== undefined) user.active = active;
-  if (password) user.passwordHash = hashPassword(password);
-  upsertUserToDb(user);
-  logActivity(req.user.id, 'team_member_updated', `${req.user.name} updated ${user.name}'s profile`);
-  res.json({ success: true, user: { id: user.id, email: user.email, name: user.name, role: user.role, active: user.active, createdAt: user.createdAt } });
 });
 
-app.delete('/api/team/:id', jwtAuth, requireRole('superadmin'), (req, res) => {
-  const idx = users.findIndex(u => u.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ error: 'User not found' });
-  if (users[idx].id === req.user.id) return res.status(400).json({ error: 'Cannot delete yourself' });
-  const deleted = users.splice(idx, 1)[0];
-  deleteUserFromDb(deleted.id);
-  logActivity(req.user.id, 'team_member_deleted', `${req.user.name} removed ${deleted.name}`);
-  res.json({ success: true });
+app.put('/api/team/:id', jwtAuth, requireRole('superadmin'), async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  try {
+    const cur = await db.query('SELECT * FROM users WHERE id = $1 LIMIT 1', [req.params.id]);
+    if (!cur.rows[0]) return res.status(404).json({ error: 'User not found' });
+    const { name, email, role, active, password } = req.body;
+    const patch = {};
+    if (name) patch.name = name;
+    if (email) {
+      const dup = await db.query('SELECT id FROM users WHERE id != $1 AND LOWER(email) = LOWER($2) LIMIT 1', [req.params.id, email]);
+      if (dup.rows[0]) return res.status(400).json({ error: 'Email already in use by another member' });
+      patch.email = email.toLowerCase();
+    }
+    if (role) patch.role = role;
+    if (active !== undefined) patch.active = active;
+    if (password) patch.passwordHash = hashPassword(password);
+    const user = await updateUserById(req.params.id, patch);
+    logActivity(req.user.id, 'team_member_updated', `${req.user.name} updated ${user.name}'s profile`);
+    res.json({ success: true, user: { id: user.id, email: user.email, name: user.name, role: user.role, active: user.active, createdAt: user.createdAt } });
+  } catch (err) {
+    console.error('[API] PUT /api/team/:id', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.delete('/api/team/:id', jwtAuth, requireRole('superadmin'), async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  if (req.params.id === req.user.id) return res.status(400).json({ error: 'Cannot delete yourself' });
+  try {
+    const cur = await db.query('SELECT id, name FROM users WHERE id = $1 LIMIT 1', [req.params.id]);
+    if (!cur.rows[0]) return res.status(404).json({ error: 'User not found' });
+    const deletedName = cur.rows[0].name;
+    await db.query('DELETE FROM users WHERE id = $1', [req.params.id]);
+    logActivity(req.user.id, 'team_member_deleted', `${req.user.name} removed ${deletedName}`);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[API] DELETE /api/team/:id', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // ══════════════════════════════
@@ -623,23 +754,20 @@ app.delete('/api/team/:id', jwtAuth, requireRole('superadmin'), (req, res) => {
 // ══════════════════════════════
 
 app.get('/api/activity-log', jwtAuth, async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
   const limit = parseInt(req.query.limit) || 50;
   const offset = parseInt(req.query.offset) || 0;
   try {
-    if (db.isReady()) {
-      const countR = await db.query('SELECT COUNT(*)::int AS c FROM activity_log');
-      if (countR.rows[0].c > 0) {
-        const items = await db.query('SELECT id, user_id, user_name, user_role, action, details, created_at FROM activity_log ORDER BY created_at DESC LIMIT $1 OFFSET $2', [limit, offset]);
-        return res.json({
-          items: items.rows.map(r => ({ id: r.id, userId: r.user_id, userName: r.user_name, userRole: r.user_role, action: r.action, details: r.details, timestamp: r.created_at })),
-          total: countR.rows[0].c
-        });
-      }
-    }
+    const countR = await db.query('SELECT COUNT(*)::int AS c FROM activity_log');
+    const items = await db.query('SELECT id, user_id, user_name, user_role, action, details, created_at FROM activity_log ORDER BY created_at DESC LIMIT $1 OFFSET $2', [limit, offset]);
+    res.json({
+      items: items.rows.map(mapActivityRow),
+      total: countR.rows[0].c
+    });
   } catch (err) {
-    console.error('[API] DB read failed for /api/activity-log:', err.message);
+    console.error('[API] GET /api/activity-log', err.message);
+    res.status(500).json({ error: 'Server error' });
   }
-  res.json({ items: activityLog.slice(offset, offset + limit), total: activityLog.length });
 });
 
 // ══════════════════════════════
@@ -647,116 +775,133 @@ app.get('/api/activity-log', jwtAuth, async (req, res) => {
 // ══════════════════════════════
 
 app.get('/api/leads', auth, async (req, res) => {
-  let source = leads;
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
   try {
-    if (db.isReady()) {
-      const r = await db.query('SELECT * FROM leads ORDER BY created_at DESC');
-      if (r.rows.length > 0) {
-        source = r.rows.map(l => ({
-          id: l.id, fullName: l.name || '', phone: l.phone || '', whatsapp: l.phone || '',
-          email: l.email || '', interest: l.car || '', address: '',
-          source: l.source || 'website', status: l.status || 'new',
-          notes: [], convertedToBooking: false, createdAt: l.created_at
-        }));
-      }
+    const r = await db.query('SELECT * FROM leads ORDER BY created_at DESC');
+    let result = r.rows.map(mapLeadRow);
+    // Filters
+    if (req.query.status) result = result.filter(l => l.status === req.query.status);
+    if (req.query.source) result = result.filter(l => l.source === req.query.source);
+    if (req.query.search) {
+      const s = req.query.search.toLowerCase();
+      result = result.filter(l => `${l.fullName} ${l.phone} ${l.interest} ${l.email} ${l.whatsapp}`.toLowerCase().includes(s));
     }
+    if (req.query.from) result = result.filter(l => new Date(l.createdAt) >= new Date(req.query.from + 'T00:00:00+04:00'));
+    if (req.query.to) result = result.filter(l => new Date(l.createdAt) <= new Date(req.query.to + 'T23:59:59+04:00'));
+    // Sorting
+    if (req.query.sort) {
+      const dir = req.query.dir === 'asc' ? 1 : -1;
+      const field = req.query.sort;
+      result.sort((a, b) => {
+        const va = a[field] || '';
+        const vb = b[field] || '';
+        if (field === 'createdAt') return dir * (new Date(va) - new Date(vb));
+        return dir * String(va).localeCompare(String(vb));
+      });
+    }
+    // Pagination
+    const total = result.length;
+    if (req.query.page) {
+      const page = Math.max(1, parseInt(req.query.page) || 1);
+      const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 25));
+      const offset = (page - 1) * limit;
+      result = result.slice(offset, offset + limit);
+      return res.json({ items: result, total, page, limit, totalPages: Math.ceil(total / limit) });
+    }
+    res.json(result);
   } catch (err) {
-    console.error('[API] DB read failed for /api/leads:', err.message);
+    console.error('[API] GET /api/leads', err.message);
+    res.status(500).json({ error: 'Server error' });
   }
-  let result = [...source];
-  // Filters
-  if (req.query.status) result = result.filter(l => l.status === req.query.status);
-  if (req.query.source) result = result.filter(l => l.source === req.query.source);
-  if (req.query.search) {
-    const s = req.query.search.toLowerCase();
-    result = result.filter(l => `${l.fullName} ${l.phone} ${l.interest} ${l.email} ${l.whatsapp}`.toLowerCase().includes(s));
-  }
-  if (req.query.from) result = result.filter(l => new Date(l.createdAt) >= new Date(req.query.from + 'T00:00:00+04:00'));
-  if (req.query.to) result = result.filter(l => new Date(l.createdAt) <= new Date(req.query.to + 'T23:59:59+04:00'));
-  // Sorting
-  if (req.query.sort) {
-    const dir = req.query.dir === 'asc' ? 1 : -1;
-    const field = req.query.sort;
-    result.sort((a, b) => {
-      const va = a[field] || '';
-      const vb = b[field] || '';
-      if (field === 'createdAt') return dir * (new Date(va) - new Date(vb));
-      return dir * String(va).localeCompare(String(vb));
-    });
-  }
-  // Pagination
-  const total = result.length;
-  if (req.query.page) {
-    const page = Math.max(1, parseInt(req.query.page) || 1);
-    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 25));
-    const offset = (page - 1) * limit;
-    result = result.slice(offset, offset + limit);
-    return res.json({ items: result, total, page, limit, totalPages: Math.ceil(total / limit) });
-  }
-  res.json(result);
 });
 
 // Bulk update leads
-app.post('/api/leads/bulk', auth, requireRole('superadmin', 'manager'), (req, res) => {
+app.post('/api/leads/bulk', auth, requireRole('superadmin', 'manager'), async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
   const { ids, action, status } = req.body;
   if (!ids || !Array.isArray(ids)) return res.status(400).json({ error: 'ids array required' });
-
-  if (action === 'delete') {
-    const deleted = ids.filter(id => {
-      const idx = leads.findIndex(l => l.id === id);
-      if (idx !== -1) { leads.splice(idx, 1); deleteLeadFromDb(id); return true; }
-      return false;
-    });
-    logActivity(req.user.id, 'leads_bulk_deleted', `Deleted ${deleted.length} leads`);
-    return res.json({ success: true, affected: deleted.length });
+  const intIds = ids.map(id => parseInt(id)).filter(n => !isNaN(n));
+  try {
+    if (action === 'delete') {
+      const r = await db.query('DELETE FROM leads WHERE id = ANY($1::int[]) RETURNING id', [intIds]);
+      logActivity(req.user.id, 'leads_bulk_deleted', `Deleted ${r.rowCount} leads`);
+      return res.json({ success: true, affected: r.rowCount });
+    }
+    if (action === 'status' && status) {
+      if (!VALID_LEAD_STATUSES.includes(status)) return res.status(400).json({ error: 'Invalid status' });
+      const r = await db.query('UPDATE leads SET status = $1, updated_at = NOW() WHERE id = ANY($2::int[])', [status, intIds]);
+      logActivity(req.user.id, 'leads_bulk_status', `Changed ${r.rowCount} leads to ${status}`);
+      return res.json({ success: true, affected: r.rowCount });
+    }
+    res.status(400).json({ error: 'Invalid bulk action' });
+  } catch (err) {
+    console.error('[API] POST /api/leads/bulk', err.message);
+    res.status(500).json({ error: 'Server error' });
   }
-  if (action === 'status' && status) {
-    let count = 0;
-    ids.forEach(id => {
-      const l = leads.find(x => x.id === id);
-      if (l) { l.status = status; upsertLeadToDb(l); count++; }
-    });
-    logActivity(req.user.id, 'leads_bulk_status', `Changed ${count} leads to ${status}`);
-    return res.json({ success: true, affected: count });
-  }
-  res.status(400).json({ error: 'Invalid bulk action' });
 });
 
-app.patch('/api/leads/:id', auth, (req, res) => {
-  const l = leads.find(x => x.id === parseInt(req.params.id));
-  if (!l) return res.status(404).json({ error: 'Not found' });
+app.patch('/api/leads/:id', auth, async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
   if (req.body.status && !VALID_LEAD_STATUSES.includes(req.body.status)) return res.status(400).json({ error: 'Invalid status' });
-  const fields = ['status', 'fullName', 'phone', 'whatsapp', 'email', 'interest', 'address', 'source', 'convertedToBooking'];
-  fields.forEach(f => { if (req.body[f] !== undefined) l[f] = req.body[f]; });
-  upsertLeadToDb(l);
-  logActivity(req.user.id, 'lead_updated', `Updated lead ${l.fullName}`);
-  res.json(l);
+  try {
+    const id = parseInt(req.params.id);
+    const cur = await db.query('SELECT id FROM leads WHERE id = $1 LIMIT 1', [id]);
+    if (!cur.rows[0]) return res.status(404).json({ error: 'Not found' });
+    const allowed = ['status', 'fullName', 'phone', 'whatsapp', 'email', 'interest', 'address', 'source', 'convertedToBooking'];
+    const patch = {};
+    allowed.forEach(f => { if (req.body[f] !== undefined) patch[f] = req.body[f]; });
+    const l = await updateLeadById(id, patch);
+    logActivity(req.user.id, 'lead_updated', `Updated lead ${l.fullName}`);
+    res.json(l);
+  } catch (err) {
+    console.error('[API] PATCH /api/leads/:id', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // Get single lead
-app.get('/api/leads/:id', auth, (req, res) => {
-  const l = leads.find(x => x.id === parseInt(req.params.id));
-  if (!l) return res.status(404).json({ error: 'Not found' });
-  res.json(l);
+app.get('/api/leads/:id', auth, async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  try {
+    const { rows } = await db.query('SELECT * FROM leads WHERE id = $1 LIMIT 1', [parseInt(req.params.id)]);
+    if (!rows[0]) return res.status(404).json({ error: 'Not found' });
+    res.json(mapLeadRow(rows[0]));
+  } catch (err) {
+    console.error('[API] GET /api/leads/:id', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-app.post('/api/leads/:id/notes', auth, (req, res) => {
-  const l = leads.find(x => x.id === parseInt(req.params.id));
-  if (!l) return res.status(404).json({ error: 'Not found' });
-  const note = { id: generateId('note'), text: req.body.text, author: req.user.name, createdAt: new Date().toISOString() };
-  if (!l.notes) l.notes = [];
-  l.notes.unshift(note);
-  logActivity(req.user.id, 'lead_note_added', `Added note to lead ${l.fullName}`);
-  res.json(note);
+app.post('/api/leads/:id/notes', auth, async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  try {
+    const id = parseInt(req.params.id);
+    const { rows } = await db.query('SELECT notes_data, name FROM leads WHERE id = $1 LIMIT 1', [id]);
+    if (!rows[0]) return res.status(404).json({ error: 'Not found' });
+    const note = { id: generateId('note'), text: req.body.text, author: req.user.name, createdAt: new Date().toISOString() };
+    const existing = Array.isArray(rows[0].notes_data) ? rows[0].notes_data : [];
+    const newNotes = [note, ...existing];
+    await db.query('UPDATE leads SET notes_data = $1::jsonb, updated_at = NOW() WHERE id = $2', [JSON.stringify(newNotes), id]);
+    logActivity(req.user.id, 'lead_note_added', `Added note to lead ${rows[0].name || ''}`);
+    res.json(note);
+  } catch (err) {
+    console.error('[API] POST /api/leads/:id/notes', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-app.delete('/api/leads/:id', auth, requireRole('superadmin', 'manager'), (req, res) => {
-  const idx = leads.findIndex(x => x.id === parseInt(req.params.id));
-  if (idx === -1) return res.status(404).json({ error: 'Not found' });
-  const deleted = leads.splice(idx, 1)[0];
-  deleteLeadFromDb(deleted.id);
-  logActivity(req.user.id, 'lead_deleted', `Deleted lead ${deleted.fullName}`);
-  res.json({ success: true });
+app.delete('/api/leads/:id', auth, requireRole('superadmin', 'manager'), async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  try {
+    const id = parseInt(req.params.id);
+    const r = await db.query('DELETE FROM leads WHERE id = $1 RETURNING name', [id]);
+    if (r.rowCount === 0) return res.status(404).json({ error: 'Not found' });
+    logActivity(req.user.id, 'lead_deleted', `Deleted lead ${r.rows[0].name || ''}`);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[API] DELETE /api/leads/:id', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // ══════════════════════════════
@@ -764,121 +909,136 @@ app.delete('/api/leads/:id', auth, requireRole('superadmin', 'manager'), (req, r
 // ══════════════════════════════
 
 app.get('/api/bookings', auth, async (req, res) => {
-  let source = bookings;
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
   try {
-    if (db.isReady()) {
-      const r = await db.query('SELECT * FROM bookings ORDER BY created_at DESC');
-      if (r.rows.length > 0) {
-        source = r.rows.map(b => ({
-          id: b.id, ref: b.ref, carId: b.car_id, carName: b.car_name || '',
-          startDate: b.start_date || '', endDate: b.end_date || '', duration: b.duration || '',
-          location: '', fullName: b.customer_name || '', phone: b.customer_phone || '',
-          email: b.customer_email || '', whatsapp: '',
-          totalAed: Number(b.total) || 0, savedAed: 0, promoCode: '', promoDiscount: 0,
-          paymentStatus: b.payment_status || 'unpaid', amountPaid: 0,
-          paymentMethod: b.payment_method || '', paymentNotes: '', paymentHistory: [],
-          invoiceNumber: '', status: b.status || 'pending', notes: [],
-          type: 'booking', createdAt: b.created_at
-        }));
-      }
+    const r = await db.query('SELECT * FROM bookings ORDER BY created_at DESC');
+    let result = r.rows.map(mapBookingRow);
+    if (req.query.status) result = result.filter(b => b.status === req.query.status);
+    if (req.query.car) result = result.filter(b => b.carName.toLowerCase().includes(req.query.car.toLowerCase()));
+    if (req.query.location) result = result.filter(b => b.location.toLowerCase().includes(req.query.location.toLowerCase()));
+    if (req.query.search) {
+      const s = req.query.search.toLowerCase();
+      result = result.filter(b => `${b.fullName} ${b.phone} ${b.ref} ${b.carName} ${b.email} ${b.location}`.toLowerCase().includes(s));
     }
+    if (req.query.from) result = result.filter(b => new Date(b.createdAt) >= new Date(req.query.from));
+    if (req.query.to) result = result.filter(b => new Date(b.createdAt) <= new Date(req.query.to + 'T23:59:59'));
+    if (req.query.sort) {
+      const dir = req.query.dir === 'asc' ? 1 : -1;
+      const field = req.query.sort;
+      result.sort((a, b) => {
+        const va = a[field] || '';
+        const vb = b[field] || '';
+        if (field === 'createdAt' || field === 'startDate') return dir * (new Date(va) - new Date(vb));
+        if (field === 'totalAed') return dir * (Number(va) - Number(vb));
+        return dir * String(va).localeCompare(String(vb));
+      });
+    }
+    const total = result.length;
+    if (req.query.page) {
+      const page = Math.max(1, parseInt(req.query.page) || 1);
+      const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 25));
+      const offset = (page - 1) * limit;
+      result = result.slice(offset, offset + limit);
+      return res.json({ items: result, total, page, limit, totalPages: Math.ceil(total / limit) });
+    }
+    res.json(result);
   } catch (err) {
-    console.error('[API] DB read failed for /api/bookings:', err.message);
+    console.error('[API] GET /api/bookings', err.message);
+    res.status(500).json({ error: 'Server error' });
   }
-  let result = [...source];
-  if (req.query.status) result = result.filter(b => b.status === req.query.status);
-  if (req.query.car) result = result.filter(b => b.carName.toLowerCase().includes(req.query.car.toLowerCase()));
-  if (req.query.location) result = result.filter(b => b.location.toLowerCase().includes(req.query.location.toLowerCase()));
-  if (req.query.search) {
-    const s = req.query.search.toLowerCase();
-    result = result.filter(b => `${b.fullName} ${b.phone} ${b.ref} ${b.carName} ${b.email} ${b.location}`.toLowerCase().includes(s));
-  }
-  if (req.query.from) result = result.filter(b => new Date(b.createdAt) >= new Date(req.query.from));
-  if (req.query.to) result = result.filter(b => new Date(b.createdAt) <= new Date(req.query.to + 'T23:59:59'));
-  if (req.query.sort) {
-    const dir = req.query.dir === 'asc' ? 1 : -1;
-    const field = req.query.sort;
-    result.sort((a, b) => {
-      const va = a[field] || '';
-      const vb = b[field] || '';
-      if (field === 'createdAt' || field === 'startDate') return dir * (new Date(va) - new Date(vb));
-      if (field === 'totalAed') return dir * (Number(va) - Number(vb));
-      return dir * String(va).localeCompare(String(vb));
-    });
-  }
-  // Pagination
-  const total = result.length;
-  if (req.query.page) {
-    const page = Math.max(1, parseInt(req.query.page) || 1);
-    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 25));
-    const offset = (page - 1) * limit;
-    result = result.slice(offset, offset + limit);
-    return res.json({ items: result, total, page, limit, totalPages: Math.ceil(total / limit) });
-  }
-  res.json(result);
 });
 
 // Get single booking
-app.get('/api/bookings/:id', auth, (req, res) => {
-  const b = bookings.find(x => x.id === parseInt(req.params.id));
-  if (!b) return res.status(404).json({ error: 'Not found' });
-  res.json(b);
+app.get('/api/bookings/:id', auth, async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  try {
+    const { rows } = await db.query('SELECT * FROM bookings WHERE id = $1 LIMIT 1', [parseInt(req.params.id)]);
+    if (!rows[0]) return res.status(404).json({ error: 'Not found' });
+    res.json(mapBookingRow(rows[0]));
+  } catch (err) {
+    console.error('[API] GET /api/bookings/:id', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-app.patch('/api/bookings/:id', auth, (req, res) => {
-  const b = bookings.find(x => x.id === parseInt(req.params.id));
-  if (!b) return res.status(404).json({ error: 'Not found' });
+app.patch('/api/bookings/:id', auth, async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
   if (req.body.status && !VALID_BOOKING_STATUSES.includes(req.body.status)) return res.status(400).json({ error: 'Invalid status' });
-  const fields = ['status', 'carName', 'carId', 'startDate', 'endDate', 'duration', 'location', 'fullName', 'phone', 'email', 'whatsapp', 'totalAed', 'savedAed'];
-  const changed = [];
-  fields.forEach(f => {
-    if (req.body[f] !== undefined && req.body[f] !== b[f]) {
-      changed.push(f);
-      b[f] = req.body[f];
-    }
-  });
-  if (changed.includes('totalAed')) b.totalAed = Number(b.totalAed);
-  upsertBookingToDb(b);
-  logActivity(req.user.id, 'booking_updated', `Updated booking ${b.ref}: ${changed.join(', ')}`);
-  res.json(b);
+  try {
+    const id = parseInt(req.params.id);
+    const cur = await db.query('SELECT * FROM bookings WHERE id = $1 LIMIT 1', [id]);
+    if (!cur.rows[0]) return res.status(404).json({ error: 'Not found' });
+    const allowed = ['status', 'carName', 'carId', 'startDate', 'endDate', 'duration', 'location', 'fullName', 'phone', 'email', 'whatsapp', 'totalAed', 'savedAed'];
+    const patch = {};
+    const changed = [];
+    allowed.forEach(f => {
+      if (req.body[f] !== undefined) { patch[f] = req.body[f]; changed.push(f); }
+    });
+    const b = await updateBookingById(id, patch);
+    logActivity(req.user.id, 'booking_updated', `Updated booking ${b.ref}: ${changed.join(', ')}`);
+    res.json(b);
+  } catch (err) {
+    console.error('[API] PATCH /api/bookings/:id', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // Add note to booking
-app.post('/api/bookings/:id/notes', auth, (req, res) => {
-  const b = bookings.find(x => x.id === parseInt(req.params.id));
-  if (!b) return res.status(404).json({ error: 'Not found' });
-  const note = { id: generateId('note'), text: req.body.text, author: req.user.name, createdAt: new Date().toISOString() };
-  if (!b.notes) b.notes = [];
-  b.notes.unshift(note);
-  logActivity(req.user.id, 'booking_note_added', `Added note to booking ${b.ref}`);
-  res.json(note);
+app.post('/api/bookings/:id/notes', auth, async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  try {
+    const id = parseInt(req.params.id);
+    const { rows } = await db.query('SELECT notes_data, ref FROM bookings WHERE id = $1 LIMIT 1', [id]);
+    if (!rows[0]) return res.status(404).json({ error: 'Not found' });
+    const note = { id: generateId('note'), text: req.body.text, author: req.user.name, createdAt: new Date().toISOString() };
+    const existing = Array.isArray(rows[0].notes_data) ? rows[0].notes_data : [];
+    const newNotes = [note, ...existing];
+    await db.query('UPDATE bookings SET notes_data = $1::jsonb, updated_at = NOW() WHERE id = $2', [JSON.stringify(newNotes), id]);
+    logActivity(req.user.id, 'booking_note_added', `Added note to booking ${rows[0].ref || ''}`);
+    res.json(note);
+  } catch (err) {
+    console.error('[API] POST /api/bookings/:id/notes', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // Bulk bookings
-app.post('/api/bookings/bulk', auth, requireRole('superadmin', 'manager'), (req, res) => {
+app.post('/api/bookings/bulk', auth, requireRole('superadmin', 'manager'), async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
   const { ids, action, status } = req.body;
   if (!ids || !Array.isArray(ids)) return res.status(400).json({ error: 'ids array required' });
-  if (action === 'delete') {
-    const deleted = ids.filter(id => { const idx = bookings.findIndex(b => b.id === id); if (idx !== -1) { bookings.splice(idx, 1); deleteBookingFromDb(id); return true; } return false; });
-    logActivity(req.user.id, 'bookings_bulk_deleted', `Deleted ${deleted.length} bookings`);
-    return res.json({ success: true, affected: deleted.length });
+  const intIds = ids.map(id => parseInt(id)).filter(n => !isNaN(n));
+  try {
+    if (action === 'delete') {
+      const r = await db.query('DELETE FROM bookings WHERE id = ANY($1::int[]) RETURNING id', [intIds]);
+      logActivity(req.user.id, 'bookings_bulk_deleted', `Deleted ${r.rowCount} bookings`);
+      return res.json({ success: true, affected: r.rowCount });
+    }
+    if (action === 'status' && status) {
+      if (!VALID_BOOKING_STATUSES.includes(status)) return res.status(400).json({ error: 'Invalid status' });
+      const r = await db.query('UPDATE bookings SET status = $1, updated_at = NOW() WHERE id = ANY($2::int[])', [status, intIds]);
+      logActivity(req.user.id, 'bookings_bulk_status', `Changed ${r.rowCount} bookings to ${status}`);
+      return res.json({ success: true, affected: r.rowCount });
+    }
+    res.status(400).json({ error: 'Invalid bulk action' });
+  } catch (err) {
+    console.error('[API] POST /api/bookings/bulk', err.message);
+    res.status(500).json({ error: 'Server error' });
   }
-  if (action === 'status' && status) {
-    let count = 0;
-    ids.forEach(id => { const b = bookings.find(x => x.id === id); if (b) { b.status = status; upsertBookingToDb(b); count++; } });
-    logActivity(req.user.id, 'bookings_bulk_status', `Changed ${count} bookings to ${status}`);
-    return res.json({ success: true, affected: count });
-  }
-  res.status(400).json({ error: 'Invalid bulk action' });
 });
 
-app.delete('/api/bookings/:id', auth, requireRole('superadmin', 'manager'), (req, res) => {
-  const idx = bookings.findIndex(x => x.id === parseInt(req.params.id));
-  if (idx === -1) return res.status(404).json({ error: 'Not found' });
-  const deleted = bookings.splice(idx, 1)[0];
-  deleteBookingFromDb(deleted.id);
-  logActivity(req.user.id, 'booking_deleted', `Deleted booking ${deleted.ref}`);
-  res.json({ success: true });
+app.delete('/api/bookings/:id', auth, requireRole('superadmin', 'manager'), async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  try {
+    const id = parseInt(req.params.id);
+    const r = await db.query('DELETE FROM bookings WHERE id = $1 RETURNING ref', [id]);
+    if (r.rowCount === 0) return res.status(404).json({ error: 'Not found' });
+    logActivity(req.user.id, 'booking_deleted', `Deleted booking ${r.rows[0].ref || ''}`);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[API] DELETE /api/bookings/:id', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // ══════════════════════════════
@@ -915,155 +1075,172 @@ app.post('/api/upload', auth, requireRole('superadmin', 'manager'), (req, res) =
 
 // Admin cars listing (includes inactive)
 app.get('/api/cars/admin', auth, async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
   try {
-    if (db.isReady()) {
-      const result = await db.query('SELECT * FROM cars ORDER BY sort_order');
-      if (result.rows.length > 0) return res.json(result.rows.map(mapCarRow));
-    }
+    const result = await db.query('SELECT * FROM cars ORDER BY sort_order');
+    res.json(result.rows.map(mapCarRowFull));
   } catch (err) {
-    console.error('[API] DB read failed for /api/cars/admin:', err.message);
+    console.error('[API] GET /api/cars/admin', err.message);
+    res.status(500).json({ error: 'Server error' });
   }
-  const sorted = [...cars].sort((a, b) => (a.order || 0) - (b.order || 0))
-    .map(c => ({ ...c, trans: c.transmission || c.trans || 'Auto' }));
-  res.json(sorted);
 });
 
-app.post('/api/cars', auth, requireRole('superadmin', 'manager'), (req, res) => {
-  const { name, cat, img, imgCard, imgBooking, price, was, type, seats, doors, transmission, bags, badge, feats, includes, spots, description, year, color, mileage, fuelType, insuranceExpiry, registrationExpiry, lastServiceDate, nextServiceDue } = req.body;
+// Car stats (MUST come before /:id routes)
+app.get('/api/cars/stats', auth, async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  try {
+    const { rows } = await db.query(
+      `SELECT c.id, c.name, c.active,
+              COUNT(b.id)::int AS bookings,
+              COALESCE(SUM(b.total),0)::numeric AS revenue
+       FROM cars c
+       LEFT JOIN bookings b ON (b.car_id = c.id OR b.car_name = c.name)
+       GROUP BY c.id, c.name, c.active
+       ORDER BY c.sort_order`
+    );
+    res.json(rows.map(r => ({ id: r.id, name: r.name, bookings: Number(r.bookings) || 0, revenue: Number(r.revenue) || 0, active: r.active })));
+  } catch (err) {
+    console.error('[API] GET /api/cars/stats', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Reorder cars (MUST come before /:id routes)
+app.put('/api/cars/reorder', auth, requireRole('superadmin', 'manager'), async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  const { order } = req.body;
+  if (!order || !Array.isArray(order)) return res.status(400).json({ error: 'order array required' });
+  try {
+    for (let i = 0; i < order.length; i++) {
+      await db.query('UPDATE cars SET sort_order = $1 WHERE id = $2', [i, parseInt(order[i])]);
+    }
+    logActivity(req.user.id, 'cars_reordered', 'Reordered car display order');
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[API] PUT /api/cars/reorder', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.post('/api/cars', auth, requireRole('superadmin', 'manager'), async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  const { name, price } = req.body;
   if (!name || !price) return res.status(400).json({ error: 'Name and price required' });
-  const car = {
-    id: nextCarId++,
-    name, cat: cat || '', img: img || '', imgCard: imgCard || '', imgBooking: imgBooking || '',
-    price: Number(price), was: Number(was) || Number(price),
-    type: type || '', seats: seats || 5, doors: doors || 4, transmission: transmission || 'Automatic', bags: bags || 2,
-    badge: badge || '', feats: feats || [], includes: includes || '',
-    description: description || '', year: year || '', color: color || '', mileage: mileage || '', fuelType: fuelType || 'Petrol',
-    insuranceExpiry: insuranceExpiry || '', registrationExpiry: registrationExpiry || '',
-    lastServiceDate: lastServiceDate || '', nextServiceDue: nextServiceDue || '',
-    spots: spots || 5, viewers: Math.floor(Math.random() * 15) + 5,
-    active: true, order: cars.length
-  };
-  cars.push(car);
-  upsertCarToDb(car);
-  logActivity(req.user.id, 'car_added', `Added car: ${name}`);
-  res.json(car);
+  try {
+    const cnt = await db.query('SELECT COUNT(*)::int AS c FROM cars');
+    const car = await insertCar({
+      ...req.body,
+      viewers: Math.floor(Math.random() * 15) + 5,
+      active: true,
+      order: cnt.rows[0].c
+    });
+    logActivity(req.user.id, 'car_added', `Added car: ${car.name}`);
+    res.json(car);
+  } catch (err) {
+    console.error('[API] POST /api/cars', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-app.put('/api/cars/:id', auth, requireRole('superadmin', 'manager'), (req, res) => {
-  const car = cars.find(x => x.id === parseInt(req.params.id));
-  if (!car) return res.status(404).json({ error: 'Not found' });
-  const prev = { ...car };
-  Object.assign(car, req.body, { id: car.id });
-  car.price = Number(car.price);
-  car.was = Number(car.was);
-  if (car.seats) car.seats = Number(car.seats);
-  if (car.doors) car.doors = Number(car.doors);
-  if (car.bags) car.bags = Number(car.bags);
-  upsertCarToDb(car);
-  logActivity(req.user.id, 'car_updated', `Updated car: ${car.name}`);
-  res.json(car);
+app.put('/api/cars/:id', auth, requireRole('superadmin', 'manager'), async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  try {
+    const id = parseInt(req.params.id);
+    const cur = await db.query('SELECT id FROM cars WHERE id = $1 LIMIT 1', [id]);
+    if (!cur.rows[0]) return res.status(404).json({ error: 'Not found' });
+    const patch = { ...req.body };
+    delete patch.id;
+    const car = await updateCarById(id, patch);
+    logActivity(req.user.id, 'car_updated', `Updated car: ${car.name}`);
+    res.json(car);
+  } catch (err) {
+    console.error('[API] PUT /api/cars/:id', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // Toggle car visibility
-app.patch('/api/cars/:id/toggle', auth, requireRole('superadmin', 'manager'), (req, res) => {
-  const car = cars.find(x => x.id === parseInt(req.params.id));
-  if (!car) return res.status(404).json({ error: 'Not found' });
-  car.active = !car.active;
-  upsertCarToDb(car);
-  logActivity(req.user.id, 'car_toggled', `${car.active ? 'Activated' : 'Deactivated'} car: ${car.name}`);
-  res.json(car);
+app.patch('/api/cars/:id/toggle', auth, requireRole('superadmin', 'manager'), async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  try {
+    const id = parseInt(req.params.id);
+    const cur = await db.query('SELECT active FROM cars WHERE id = $1 LIMIT 1', [id]);
+    if (!cur.rows[0]) return res.status(404).json({ error: 'Not found' });
+    const car = await updateCarById(id, { active: !cur.rows[0].active });
+    logActivity(req.user.id, 'car_toggled', `${car.active ? 'Activated' : 'Deactivated'} car: ${car.name}`);
+    res.json(car);
+  } catch (err) {
+    console.error('[API] PATCH /api/cars/:id/toggle', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // Duplicate car
-app.post('/api/cars/:id/duplicate', auth, requireRole('superadmin', 'manager'), (req, res) => {
-  const original = cars.find(x => x.id === parseInt(req.params.id));
-  if (!original) return res.status(404).json({ error: 'Not found' });
-  const dup = {
-    ...original,
-    id: nextCarId++,
-    name: original.name + ' (Copy)',
-    order: cars.length,
-    viewers: Math.floor(Math.random() * 15) + 5
-  };
-  cars.push(dup);
-  upsertCarToDb(dup);
-  logActivity(req.user.id, 'car_duplicated', `Duplicated car: ${original.name}`);
-  res.json(dup);
+app.post('/api/cars/:id/duplicate', auth, requireRole('superadmin', 'manager'), async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  try {
+    const id = parseInt(req.params.id);
+    const { rows } = await db.query('SELECT * FROM cars WHERE id = $1 LIMIT 1', [id]);
+    if (!rows[0]) return res.status(404).json({ error: 'Not found' });
+    const orig = mapCarRowFull(rows[0]);
+    const cnt = await db.query('SELECT COUNT(*)::int AS c FROM cars');
+    const dup = await insertCar({
+      ...orig,
+      name: orig.name + ' (Copy)',
+      order: cnt.rows[0].c,
+      viewers: Math.floor(Math.random() * 15) + 5
+    });
+    logActivity(req.user.id, 'car_duplicated', `Duplicated car: ${orig.name}`);
+    res.json(dup);
+  } catch (err) {
+    console.error('[API] POST /api/cars/:id/duplicate', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-// Reorder cars
-app.put('/api/cars/reorder', auth, requireRole('superadmin', 'manager'), (req, res) => {
-  const { order } = req.body; // array of car IDs in new order
-  if (!order || !Array.isArray(order)) return res.status(400).json({ error: 'order array required' });
-  order.forEach((id, idx) => {
-    const car = cars.find(c => c.id === id);
-    if (car) { car.order = idx; upsertCarToDb(car); }
-  });
-  logActivity(req.user.id, 'cars_reordered', 'Reordered car display order');
-  res.json({ success: true });
-});
-
-app.delete('/api/cars/:id', auth, requireRole('superadmin', 'manager'), (req, res) => {
-  const idx = cars.findIndex(x => x.id === parseInt(req.params.id));
-  if (idx === -1) return res.status(404).json({ error: 'Not found' });
-  const deleted = cars.splice(idx, 1)[0];
-  deleteCarFromDb(deleted.id);
-  logActivity(req.user.id, 'car_deleted', `Deleted car: ${deleted.name}`);
-  res.json({ success: true });
-});
-
-// Car stats
-app.get('/api/cars/stats', auth, (req, res) => {
-  const stats = cars.map(c => {
-    const carBookings = bookings.filter(b => b.carId === c.id || b.carName === c.name);
-    return {
-      id: c.id, name: c.name,
-      bookings: carBookings.length,
-      revenue: carBookings.reduce((s, b) => s + (Number(b.totalAed) || 0), 0),
-      active: c.active
-    };
-  });
-  res.json(stats);
+app.delete('/api/cars/:id', auth, requireRole('superadmin', 'manager'), async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  try {
+    const id = parseInt(req.params.id);
+    const r = await db.query('DELETE FROM cars WHERE id = $1 RETURNING name', [id]);
+    if (r.rowCount === 0) return res.status(404).json({ error: 'Not found' });
+    logActivity(req.user.id, 'car_deleted', `Deleted car: ${r.rows[0].name || ''}`);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[API] DELETE /api/cars/:id', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // Stats
 app.get('/api/stats', auth, async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
   try {
-    if (db.isReady()) {
-      const [b, l, c] = await Promise.all([
-        db.query(`SELECT COUNT(*)::int AS total_count, COALESCE(SUM(total),0)::numeric AS revenue, SUM(CASE WHEN status IN ('new','pending') THEN 1 ELSE 0 END)::int AS new_count FROM bookings`),
-        db.query(`SELECT COUNT(*)::int AS total_count, SUM(CASE WHEN status='new' THEN 1 ELSE 0 END)::int AS new_count FROM leads`),
-        db.query(`SELECT COUNT(*)::int AS c FROM cars`)
-      ]);
-      if (b.rows[0].total_count > 0 || l.rows[0].total_count > 0) {
-        const pop = await db.query(`SELECT car_name FROM bookings WHERE car_name IS NOT NULL GROUP BY car_name ORDER BY COUNT(*) DESC LIMIT 1`);
-        return res.json({
-          totalBookings: b.rows[0].total_count,
-          totalLeads: l.rows[0].total_count,
-          totalRevenue: Number(b.rows[0].revenue) || 0,
-          newBookings: b.rows[0].new_count || 0,
-          newLeads: l.rows[0].new_count || 0,
-          convertedLeads: 0,
-          conversionRate: 0,
-          popularCar: (pop.rows[0] && pop.rows[0].car_name) || '-',
-          totalCars: c.rows[0].c
-        });
-      }
-    }
+    const [b, l, c, conv, pop] = await Promise.all([
+      db.query(`SELECT COUNT(*)::int AS total_count, COALESCE(SUM(total),0)::numeric AS revenue, SUM(CASE WHEN status IN ('new','pending') THEN 1 ELSE 0 END)::int AS new_count FROM bookings`),
+      db.query(`SELECT COUNT(*)::int AS total_count, SUM(CASE WHEN status='new' THEN 1 ELSE 0 END)::int AS new_count FROM leads`),
+      db.query(`SELECT COUNT(*)::int AS c FROM cars`),
+      db.query(`SELECT COUNT(*)::int AS c FROM leads WHERE converted_to_booking = true`),
+      db.query(`SELECT car_name FROM bookings WHERE car_name IS NOT NULL AND car_name != '' GROUP BY car_name ORDER BY COUNT(*) DESC LIMIT 1`)
+    ]);
+    const totalLeads = l.rows[0].total_count || 0;
+    const convertedLeads = conv.rows[0].c || 0;
+    const conversionRate = totalLeads > 0 ? Math.round((convertedLeads / totalLeads) * 100) : 0;
+    res.json({
+      totalBookings: b.rows[0].total_count || 0,
+      totalLeads,
+      totalRevenue: Number(b.rows[0].revenue) || 0,
+      newBookings: b.rows[0].new_count || 0,
+      newLeads: l.rows[0].new_count || 0,
+      convertedLeads,
+      conversionRate,
+      popularCar: (pop.rows[0] && pop.rows[0].car_name) || '-',
+      totalCars: c.rows[0].c
+    });
   } catch (err) {
-    console.error('[API] DB read failed for /api/stats:', err.message);
+    console.error('[API] GET /api/stats', err.message);
+    res.status(500).json({ error: 'Server error' });
   }
-  const totalBookings = bookings.length;
-  const totalLeads = leads.length;
-  const totalRevenue = bookings.reduce((s, b) => s + (Number(b.totalAed) || 0), 0);
-  const newBookings = bookings.filter(b => b.status === 'new' || b.status === 'pending').length;
-  const newLeads = leads.filter(l => l.status === 'new').length;
-  const convertedLeads = leads.filter(l => l.convertedToBooking).length;
-  const conversionRate = totalLeads > 0 ? Math.round((convertedLeads / totalLeads) * 100) : 0;
-  const carCounts = {};
-  bookings.forEach(b => { carCounts[b.carName] = (carCounts[b.carName] || 0) + 1; });
-  const popularCar = Object.keys(carCounts).sort((a, b) => carCounts[b] - carCounts[a])[0] || '-';
-  res.json({ totalBookings, totalLeads, totalRevenue, newBookings, newLeads, convertedLeads, conversionRate, popularCar, totalCars: cars.length });
 });
 
 // ══════════════════════════════
@@ -1126,7 +1303,8 @@ function groupRevByPeriod(items, period) {
   return buckets;
 }
 
-app.get('/api/analytics/overview', auth, (req, res) => {
+app.get('/api/analytics/overview', auth, async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
   const now = new Date();
   const todayStart = startOfDay(now);
   const yesterdayStart = addDays(todayStart, -1);
@@ -1135,222 +1313,192 @@ app.get('/api/analytics/overview', auth, (req, res) => {
   const monthStart = startOfMonth(now);
   const prevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
   const prevMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
-
-  const todayLeads = leads.filter(l => new Date(l.createdAt) >= todayStart).length;
-  const yesterdayLeads = leads.filter(l => { const d = new Date(l.createdAt); return d >= yesterdayStart && d < todayStart; }).length;
-  const weekLeads = leads.filter(l => new Date(l.createdAt) >= weekStart).length;
-  const prevWeekLeads = leads.filter(l => { const d = new Date(l.createdAt); return d >= prevWeekStart && d < weekStart; }).length;
-  const monthLeads = leads.filter(l => new Date(l.createdAt) >= monthStart).length;
-  const prevMonthLeads = leads.filter(l => { const d = new Date(l.createdAt); return d >= prevMonthStart && d <= prevMonthEnd; }).length;
-  const todayBookings = bookings.filter(b => new Date(b.createdAt) >= todayStart).length;
-  const yesterdayBookings = bookings.filter(b => { const d = new Date(b.createdAt); return d >= yesterdayStart && d < todayStart; }).length;
-  const weekBookings = bookings.filter(b => new Date(b.createdAt) >= weekStart).length;
-  const monthBookings = bookings.filter(b => new Date(b.createdAt) >= monthStart).length;
-  const todayRevenue = bookings.filter(b => new Date(b.createdAt) >= todayStart).reduce((s, b) => s + (Number(b.totalAed) || 0), 0);
-  const yesterdayRevenue = bookings.filter(b => { const d = new Date(b.createdAt); return d >= yesterdayStart && d < todayStart; }).reduce((s, b) => s + (Number(b.totalAed) || 0), 0);
-  const totalRevenue = bookings.reduce((s, b) => s + (Number(b.totalAed) || 0), 0);
-  const totalLeads = leads.length;
-  const totalBookingsCount = bookings.length;
-  const convertedLeads = leads.filter(l => l.convertedToBooking).length;
-  const conversionRate = totalLeads > 0 ? Math.round((convertedLeads / totalLeads) * 100) : 0;
-  const activeCars = cars.filter(c => c.active !== false).length;
-  const hotCutoff = Date.now() - 1800000;
-  const hotLeads = leads.filter(l => l.status === 'new' && new Date(l.createdAt).getTime() >= hotCutoff);
-
-  res.json({
-    leads: { today: todayLeads, yesterday: yesterdayLeads, week: weekLeads, prevWeek: prevWeekLeads, month: monthLeads, prevMonth: prevMonthLeads, total: totalLeads },
-    bookings: { today: todayBookings, yesterday: yesterdayBookings, week: weekBookings, month: monthBookings, total: totalBookingsCount },
-    revenue: { today: todayRevenue, yesterday: yesterdayRevenue, total: totalRevenue },
-    conversionRate, activeCars,
-    liveVisitors: liveVisitors.size,
-    pageViews: pageViews || Math.max(leads.length * 8, 100),
-    hotLeads: hotLeads.map(l => ({ id: l.id, fullName: l.fullName, phone: l.phone, interest: l.interest, createdAt: l.createdAt }))
-  });
+  const hotCutoff = new Date(Date.now() - 1800000);
+  try {
+    const [leadAgg, bookAgg, convAgg, carsAgg, hotR] = await Promise.all([
+      db.query(
+        `SELECT
+           SUM(CASE WHEN created_at >= $1 THEN 1 ELSE 0 END)::int AS today,
+           SUM(CASE WHEN created_at >= $2 AND created_at < $1 THEN 1 ELSE 0 END)::int AS yesterday,
+           SUM(CASE WHEN created_at >= $3 THEN 1 ELSE 0 END)::int AS week,
+           SUM(CASE WHEN created_at >= $4 AND created_at < $3 THEN 1 ELSE 0 END)::int AS prev_week,
+           SUM(CASE WHEN created_at >= $5 THEN 1 ELSE 0 END)::int AS month,
+           SUM(CASE WHEN created_at >= $6 AND created_at <= $7 THEN 1 ELSE 0 END)::int AS prev_month,
+           COUNT(*)::int AS total
+         FROM leads`,
+        [todayStart, yesterdayStart, weekStart, prevWeekStart, monthStart, prevMonthStart, prevMonthEnd]
+      ),
+      db.query(
+        `SELECT
+           SUM(CASE WHEN created_at >= $1 THEN 1 ELSE 0 END)::int AS today,
+           SUM(CASE WHEN created_at >= $2 AND created_at < $1 THEN 1 ELSE 0 END)::int AS yesterday,
+           SUM(CASE WHEN created_at >= $3 THEN 1 ELSE 0 END)::int AS week,
+           SUM(CASE WHEN created_at >= $4 THEN 1 ELSE 0 END)::int AS month,
+           COUNT(*)::int AS total,
+           COALESCE(SUM(CASE WHEN created_at >= $1 THEN total ELSE 0 END),0)::numeric AS today_rev,
+           COALESCE(SUM(CASE WHEN created_at >= $2 AND created_at < $1 THEN total ELSE 0 END),0)::numeric AS yesterday_rev,
+           COALESCE(SUM(total),0)::numeric AS total_rev
+         FROM bookings`,
+        [todayStart, yesterdayStart, weekStart, monthStart]
+      ),
+      db.query(`SELECT COUNT(*)::int AS c FROM leads WHERE converted_to_booking = true`),
+      db.query(`SELECT COUNT(*)::int AS c FROM cars WHERE active = true`),
+      db.query(
+        `SELECT id, name, phone, car, created_at FROM leads WHERE status = 'new' AND created_at >= $1 ORDER BY created_at DESC LIMIT 10`,
+        [hotCutoff]
+      )
+    ]);
+    const L = leadAgg.rows[0], B = bookAgg.rows[0];
+    const totalLeads = L.total || 0;
+    const convertedLeads = convAgg.rows[0].c || 0;
+    const conversionRate = totalLeads > 0 ? Math.round((convertedLeads / totalLeads) * 100) : 0;
+    res.json({
+      leads: {
+        today: L.today || 0, yesterday: L.yesterday || 0,
+        week: L.week || 0, prevWeek: L.prev_week || 0,
+        month: L.month || 0, prevMonth: L.prev_month || 0,
+        total: totalLeads
+      },
+      bookings: {
+        today: B.today || 0, yesterday: B.yesterday || 0,
+        week: B.week || 0, month: B.month || 0,
+        total: B.total || 0
+      },
+      revenue: {
+        today: Number(B.today_rev) || 0,
+        yesterday: Number(B.yesterday_rev) || 0,
+        total: Number(B.total_rev) || 0
+      },
+      conversionRate,
+      activeCars: carsAgg.rows[0].c || 0,
+      liveVisitors: liveVisitors.size,
+      pageViews: pageViews || Math.max(totalLeads * 8, 100),
+      hotLeads: hotR.rows.map(l => ({ id: l.id, fullName: l.name || '', phone: l.phone || '', interest: l.car || '', createdAt: l.created_at }))
+    });
+  } catch (err) {
+    console.error('[API] GET /api/analytics/overview', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-app.get('/api/analytics/leads', auth, (req, res) => {
-  const period = req.query.period || 'daily';
-  const { start, end } = getDateRange(req.query.from, req.query.to);
-  const filtered = leads.filter(l => { const d = new Date(l.createdAt); return d >= start && d <= end; });
-  res.json(groupByPeriod(filtered, 'createdAt', period));
+app.get('/api/analytics/leads', auth, async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  try {
+    const period = req.query.period || 'daily';
+    const { start, end } = getDateRange(req.query.from, req.query.to);
+    const { rows } = await db.query('SELECT created_at FROM leads WHERE created_at >= $1 AND created_at <= $2', [start, end]);
+    const items = rows.map(r => ({ createdAt: r.created_at }));
+    res.json(groupByPeriod(items, 'createdAt', period));
+  } catch (err) {
+    console.error('[API] GET /api/analytics/leads', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-app.get('/api/analytics/bookings', auth, (req, res) => {
-  const period = req.query.period || 'daily';
-  const { start, end } = getDateRange(req.query.from, req.query.to);
-  const filtered = bookings.filter(b => { const d = new Date(b.createdAt); return d >= start && d <= end; });
-  res.json(groupByPeriod(filtered, 'createdAt', period));
+app.get('/api/analytics/bookings', auth, async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  try {
+    const period = req.query.period || 'daily';
+    const { start, end } = getDateRange(req.query.from, req.query.to);
+    const { rows } = await db.query('SELECT created_at FROM bookings WHERE created_at >= $1 AND created_at <= $2', [start, end]);
+    const items = rows.map(r => ({ createdAt: r.created_at }));
+    res.json(groupByPeriod(items, 'createdAt', period));
+  } catch (err) {
+    console.error('[API] GET /api/analytics/bookings', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-app.get('/api/analytics/revenue', auth, (req, res) => {
-  const period = req.query.period || 'daily';
-  const { start, end } = getDateRange(req.query.from, req.query.to);
-  const filtered = bookings.filter(b => { const d = new Date(b.createdAt); return d >= start && d <= end; });
-  res.json(groupRevByPeriod(filtered, period));
+app.get('/api/analytics/revenue', auth, async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  try {
+    const period = req.query.period || 'daily';
+    const { start, end } = getDateRange(req.query.from, req.query.to);
+    const { rows } = await db.query('SELECT created_at, total FROM bookings WHERE created_at >= $1 AND created_at <= $2', [start, end]);
+    const items = rows.map(r => ({ createdAt: r.created_at, totalAed: Number(r.total) || 0 }));
+    res.json(groupRevByPeriod(items, period));
+  } catch (err) {
+    console.error('[API] GET /api/analytics/revenue', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-app.get('/api/analytics/sources', auth, (req, res) => {
-  const counts = {};
-  leads.forEach(l => { const s = l.source || 'unknown'; counts[s] = (counts[s] || 0) + 1; });
-  res.json(counts);
+app.get('/api/analytics/sources', auth, async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  try {
+    const { rows } = await db.query(`SELECT COALESCE(NULLIF(source,''),'unknown') AS source, COUNT(*)::int AS c FROM leads GROUP BY 1`);
+    const counts = {};
+    rows.forEach(r => { counts[r.source] = r.c; });
+    res.json(counts);
+  } catch (err) {
+    console.error('[API] GET /api/analytics/sources', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-app.get('/api/analytics/popular-cars', auth, (req, res) => {
-  const counts = {};
-  bookings.forEach(b => { counts[b.carName] = (counts[b.carName] || 0) + 1; });
-  res.json(Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([name, count]) => ({ name, count })));
+app.get('/api/analytics/popular-cars', auth, async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  try {
+    const { rows } = await db.query(`SELECT COALESCE(car_name,'') AS name, COUNT(*)::int AS count FROM bookings WHERE car_name IS NOT NULL AND car_name != '' GROUP BY car_name ORDER BY count DESC`);
+    res.json(rows.map(r => ({ name: r.name, count: r.count })));
+  } catch (err) {
+    console.error('[API] GET /api/analytics/popular-cars', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-app.get('/api/analytics/locations', auth, (req, res) => {
-  const counts = {};
-  bookings.forEach(b => { const loc = b.location || 'Unknown'; counts[loc] = (counts[loc] || 0) + 1; });
-  res.json(counts);
+app.get('/api/analytics/locations', auth, async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  try {
+    const { rows } = await db.query(`SELECT COALESCE(NULLIF(location,''),'Unknown') AS loc, COUNT(*)::int AS c FROM bookings GROUP BY 1`);
+    const counts = {};
+    rows.forEach(r => { counts[r.loc] = r.c; });
+    res.json(counts);
+  } catch (err) {
+    console.error('[API] GET /api/analytics/locations', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-app.get('/api/analytics/funnel', auth, (req, res) => {
-  res.json({ pageViews: pageViews || Math.max(leads.length * 8, 100), leads: leads.length, bookings: bookings.length });
+app.get('/api/analytics/funnel', auth, async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  try {
+    const [lR, bR] = await Promise.all([
+      db.query('SELECT COUNT(*)::int AS c FROM leads'),
+      db.query('SELECT COUNT(*)::int AS c FROM bookings')
+    ]);
+    const leadsCount = lR.rows[0].c;
+    const bookingsCount = bR.rows[0].c;
+    res.json({ pageViews: pageViews || Math.max(leadsCount * 8, 100), leads: leadsCount, bookings: bookingsCount });
+  } catch (err) {
+    console.error('[API] GET /api/analytics/funnel', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-app.get('/api/analytics/activity', auth, (req, res) => {
-  res.json(activityLog.slice(0, 20));
+app.get('/api/analytics/activity', auth, async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  try {
+    const { rows } = await db.query('SELECT id, user_id, user_name, user_role, action, details, created_at FROM activity_log ORDER BY created_at DESC LIMIT 20');
+    res.json(rows.map(mapActivityRow));
+  } catch (err) {
+    console.error('[API] GET /api/analytics/activity', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // ══════════════════════════════
 // CMS CONFIG API
 // ══════════════════════════════
 
-const DEFAULT_SECTIONS = [
-  { id: 'nav', name: 'Navigation', type: 'builtin', visible: true, order: 0 },
-  { id: 'countdown', name: 'Countdown Timer', type: 'builtin', visible: true, order: 1 },
-  { id: 'hero', name: 'Hero Section', type: 'builtin', visible: true, order: 2 },
-  { id: 'ticker', name: 'Social Proof Ticker', type: 'builtin', visible: true, order: 3 },
-  { id: 'trust', name: 'Trust Bar', type: 'builtin', visible: true, order: 4 },
-  { id: 'cars', name: 'Cars / Offers', type: 'builtin', visible: true, order: 5 },
-  { id: 'why', name: 'Why Us', type: 'builtin', visible: true, order: 6 },
-  { id: 'reviews', name: 'Customer Reviews', type: 'builtin', visible: true, order: 7 },
-  { id: 'guarantee', name: 'Guarantee', type: 'builtin', visible: true, order: 8 },
-  { id: 'finalcta', name: 'Final CTA', type: 'builtin', visible: true, order: 9 },
-  { id: 'footer', name: 'Footer', type: 'builtin', visible: true, order: 10 },
-  { id: 'sticky', name: 'Sticky Bottom Bar', type: 'builtin', visible: true, order: 11 },
-  { id: 'leadpopup', name: 'Lead Popup', type: 'builtin', visible: true, order: 12 }
-];
+const DEFAULT_SECTIONS = DEFAULT_SITE_CONFIG.sections;
 
-let siteConfig = {
-  content: {
-    logo: 'FASTRACK',
-    nav: { ctaText: 'View Offers' },
-    countdown: { enabled: true, urgencyText: 'DEAL EXPIRES IN:', endDate: '' },
-    hero: {
-      urgencyBadge: 'Offer Ends Soon — Limited Spots',
-      headline: 'SAVE UP TO <strong>40%</strong> ON MONTHLY CAR RENTAL',
-      subtext: 'Premium cars from AED 999/month. Full insurance, free UAE delivery, zero hidden fees.',
-      proof1: '4.9/5 from 2,500+ customers',
-      proof2: '143 booked this week',
-      ctaPrimary: 'Claim Your Deal',
-      ctaSecondary: 'WhatsApp Us',
-      liveText: 'people viewing offers right now'
-    },
-    ticker: {
-      messages: [
-        'Ahmed from Dubai Marina just booked a Mitsubishi ASX',
-        'Sara saved AED 2,400 on a 3-month plan',
-        'Mohammed from Business Bay booked 2 min ago',
-        '143 rentals booked this week',
-        '4.9★ average from 2,500+ customers'
-      ]
-    },
-    trust: {
-      items: ['Full Insurance', 'Free Delivery', '24/7 Assist', 'No Hidden Fees', 'Cancel Anytime']
-    },
-    carsSection: {
-      tag: 'Limited Spots Available',
-      headline: 'CHOOSE YOUR <strong>DEAL</strong>',
-      subtext: 'Lock in your discounted monthly rate before it\'s gone.'
-    },
-    whyUs: {
-      label: 'Why 2,500+ Customers Trust Us',
-      title: 'THE FASTRACK DIFFERENCE',
-      cards: [
-        { icon: '🛡️', title: 'Full Insurance', text: 'Comprehensive coverage. Zero deductibles, zero worries.' },
-        { icon: '🚚', title: 'Free Delivery', text: 'To your doorstep anywhere in UAE. No pickup hassle.' },
-        { icon: '💰', title: 'No Hidden Fees', text: 'Price you see is the price you pay. Period.' },
-        { icon: '⚡', title: '2-Min Booking', text: 'Pick, confirm, done. Car at your door tomorrow.' },
-        { icon: '🔄', title: 'Flexible Plans', text: 'Switch cars, extend, or cancel anytime. No penalties.' },
-        { icon: '📞', title: '24/7 Support', text: 'Phone & WhatsApp support around the clock.' }
-      ]
-    },
-    reviews: {
-      label: 'Real Reviews',
-      title: 'WHAT OUR CUSTOMERS SAY',
-      items: [
-        { stars: 5, text: 'Saved AED 2,400 on a 3-month rental. Fastrack beat every quote I got.', name: 'Ahmed K.', role: 'Business Consultant, Dubai Marina' },
-        { stars: 5, text: 'Compared 5 companies. Fastrack was 40% cheaper with better insurance.', name: 'Sara M.', role: 'Marketing Manager, Business Bay' },
-        { stars: 5, text: 'Booked in 2 minutes. Car delivered next day to my apartment.', name: 'Omar H.', role: 'Entrepreneur, JBR' },
-        { stars: 5, text: 'I was paying AED 2,200/month before. Now paying AED 1,299. Same class of car.', name: 'Khalid R.', role: 'Sales Director, Downtown' },
-        { stars: 5, text: 'Needed a car urgently. Called at 9pm, had a car by 8am next morning.', name: 'Fatima A.', role: 'Consultant, Abu Dhabi' },
-        { stars: 5, text: 'Third time renting from them. Consistent quality and fair pricing.', name: 'Rami T.', role: 'Freelancer, Deira' },
-        { stars: 5, text: 'Rented a JS4 for 6 months. Panoramic roof, 360 camera — luxury for less.', name: 'Layla S.', role: 'Interior Designer, JBR' },
-        { stars: 5, text: 'My company rents 3 cars from Fastrack. Best fleet deal in the UAE.', name: 'Nasser Q.', role: 'CEO, Small Business, Sharjah' }
-      ]
-    },
-    guarantee: {
-      headline: 'PRICE MATCH <strong>GUARANTEE</strong>',
-      subtext: 'Found a cheaper monthly rate? We\'ll match it + give you extra 5% off.'
-    },
-    finalCta: {
-      headline: 'DON\'T MISS OUT — <strong>LOCK YOUR RATE</strong>',
-      subtext: 'Prices go up when spots are filled. Secure your deal today.',
-      buttonText: 'View Deals'
-    },
-    footer: {
-      copyright: '© 2024 Fastrack Rent a Car • Dubai, UAE',
-      phone: '+971 58 596 9960',
-      whatsappText: 'WhatsApp',
-      email: 'info@fasttrackrac.com'
-    },
-    stickyBar: {
-      prefix: 'From',
-      wasPrice: 'AED 1,399',
-      currentPrice: 'AED 999/mo',
-      buttonText: 'Claim Deal'
-    },
-    leadPopup: {
-      headline: 'Wait — Get 5% Extra Off',
-      subtext: 'Drop your WhatsApp and we\'ll send you an exclusive discount code.',
-      buttonText: 'Send Me The Deal',
-      skipText: 'No thanks, I\'ll pay full price'
-    },
-    notifications: {
-      messages: [
-        'Ahmed from Dubai Marina just booked Mitsubishi ASX',
-        'Sara from JBR saved AED 2,400',
-        'Mohammed from Business Bay booked 2 min ago',
-        'Fatima from Downtown claimed the JAC J7 deal',
-        'Ali from Sharjah booked Mitsubishi Attrage',
-        'Khalid from Abu Dhabi just booked JAC JS4'
-      ]
-    }
-  },
-  sections: JSON.parse(JSON.stringify(DEFAULT_SECTIONS)),
-  settings: {
-    colors: { primary: '#FF5F00', dark: '#1A1A1A', accent: '#00C853' },
-    fonts: { family: 'Inter', sizePreset: 'default' },
-    seo: { title: 'Fastrack Rent a Car Dubai — Save Up to 40%', description: 'Premium monthly car rental in Dubai from AED 999. Full insurance, free delivery.', ogImage: '' },
-    scripts: { headerScripts: '', footerScripts: '' },
-    social: { whatsapp: '971585969960', phone: '+971 58 596 9960', email: 'info@fasttrackrac.com' }
-  }
-};
+// siteConfig is an in-memory cache of the site_config.main row.
+// Initialized from defaults, overwritten on startup from DB, and synced back on mutation.
+let siteConfig = JSON.parse(JSON.stringify(DEFAULT_SITE_CONFIG));
 
-// Public: landing page fetches config
-app.get('/api/config', async (req, res) => {
-  try {
-    if (db.isReady()) {
-      const result = await db.query(`SELECT value FROM site_config WHERE key = 'main'`);
-      if (result.rows.length > 0 && result.rows[0].value) return res.json(result.rows[0].value);
-    }
-  } catch (err) {
-    console.error('[API] DB read failed for /api/config:', err.message);
-  }
+// Public: landing page fetches config (served from the cache)
+app.get('/api/config', (req, res) => {
   res.json(siteConfig);
 });
 
@@ -1359,7 +1507,7 @@ app.put('/api/config', auth, requireRole('superadmin', 'manager'), (req, res) =>
   const { content, settings } = req.body;
   if (content) siteConfig.content = { ...siteConfig.content, ...content };
   if (settings) siteConfig.settings = { ...siteConfig.settings, ...settings };
-  syncSiteConfigToDb();
+  syncSiteConfigToDb(siteConfig);
   logActivity(req.user.id, 'config_updated', 'Updated landing page configuration');
   res.json({ success: true, config: siteConfig });
 });
@@ -1377,7 +1525,7 @@ app.put('/api/config/sections/reorder', auth, requireRole('superadmin', 'manager
     const sec = siteConfig.sections.find(s => s.id === id);
     if (sec) sec.order = idx;
   });
-  syncSiteConfigToDb();
+  syncSiteConfigToDb(siteConfig);
   logActivity(req.user.id, 'sections_reordered', 'Reordered landing page sections');
   res.json({ success: true, sections: siteConfig.sections.sort((a, b) => a.order - b.order) });
 });
@@ -1392,7 +1540,7 @@ app.patch('/api/config/sections/:id', auth, requireRole('superadmin', 'manager')
     if (req.body.type && ['text', 'image_text', 'cta_banner'].includes(req.body.type)) sec.type = req.body.type;
     if (req.body.content && typeof req.body.content === 'object') sec.content = { ...(sec.content || {}), ...req.body.content };
   }
-  syncSiteConfigToDb();
+  syncSiteConfigToDb(siteConfig);
   logActivity(req.user.id, 'section_updated', `Updated section: ${sec.name}`);
   res.json(sec);
 });
@@ -1411,7 +1559,7 @@ app.post('/api/config/sections', auth, requireRole('superadmin', 'manager'), (re
     content: content || { heading: '', body: '', imageUrl: '', buttonText: '', buttonUrl: '' }
   };
   siteConfig.sections.push(sec);
-  syncSiteConfigToDb();
+  syncSiteConfigToDb(siteConfig);
   logActivity(req.user.id, 'section_added', `Added custom section: ${name}`);
   res.json(sec);
 });
@@ -1422,7 +1570,7 @@ app.delete('/api/config/sections/:id', auth, requireRole('superadmin', 'manager'
   if (idx === -1) return res.status(404).json({ error: 'Section not found' });
   if (siteConfig.sections[idx].type === 'builtin') return res.status(400).json({ error: 'Cannot delete built-in sections' });
   const deleted = siteConfig.sections.splice(idx, 1)[0];
-  syncSiteConfigToDb();
+  syncSiteConfigToDb(siteConfig);
   logActivity(req.user.id, 'section_deleted', `Deleted section: ${deleted.name}`);
   res.json({ success: true });
 });
@@ -1430,7 +1578,7 @@ app.delete('/api/config/sections/:id', auth, requireRole('superadmin', 'manager'
 // Reset config to defaults
 app.post('/api/config/reset', auth, requireRole('superadmin'), (req, res) => {
   siteConfig.sections = JSON.parse(JSON.stringify(DEFAULT_SECTIONS));
-  syncSiteConfigToDb();
+  syncSiteConfigToDb(siteConfig);
   logActivity(req.user.id, 'config_reset', 'Reset landing page sections to defaults');
   res.json({ success: true });
 });
@@ -1440,102 +1588,139 @@ app.post('/api/config/reset', auth, requireRole('superadmin'), (req, res) => {
 // ══════════════════════════════
 
 app.get('/api/notifications', auth, async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
   const limit = parseInt(req.query.limit) || 30;
   const unreadOnly = req.query.unread === 'true';
   try {
-    if (db.isReady()) {
-      const countR = await db.query('SELECT COUNT(*)::int AS c FROM notifications');
-      if (countR.rows[0].c > 0) {
-        const filter = unreadOnly ? ' WHERE read = false' : '';
-        const rowsR = await db.query(`SELECT id, type, title, body, read, user_id, created_at FROM notifications${filter} ORDER BY created_at DESC LIMIT $1`, [limit]);
-        const unreadR = await db.query('SELECT COUNT(*)::int AS c FROM notifications WHERE read = false');
-        return res.json({
-          items: rowsR.rows.map(r => ({ id: r.id, type: r.type, title: r.title, body: r.body, read: r.read, userId: r.user_id, createdAt: r.created_at })),
-          unreadCount: unreadR.rows[0].c
-        });
-      }
-    }
+    const filter = unreadOnly ? ' WHERE read = false' : '';
+    const rowsR = await db.query(`SELECT id, type, title, body, read, user_id, created_at FROM notifications${filter} ORDER BY created_at DESC LIMIT $1`, [limit]);
+    const unreadR = await db.query('SELECT COUNT(*)::int AS c FROM notifications WHERE read = false');
+    res.json({
+      items: rowsR.rows.map(mapNotificationRow),
+      unreadCount: unreadR.rows[0].c
+    });
   } catch (err) {
-    console.error('[API] DB read failed for /api/notifications:', err.message);
+    console.error('[API] GET /api/notifications', err.message);
+    res.status(500).json({ error: 'Server error' });
   }
-  let result = notifications;
-  if (unreadOnly) result = result.filter(n => !n.read);
-  res.json({ items: result.slice(0, limit), unreadCount: notifications.filter(n => !n.read).length });
 });
 
-app.patch('/api/notifications/:id/read', auth, (req, res) => {
-  const n = notifications.find(x => String(x.id) === req.params.id);
-  if (n) n.read = true;
-  markNotificationReadInDb(req.params.id, false);
-  res.json({ success: true });
+app.patch('/api/notifications/:id/read', auth, async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  try {
+    await db.query('UPDATE notifications SET read = true WHERE id = $1', [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[API] PATCH /api/notifications/:id/read', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-app.post('/api/notifications/read-all', auth, (req, res) => {
-  notifications.forEach(n => n.read = true);
-  markNotificationReadInDb(null, true);
-  res.json({ success: true });
+app.post('/api/notifications/read-all', auth, async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  try {
+    await db.query('UPDATE notifications SET read = true WHERE read = false');
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[API] POST /api/notifications/read-all', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // ══════════════════════════════
 // GLOBAL SEARCH API
 // ══════════════════════════════
 
-app.get('/api/search', auth, (req, res) => {
-  const q = (req.query.q || '').toLowerCase();
+app.get('/api/search', auth, async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  const q = (req.query.q || '').trim();
   if (!q || q.length < 2) return res.json({ leads: [], bookings: [], cars: [] });
-
-  const matchedLeads = leads.filter(l => `${l.fullName} ${l.phone} ${l.email} ${l.interest}`.toLowerCase().includes(q)).slice(0, 8).map(l => ({ id: l.id, type: 'lead', title: l.fullName, subtitle: l.phone + ' — ' + (l.status || 'new'), icon: '&#128101;' }));
-  const matchedBookings = bookings.filter(b => `${b.fullName} ${b.phone} ${b.ref} ${b.carName}`.toLowerCase().includes(q)).slice(0, 8).map(b => ({ id: b.id, type: 'booking', title: b.ref + ' — ' + b.fullName, subtitle: b.carName + ' — ' + (b.status || 'pending'), icon: '&#128203;' }));
-  const matchedCars = cars.filter(c => `${c.name} ${c.cat} ${c.type}`.toLowerCase().includes(q)).slice(0, 8).map(c => ({ id: c.id, type: 'car', title: c.name, subtitle: c.cat + ' — AED ' + c.price, icon: '&#128663;' }));
-
-  res.json({ leads: matchedLeads, bookings: matchedBookings, cars: matchedCars });
+  const like = '%' + q + '%';
+  try {
+    const [lR, bR, cR] = await Promise.all([
+      db.query(
+        `SELECT id, name, phone, email, car, status FROM leads
+         WHERE name ILIKE $1 OR phone ILIKE $1 OR email ILIKE $1 OR car ILIKE $1
+         ORDER BY created_at DESC LIMIT 8`,
+        [like]
+      ),
+      db.query(
+        `SELECT id, ref, customer_name, customer_phone, car_name, status FROM bookings
+         WHERE customer_name ILIKE $1 OR customer_phone ILIKE $1 OR ref ILIKE $1 OR car_name ILIKE $1
+         ORDER BY created_at DESC LIMIT 8`,
+        [like]
+      ),
+      db.query(
+        `SELECT id, name, cat, type, price FROM cars
+         WHERE name ILIKE $1 OR cat ILIKE $1 OR type ILIKE $1
+         ORDER BY sort_order LIMIT 8`,
+        [like]
+      )
+    ]);
+    res.json({
+      leads: lR.rows.map(l => ({ id: l.id, type: 'lead', title: l.name || '', subtitle: (l.phone || '') + ' — ' + (l.status || 'new'), icon: '&#128101;' })),
+      bookings: bR.rows.map(b => ({ id: b.id, type: 'booking', title: (b.ref || '') + ' — ' + (b.customer_name || ''), subtitle: (b.car_name || '') + ' — ' + (b.status || 'pending'), icon: '&#128203;' })),
+      cars: cR.rows.map(c => ({ id: c.id, type: 'car', title: c.name, subtitle: (c.cat || '') + ' — AED ' + c.price, icon: '&#128663;' }))
+    });
+  } catch (err) {
+    console.error('[API] GET /api/search', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // ══════════════════════════════
 // DATA EXPORT / IMPORT / CLEAR
 // ══════════════════════════════
 
-app.get('/api/export', auth, (req, res) => {
-  res.json({
-    exportDate: new Date().toISOString(),
-    version: '2.0',
-    leads, bookings, cars,
-    config: siteConfig,
-    activityLog: activityLog.slice(0, 100)
-  });
-});
-
-app.post('/api/import', auth, requireRole('superadmin'), (req, res) => {
-  const { data, mode } = req.body; // mode: 'merge' or 'replace'
-  if (!data) return res.status(400).json({ error: 'No data provided' });
-
+app.get('/api/export', auth, async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
   try {
-    if (mode === 'replace') {
-      if (data.leads) { leads = data.leads; nextLeadId = Math.max(...leads.map(l => l.id || 0), 0) + 1; }
-      if (data.bookings) { bookings = data.bookings; nextBookingId = Math.max(...bookings.map(b => b.id || 0), 0) + 1; }
-      if (data.cars) { cars = data.cars; nextCarId = Math.max(...cars.map(c => c.id || 0), 0) + 1; }
-      if (data.config) { siteConfig = { ...siteConfig, ...data.config }; }
-    } else {
-      if (data.leads) { const existIds = new Set(leads.map(l => l.id)); data.leads.forEach(l => { if (!existIds.has(l.id)) leads.push(l); }); nextLeadId = Math.max(...leads.map(l => l.id || 0), 0) + 1; }
-      if (data.bookings) { const existIds = new Set(bookings.map(b => b.id)); data.bookings.forEach(b => { if (!existIds.has(b.id)) bookings.push(b); }); nextBookingId = Math.max(...bookings.map(b => b.id || 0), 0) + 1; }
-      if (data.cars) { const existIds = new Set(cars.map(c => c.id)); data.cars.forEach(c => { if (!existIds.has(c.id)) cars.push(c); }); nextCarId = Math.max(...cars.map(c => c.id || 0), 0) + 1; }
-    }
-    logActivity(req.user.id, 'data_imported', `Imported data (${mode} mode)`);
-    addNotification('system', 'Data Imported', `Data was imported in ${mode} mode`);
-    res.json({ success: true, counts: { leads: leads.length, bookings: bookings.length, cars: cars.length } });
-  } catch(e) {
-    res.status(400).json({ error: 'Invalid data format: ' + e.message });
+    const [leadsR, bookingsR, carsR, activityR] = await Promise.all([
+      db.query('SELECT * FROM leads ORDER BY created_at DESC'),
+      db.query('SELECT * FROM bookings ORDER BY created_at DESC'),
+      db.query('SELECT * FROM cars ORDER BY sort_order'),
+      db.query('SELECT id, user_id, user_name, user_role, action, details, created_at FROM activity_log ORDER BY created_at DESC LIMIT 100')
+    ]);
+    res.json({
+      exportDate: new Date().toISOString(),
+      version: '2.0',
+      leads: leadsR.rows.map(mapLeadRow),
+      bookings: bookingsR.rows.map(mapBookingRow),
+      cars: carsR.rows.map(mapCarRowFull),
+      config: siteConfig,
+      activityLog: activityR.rows.map(mapActivityRow)
+    });
+  } catch (err) {
+    console.error('[API] GET /api/export', err.message);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
-app.delete('/api/data', auth, requireRole('superadmin'), (req, res) => {
+app.post('/api/import', auth, requireRole('superadmin'), (req, res) => {
+  res.status(501).json({ error: 'Import not supported in DB-only mode' });
+});
+
+app.delete('/api/data', auth, requireRole('superadmin'), async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
   const { confirmToken } = req.body;
   if (confirmToken !== 'DELETE') return res.status(400).json({ error: 'Type DELETE to confirm' });
-  const prevCounts = { leads: leads.length, bookings: bookings.length };
-  leads = []; bookings = []; nextLeadId = 1; nextBookingId = 1;
-  logActivity(req.user.id, 'data_cleared', `Cleared all data (${prevCounts.leads} leads, ${prevCounts.bookings} bookings)`);
-  addNotification('system', 'Data Cleared', 'All leads and bookings have been cleared');
-  res.json({ success: true });
+  try {
+    const [leadsR, bookingsR] = await Promise.all([
+      db.query('SELECT COUNT(*)::int AS c FROM leads'),
+      db.query('SELECT COUNT(*)::int AS c FROM bookings')
+    ]);
+    const prevCounts = { leads: leadsR.rows[0].c, bookings: bookingsR.rows[0].c };
+    await db.query('DELETE FROM leads');
+    await db.query('DELETE FROM bookings');
+    await db.query('DELETE FROM activity_log');
+    await db.query('DELETE FROM notifications');
+    logActivity(req.user.id, 'data_cleared', `Cleared all data (${prevCounts.leads} leads, ${prevCounts.bookings} bookings)`);
+    addNotification('system', 'Data Cleared', 'All leads and bookings have been cleared');
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[API] DELETE /api/data', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // ══════════════════════════════
@@ -1544,59 +1729,99 @@ app.delete('/api/data', auth, requireRole('superadmin'), (req, res) => {
 const VALID_PAYMENT_STATUSES = ['unpaid', 'partial', 'paid'];
 const VALID_PAYMENT_METHODS = ['', 'cash', 'card', 'transfer', 'cheque'];
 
-app.patch('/api/bookings/:id/payment', auth, requireRole('superadmin', 'manager'), (req, res) => {
-  const b = bookings.find(x => x.id === parseInt(req.params.id));
-  if (!b) return res.status(404).json({ error: 'Not found' });
+app.patch('/api/bookings/:id/payment', auth, requireRole('superadmin', 'manager'), async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
   const { paymentStatus, amountPaid, paymentMethod, paymentNotes, addPayment } = req.body;
   if (paymentStatus && !VALID_PAYMENT_STATUSES.includes(paymentStatus)) return res.status(400).json({ error: 'Invalid payment status' });
   if (paymentMethod && !VALID_PAYMENT_METHODS.includes(paymentMethod)) return res.status(400).json({ error: 'Invalid payment method' });
-  if (!b.paymentHistory) b.paymentHistory = [];
-  if (addPayment && Number(addPayment.amount) > 0) {
-    b.paymentHistory.unshift({
-      id: generateId('pmt'), amount: Number(addPayment.amount),
-      method: addPayment.method || b.paymentMethod || '',
-      notes: addPayment.notes || '',
-      recordedBy: req.user.name,
-      recordedAt: new Date().toISOString()
-    });
-    b.amountPaid = (b.paymentHistory || []).reduce((s, p) => s + Number(p.amount || 0), 0);
+  try {
+    const id = parseInt(req.params.id);
+    const { rows } = await db.query('SELECT * FROM bookings WHERE id = $1 LIMIT 1', [id]);
+    if (!rows[0]) return res.status(404).json({ error: 'Not found' });
+    const b = mapBookingRow(rows[0]);
+    const patch = {};
+    let history = Array.isArray(b.paymentHistory) ? [...b.paymentHistory] : [];
+    let newAmountPaid = b.amountPaid || 0;
+    if (addPayment && Number(addPayment.amount) > 0) {
+      history.unshift({
+        id: generateId('pmt'), amount: Number(addPayment.amount),
+        method: addPayment.method || b.paymentMethod || '',
+        notes: addPayment.notes || '',
+        recordedBy: req.user.name,
+        recordedAt: new Date().toISOString()
+      });
+      newAmountPaid = history.reduce((s, p) => s + Number(p.amount || 0), 0);
+      patch.paymentHistory = history;
+    }
+    if (amountPaid !== undefined) newAmountPaid = Number(amountPaid);
+    patch.amountPaid = newAmountPaid;
+    if (paymentMethod !== undefined) patch.paymentMethod = paymentMethod;
+    if (paymentNotes !== undefined) patch.paymentNotes = paymentNotes;
+    // Derive payment status
+    const total = Number(b.totalAed) || 0;
+    let finalStatus = paymentStatus || b.paymentStatus || 'unpaid';
+    if (newAmountPaid >= total && total > 0) finalStatus = 'paid';
+    else if (newAmountPaid > 0) finalStatus = 'partial';
+    else if (!paymentStatus) finalStatus = 'unpaid';
+    patch.paymentStatus = finalStatus;
+    const updated = await updateBookingById(id, patch);
+    logActivity(req.user.id, 'payment_updated', `Payment updated for ${updated.ref}: ${updated.paymentStatus} (AED ${updated.amountPaid}/${total})`);
+    res.json(updated);
+  } catch (err) {
+    console.error('[API] PATCH /api/bookings/:id/payment', err.message);
+    res.status(500).json({ error: 'Server error' });
   }
-  if (paymentStatus) b.paymentStatus = paymentStatus;
-  if (amountPaid !== undefined) b.amountPaid = Number(amountPaid);
-  if (paymentMethod !== undefined) b.paymentMethod = paymentMethod;
-  if (paymentNotes !== undefined) b.paymentNotes = paymentNotes;
-  // Auto-update status based on amount
-  const total = Number(b.totalAed) || 0;
-  if (b.amountPaid >= total && total > 0) b.paymentStatus = 'paid';
-  else if (b.amountPaid > 0) b.paymentStatus = 'partial';
-  else if (!paymentStatus) b.paymentStatus = b.paymentStatus || 'unpaid';
-  upsertBookingToDb(b);
-  logActivity(req.user.id, 'payment_updated', `Payment updated for ${b.ref}: ${b.paymentStatus} (AED ${b.amountPaid}/${total})`);
-  res.json(b);
 });
 
 // ══════════════════════════════
 // INVOICE API (Feature 2)
 // ══════════════════════════════
-app.post('/api/bookings/:id/invoice', auth, requireRole('superadmin', 'manager'), (req, res) => {
-  const b = bookings.find(x => x.id === parseInt(req.params.id));
-  if (!b) return res.status(404).json({ error: 'Not found' });
-  if (!b.invoiceNumber) {
-    b.invoiceNumber = 'FT-INV-' + String(nextInvoiceNumber++).padStart(4, '0');
-    b.invoiceGeneratedAt = new Date().toISOString();
+app.post('/api/bookings/:id/invoice', auth, requireRole('superadmin', 'manager'), async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  try {
+    const id = parseInt(req.params.id);
+    const { rows } = await db.query('SELECT * FROM bookings WHERE id = $1 LIMIT 1', [id]);
+    if (!rows[0]) return res.status(404).json({ error: 'Not found' });
+    let booking = mapBookingRow(rows[0]);
+    if (!booking.invoiceNumber) {
+      const updR = await db.query(
+        `UPDATE bookings
+         SET invoice_number = 'FT-INV-' || LPAD(nextval('invoice_seq')::text, 4, '0'),
+             invoice_generated_at = NOW(),
+             updated_at = NOW()
+         WHERE id = $1
+         RETURNING *`,
+        [id]
+      );
+      booking = mapBookingRow(updR.rows[0]);
+    }
+    logActivity(req.user.id, 'invoice_generated', `Generated invoice ${booking.invoiceNumber} for booking ${booking.ref}`);
+    res.json({ success: true, invoiceNumber: booking.invoiceNumber, booking });
+  } catch (err) {
+    console.error('[API] POST /api/bookings/:id/invoice', err.message);
+    res.status(500).json({ error: 'Server error' });
   }
-  logActivity(req.user.id, 'invoice_generated', `Generated invoice ${b.invoiceNumber} for booking ${b.ref}`);
-  res.json({ success: true, invoiceNumber: b.invoiceNumber, booking: b });
 });
 
 // ══════════════════════════════
 // CUSTOMERS API (Feature 3)
 // ══════════════════════════════
-function buildCustomers() {
+function normPhone(p) { return (p || '').replace(/[^0-9]/g, ''); }
+
+async function buildCustomers() {
+  const [bookingsR, leadsR, metaR] = await Promise.all([
+    db.query('SELECT * FROM bookings ORDER BY created_at DESC'),
+    db.query('SELECT * FROM leads ORDER BY created_at DESC'),
+    db.query('SELECT phone, notes, tags FROM customer_meta')
+  ]);
+  const metaMap = new Map();
+  metaR.rows.forEach(m => {
+    metaMap.set(m.phone, { notes: m.notes || '', tags: Array.isArray(m.tags) ? m.tags : [] });
+  });
   const byPhone = new Map();
-  function norm(p) { return (p || '').replace(/[^0-9]/g, ''); }
-  bookings.forEach(b => {
-    const key = norm(b.phone);
+  bookingsR.rows.forEach(row => {
+    const b = mapBookingRow(row);
+    const key = normPhone(b.phone);
     if (!key) return;
     let c = byPhone.get(key);
     if (!c) {
@@ -1609,8 +1834,9 @@ function buildCustomers() {
     if (b.whatsapp && !c.whatsapp) c.whatsapp = b.whatsapp;
     if (new Date(b.createdAt) < new Date(c.customerSince)) c.customerSince = b.createdAt;
   });
-  leads.forEach(l => {
-    const key = norm(l.phone);
+  leadsR.rows.forEach(row => {
+    const l = mapLeadRow(row);
+    const key = normPhone(l.phone);
     if (!key) return;
     let c = byPhone.get(key);
     if (!c) {
@@ -1623,7 +1849,7 @@ function buildCustomers() {
     if (new Date(l.createdAt) < new Date(c.customerSince)) c.customerSince = l.createdAt;
   });
   const list = Array.from(byPhone.values()).map(c => {
-    const meta = customerMeta.get(c.id) || { notes: '', tags: [] };
+    const meta = metaMap.get(c.id) || { notes: '', tags: [] };
     const autoTags = [];
     if (c.bookings.length >= 3) autoTags.push('Repeat');
     if (c.totalSpent >= 10000) autoTags.push('VIP');
@@ -1637,208 +1863,264 @@ function buildCustomers() {
   return list;
 }
 
-app.get('/api/customers', auth, (req, res) => {
-  const all = buildCustomers();
-  const q = (req.query.search || '').toLowerCase();
-  const tagFilter = req.query.tag || '';
-  let result = all;
-  if (q) result = result.filter(c => `${c.fullName} ${c.phone} ${c.email}`.toLowerCase().includes(q));
-  if (tagFilter) result = result.filter(c => c.tags.includes(tagFilter));
-  res.json(result);
+app.get('/api/customers', auth, async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  try {
+    const all = await buildCustomers();
+    const q = (req.query.search || '').toLowerCase();
+    const tagFilter = req.query.tag || '';
+    let result = all;
+    if (q) result = result.filter(c => `${c.fullName} ${c.phone} ${c.email}`.toLowerCase().includes(q));
+    if (tagFilter) result = result.filter(c => c.tags.includes(tagFilter));
+    res.json(result);
+  } catch (err) {
+    console.error('[API] GET /api/customers', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-app.get('/api/customers/:id', auth, (req, res) => {
-  const all = buildCustomers();
-  const c = all.find(x => x.id === req.params.id);
-  if (!c) return res.status(404).json({ error: 'Customer not found' });
-  res.json(c);
+app.get('/api/customers/:id', auth, async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  try {
+    const all = await buildCustomers();
+    const c = all.find(x => x.id === req.params.id);
+    if (!c) return res.status(404).json({ error: 'Customer not found' });
+    res.json(c);
+  } catch (err) {
+    console.error('[API] GET /api/customers/:id', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-app.patch('/api/customers/:id', auth, requireRole('superadmin', 'manager'), (req, res) => {
+app.patch('/api/customers/:id', auth, requireRole('superadmin', 'manager'), async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
   const { notes, tags } = req.body;
-  const existing = customerMeta.get(req.params.id) || { notes: '', tags: [] };
-  if (notes !== undefined) existing.notes = notes;
-  if (Array.isArray(tags)) existing.tags = tags;
-  customerMeta.set(req.params.id, existing);
-  logActivity(req.user.id, 'customer_updated', `Updated customer meta for ${req.params.id}`);
-  res.json({ success: true, meta: existing });
+  try {
+    const cur = await db.query('SELECT notes, tags FROM customer_meta WHERE phone = $1 LIMIT 1', [req.params.id]);
+    const existing = cur.rows[0]
+      ? { notes: cur.rows[0].notes || '', tags: Array.isArray(cur.rows[0].tags) ? cur.rows[0].tags : [] }
+      : { notes: '', tags: [] };
+    if (notes !== undefined) existing.notes = notes;
+    if (Array.isArray(tags)) existing.tags = tags;
+    await db.query(
+      `INSERT INTO customer_meta (phone, notes, tags, updated_at) VALUES ($1, $2, $3::jsonb, NOW())
+       ON CONFLICT (phone) DO UPDATE SET notes = EXCLUDED.notes, tags = EXCLUDED.tags, updated_at = NOW()`,
+      [req.params.id, existing.notes, JSON.stringify(existing.tags)]
+    );
+    logActivity(req.user.id, 'customer_updated', `Updated customer meta for ${req.params.id}`);
+    res.json({ success: true, meta: existing });
+  } catch (err) {
+    console.error('[API] PATCH /api/customers/:id', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // ══════════════════════════════
 // PROMO CODES API (Feature 4)
 // ══════════════════════════════
 app.get('/api/promos', auth, async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
   try {
-    if (db.isReady()) {
-      const countR = await db.query('SELECT COUNT(*)::int AS c FROM promos');
-      if (countR.rows[0].c > 0) {
-        const result = await db.query('SELECT id, code, type, value, min_months, max_uses, used_count, active, expires_at, created_at FROM promos ORDER BY created_at DESC');
-        return res.json(result.rows.map(p => ({
-          id: p.id, code: p.code, discountType: p.type, value: Number(p.value),
-          minDuration: p.min_months || 0, maxUses: p.max_uses || 0,
-          usageCount: p.used_count || 0, expiryDate: p.expires_at || '',
-          active: p.active, createdAt: p.created_at
-        })));
-      }
-    }
+    const result = await db.query('SELECT * FROM promos ORDER BY created_at DESC');
+    res.json(result.rows.map(mapPromoRow));
   } catch (err) {
-    console.error('[API] DB read failed for /api/promos:', err.message);
+    console.error('[API] GET /api/promos', err.message);
+    res.status(500).json({ error: 'Server error' });
   }
-  res.json(promos.map(p => ({ ...p, usageCount: p.usageCount || 0 })));
 });
 
-app.post('/api/promos', auth, requireRole('superadmin', 'manager'), (req, res) => {
+app.post('/api/promos', auth, requireRole('superadmin', 'manager'), async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
   const { code, discountType, value, minDuration, maxUses, expiryDate, active } = req.body;
   if (!code || !value) return res.status(400).json({ error: 'Code and value required' });
-  if (promos.find(p => p.code.toUpperCase() === code.toUpperCase())) return res.status(400).json({ error: 'Promo code already exists' });
   if (discountType && !['percentage', 'fixed'].includes(discountType)) return res.status(400).json({ error: 'Invalid discount type' });
-  const promo = {
-    id: generateId('promo'),
-    code: code.toUpperCase(),
-    discountType: discountType || 'percentage',
-    value: Number(value),
-    minDuration: Number(minDuration) || 0,
-    maxUses: Number(maxUses) || 0,
-    usageCount: 0,
-    expiryDate: expiryDate || '',
-    active: active !== false,
-    createdAt: new Date().toISOString()
-  };
-  promos.push(promo);
-  upsertPromoToDb(promo);
-  logActivity(req.user.id, 'promo_created', `Created promo ${promo.code}`);
-  res.json(promo);
+  try {
+    const dup = await db.query('SELECT id FROM promos WHERE UPPER(code) = UPPER($1) LIMIT 1', [code]);
+    if (dup.rows[0]) return res.status(400).json({ error: 'Promo code already exists' });
+    const promo = await insertPromo({
+      id: generateId('promo'),
+      code,
+      discountType: discountType || 'percentage',
+      value,
+      minDuration: minDuration || 0,
+      maxUses: maxUses || 0,
+      usageCount: 0,
+      expiryDate: expiryDate || '',
+      active: active !== false
+    });
+    logActivity(req.user.id, 'promo_created', `Created promo ${promo.code}`);
+    res.json(promo);
+  } catch (err) {
+    console.error('[API] POST /api/promos', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-app.put('/api/promos/:id', auth, requireRole('superadmin', 'manager'), (req, res) => {
-  const p = promos.find(x => x.id === req.params.id);
-  if (!p) return res.status(404).json({ error: 'Not found' });
-  const { code, discountType, value, minDuration, maxUses, expiryDate, active } = req.body;
-  if (code) p.code = code.toUpperCase();
-  if (discountType && ['percentage', 'fixed'].includes(discountType)) p.discountType = discountType;
-  if (value !== undefined) p.value = Number(value);
-  if (minDuration !== undefined) p.minDuration = Number(minDuration);
-  if (maxUses !== undefined) p.maxUses = Number(maxUses);
-  if (expiryDate !== undefined) p.expiryDate = expiryDate;
-  if (active !== undefined) p.active = active;
-  upsertPromoToDb(p);
-  logActivity(req.user.id, 'promo_updated', `Updated promo ${p.code}`);
-  res.json(p);
+app.put('/api/promos/:id', auth, requireRole('superadmin', 'manager'), async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  const { discountType } = req.body;
+  if (discountType && !['percentage', 'fixed'].includes(discountType)) return res.status(400).json({ error: 'Invalid discount type' });
+  try {
+    const cur = await db.query('SELECT id FROM promos WHERE id = $1 LIMIT 1', [req.params.id]);
+    if (!cur.rows[0]) return res.status(404).json({ error: 'Not found' });
+    const p = await updatePromoById(req.params.id, req.body);
+    logActivity(req.user.id, 'promo_updated', `Updated promo ${p.code}`);
+    res.json(p);
+  } catch (err) {
+    console.error('[API] PUT /api/promos/:id', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-app.delete('/api/promos/:id', auth, requireRole('superadmin', 'manager'), (req, res) => {
-  const idx = promos.findIndex(x => x.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ error: 'Not found' });
-  const deleted = promos.splice(idx, 1)[0];
-  deletePromoFromDb(deleted.id);
-  logActivity(req.user.id, 'promo_deleted', `Deleted promo ${deleted.code}`);
-  res.json({ success: true });
+app.delete('/api/promos/:id', auth, requireRole('superadmin', 'manager'), async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  try {
+    const r = await db.query('DELETE FROM promos WHERE id = $1 RETURNING code', [req.params.id]);
+    if (r.rowCount === 0) return res.status(404).json({ error: 'Not found' });
+    logActivity(req.user.id, 'promo_deleted', `Deleted promo ${r.rows[0].code || ''}`);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[API] DELETE /api/promos/:id', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // Public promo validation
-app.post('/api/promos/validate', (req, res) => {
+app.post('/api/promos/validate', async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
   const { code, duration, subtotal } = req.body;
   if (!code) return res.status(400).json({ error: 'Promo code required' });
-  const p = promos.find(pp => pp.code.toUpperCase() === code.toUpperCase());
-  if (!p) return res.status(404).json({ valid: false, error: 'Invalid promo code' });
-  if (!p.active) return res.status(400).json({ valid: false, error: 'Promo code is inactive' });
-  if (p.expiryDate && new Date(p.expiryDate) < new Date()) return res.status(400).json({ valid: false, error: 'Promo code has expired' });
-  if (p.maxUses && (p.usageCount || 0) >= p.maxUses) return res.status(400).json({ valid: false, error: 'Promo code usage limit reached' });
-  if (p.minDuration && Number(duration) < p.minDuration) return res.status(400).json({ valid: false, error: `Minimum ${p.minDuration} months required` });
-  const sub = Number(subtotal) || 0;
-  let discount = 0;
-  if (p.discountType === 'percentage') discount = Math.round(sub * p.value / 100);
-  else discount = Math.min(p.value, sub);
-  res.json({ valid: true, code: p.code, discountType: p.discountType, value: p.value, discount, finalTotal: Math.max(0, sub - discount) });
+  try {
+    const { rows } = await db.query('SELECT * FROM promos WHERE UPPER(code) = UPPER($1) LIMIT 1', [code]);
+    if (!rows[0]) return res.status(404).json({ valid: false, error: 'Invalid promo code' });
+    const p = mapPromoRow(rows[0]);
+    if (!p.active) return res.status(400).json({ valid: false, error: 'Promo code is inactive' });
+    if (p.expiryDate && new Date(p.expiryDate) < new Date()) return res.status(400).json({ valid: false, error: 'Promo code has expired' });
+    if (p.maxUses && (p.usageCount || 0) >= p.maxUses) return res.status(400).json({ valid: false, error: 'Promo code usage limit reached' });
+    if (p.minDuration && Number(duration) < p.minDuration) return res.status(400).json({ valid: false, error: `Minimum ${p.minDuration} months required` });
+    const sub = Number(subtotal) || 0;
+    let discount = 0;
+    if (p.discountType === 'percentage') discount = Math.round(sub * p.value / 100);
+    else discount = Math.min(p.value, sub);
+    res.json({ valid: true, code: p.code, discountType: p.discountType, value: p.value, discount, finalTotal: Math.max(0, sub - discount) });
+  } catch (err) {
+    console.error('[API] POST /api/promos/validate', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // ══════════════════════════════
 // CAR DOCUMENT ALERTS API (Feature 6)
 // ══════════════════════════════
-app.get('/api/cars/alerts', auth, (req, res) => {
-  const now = Date.now();
-  const thirtyDays = 30 * 24 * 60 * 60 * 1000;
-  const alerts = [];
-  cars.forEach(c => {
-    ['insuranceExpiry', 'registrationExpiry', 'nextServiceDue'].forEach(field => {
-      if (!c[field]) return;
-      const d = new Date(c[field]).getTime();
-      if (isNaN(d)) return;
-      const diff = d - now;
-      let severity = null;
-      if (diff < 0) severity = 'expired';
-      else if (diff < thirtyDays) severity = 'warning';
-      if (severity) {
-        alerts.push({
-          carId: c.id, carName: c.name, field,
-          fieldLabel: field === 'insuranceExpiry' ? 'Insurance' : field === 'registrationExpiry' ? 'Registration' : 'Service Due',
-          date: c[field], severity, daysRemaining: Math.ceil(diff / (24 * 60 * 60 * 1000))
-        });
-      }
+app.get('/api/cars/alerts', auth, async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  try {
+    const { rows } = await db.query('SELECT * FROM cars');
+    const now = Date.now();
+    const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+    const alerts = [];
+    rows.forEach(row => {
+      const c = mapCarRowFull(row);
+      ['insuranceExpiry', 'registrationExpiry', 'nextServiceDue'].forEach(field => {
+        if (!c[field]) return;
+        const d = new Date(c[field]).getTime();
+        if (isNaN(d)) return;
+        const diff = d - now;
+        let severity = null;
+        if (diff < 0) severity = 'expired';
+        else if (diff < thirtyDays) severity = 'warning';
+        if (severity) {
+          alerts.push({
+            carId: c.id, carName: c.name, field,
+            fieldLabel: field === 'insuranceExpiry' ? 'Insurance' : field === 'registrationExpiry' ? 'Registration' : 'Service Due',
+            date: c[field], severity, daysRemaining: Math.ceil(diff / (24 * 60 * 60 * 1000))
+          });
+        }
+      });
     });
-  });
-  res.json(alerts);
+    res.json(alerts);
+  } catch (err) {
+    console.error('[API] GET /api/cars/alerts', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // ══════════════════════════════
 // WHATSAPP TEMPLATES API (Feature 7)
 // ══════════════════════════════
 app.get('/api/templates', auth, async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
   try {
-    if (db.isReady()) {
-      const result = await db.query('SELECT id, name, category, body, created_at FROM templates ORDER BY created_at');
-      if (result.rows.length > 0) {
-        return res.json(result.rows.map(t => ({ id: t.id, name: t.name, category: t.category, body: t.body, createdAt: t.created_at })));
-      }
-    }
+    const result = await db.query('SELECT * FROM templates ORDER BY created_at');
+    res.json(result.rows.map(mapTemplateRow));
   } catch (err) {
-    console.error('[API] DB read failed for /api/templates:', err.message);
+    console.error('[API] GET /api/templates', err.message);
+    res.status(500).json({ error: 'Server error' });
   }
-  res.json(templates);
 });
 
-app.post('/api/templates', auth, requireRole('superadmin', 'manager'), (req, res) => {
+app.post('/api/templates', auth, requireRole('superadmin', 'manager'), async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
   const { name, category, body } = req.body;
   if (!name || !body) return res.status(400).json({ error: 'Name and body required' });
-  const tpl = { id: generateId('tpl'), name, category: category || 'custom', body, createdAt: new Date().toISOString() };
-  templates.push(tpl);
-  upsertTemplateToDb(tpl);
-  logActivity(req.user.id, 'template_created', `Created template: ${name}`);
-  res.json(tpl);
+  try {
+    const tpl = await insertTemplate({ id: generateId('tpl'), name, category: category || 'custom', body });
+    logActivity(req.user.id, 'template_created', `Created template: ${name}`);
+    res.json(tpl);
+  } catch (err) {
+    console.error('[API] POST /api/templates', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-app.put('/api/templates/:id', auth, requireRole('superadmin', 'manager'), (req, res) => {
-  const t = templates.find(x => x.id === req.params.id);
-  if (!t) return res.status(404).json({ error: 'Not found' });
-  if (req.body.name) t.name = req.body.name;
-  if (req.body.category) t.category = req.body.category;
-  if (req.body.body) t.body = req.body.body;
-  upsertTemplateToDb(t);
-  logActivity(req.user.id, 'template_updated', `Updated template: ${t.name}`);
-  res.json(t);
+app.put('/api/templates/:id', auth, requireRole('superadmin', 'manager'), async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  try {
+    const cur = await db.query('SELECT id FROM templates WHERE id = $1 LIMIT 1', [req.params.id]);
+    if (!cur.rows[0]) return res.status(404).json({ error: 'Not found' });
+    const t = await updateTemplateById(req.params.id, req.body);
+    logActivity(req.user.id, 'template_updated', `Updated template: ${t.name}`);
+    res.json(t);
+  } catch (err) {
+    console.error('[API] PUT /api/templates/:id', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-app.delete('/api/templates/:id', auth, requireRole('superadmin', 'manager'), (req, res) => {
-  const idx = templates.findIndex(x => x.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ error: 'Not found' });
-  const deleted = templates.splice(idx, 1)[0];
-  deleteTemplateFromDb(deleted.id);
-  logActivity(req.user.id, 'template_deleted', `Deleted template: ${deleted.name}`);
-  res.json({ success: true });
+app.delete('/api/templates/:id', auth, requireRole('superadmin', 'manager'), async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  try {
+    const r = await db.query('DELETE FROM templates WHERE id = $1 RETURNING name', [req.params.id]);
+    if (r.rowCount === 0) return res.status(404).json({ error: 'Not found' });
+    logActivity(req.user.id, 'template_deleted', `Deleted template: ${r.rows[0].name || ''}`);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[API] DELETE /api/templates/:id', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // ══════════════════════════════
 // OUTSTANDING PAYMENTS (extend /api/stats)
 // ══════════════════════════════
-app.get('/api/stats/outstanding', auth, (req, res) => {
-  let outstanding = 0, count = 0;
-  bookings.forEach(b => {
-    if (b.status === 'cancelled') return;
-    const total = Number(b.totalAed) || 0;
-    const paid = Number(b.amountPaid) || 0;
-    if (paid < total) { outstanding += (total - paid); count++; }
-  });
-  res.json({ outstandingAmount: outstanding, unpaidCount: count });
+app.get('/api/stats/outstanding', auth, async (req, res) => {
+  if (!db.isReady()) return res.status(503).json({ error: 'Database unavailable' });
+  try {
+    const { rows } = await db.query(
+      `SELECT
+         COALESCE(SUM(total - COALESCE(amount_paid,0)), 0)::numeric AS outstanding,
+         COUNT(*)::int AS unpaid_count
+       FROM bookings
+       WHERE status != 'cancelled' AND COALESCE(amount_paid,0) < total`
+    );
+    res.json({
+      outstandingAmount: Number(rows[0].outstanding) || 0,
+      unpaidCount: rows[0].unpaid_count || 0
+    });
+  } catch (err) {
+    console.error('[API] GET /api/stats/outstanding', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 app.get('/dashboard', (req, res) => {
@@ -1858,19 +2140,28 @@ app.get('/api/health', (req, res) => {
 app.listen(PORT, async () => {
   console.log(`Fastrack server running on port ${PORT}`);
 
-  // Test database connection (non-blocking, app works without DB)
+  // Test database connection
   const dbConnected = await db.testConnection();
   if (dbConnected) {
-    console.log('[Server] Database ready — future phases will migrate data to PostgreSQL');
+    console.log('[Server] Database connected');
     const schemaOk = await initSchema();
     if (schemaOk) {
       console.log('[Server] Database schema initialized — all tables ready');
       await seedDefaults();
       console.log('[Server] Default data seeded (if tables were empty)');
+      try {
+        const dbCfg = await loadSiteConfigFromDb();
+        if (dbCfg) {
+          siteConfig = dbCfg;
+          console.log('[Server] Site config loaded from database');
+        }
+      } catch (err) {
+        console.error('[Server] Failed to load site config from DB:', err.message);
+      }
     } else {
-      console.error('[Server] Schema initialization failed — running in memory-only mode');
+      console.error('[Server] Schema initialization failed — DB-dependent endpoints will return 503');
     }
   } else {
-    console.log('[Server] Running in memory-only mode — all data stored in RAM (resets on restart)');
+    console.log('[Server] Database unavailable — DB-dependent endpoints will return 503 until connected');
   }
 });
