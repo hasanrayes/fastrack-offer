@@ -1525,13 +1525,36 @@ app.get('/api/config', (req, res) => {
 });
 
 // Admin: update full config
-app.put('/api/config', auth, requireRole('superadmin', 'manager'), (req, res) => {
-  const { content, settings } = req.body;
-  if (content) siteConfig.content = { ...siteConfig.content, ...content };
-  if (settings) siteConfig.settings = { ...siteConfig.settings, ...settings };
-  syncSiteConfigToDb(siteConfig);
-  logActivity(req.user.id, 'config_updated', 'Updated landing page configuration');
-  res.json({ success: true, config: siteConfig });
+app.put('/api/config', auth, requireRole('superadmin', 'manager'), async (req, res) => {
+  try {
+    const { content, settings } = req.body;
+    if (content) {
+      // Deep merge content to preserve nested objects
+      for (const key of Object.keys(content)) {
+        if (typeof content[key] === 'object' && content[key] !== null && !Array.isArray(content[key]) && siteConfig.content[key]) {
+          siteConfig.content[key] = { ...siteConfig.content[key], ...content[key] };
+        } else {
+          siteConfig.content[key] = content[key];
+        }
+      }
+    }
+    if (settings) {
+      // Deep merge settings to preserve nested objects (social, colors, fonts, etc.)
+      for (const key of Object.keys(settings)) {
+        if (typeof settings[key] === 'object' && settings[key] !== null && !Array.isArray(settings[key]) && siteConfig.settings[key]) {
+          siteConfig.settings[key] = { ...siteConfig.settings[key], ...settings[key] };
+        } else {
+          siteConfig.settings[key] = settings[key];
+        }
+      }
+    }
+    await syncSiteConfigToDb(siteConfig);
+    logActivity(req.user.id, 'config_updated', 'Updated landing page configuration');
+    res.json({ success: true, config: siteConfig });
+  } catch (err) {
+    console.error('[API] Config update failed:', err.message);
+    res.status(500).json({ error: 'Failed to save configuration' });
+  }
 });
 
 // Sections list
